@@ -1,0 +1,57 @@
+@page {
+        size:8.5in 11in;
+        margin:.2in bleed:6pt;
+}
+@page:right {
+        margin-left:1.4in;
+}
+body {
+        counter-reset:PageNumber;
+}
+img {
+        image-resolution:from-image;
+}
+div.pagenumber:before {
+        counter-increment:PageNumber;
+        content:counter(PageNumber) " ";
+}
+.page {
+        height:10.6in;
+        width:8.1in;
+        position:relative;
+}
+#contents {
+        -webkit-flow:'article';
+        -webkit-flow-into:article;
+        position:relative;
+}
+.contents {
+        height:9in;
+        width:80%;
+        -webkit-flow-from:article;
+        content:-webkit-from-flow('article');
+}
+.pagenumber {
+        width:1in;
+        padding-top:.2in;
+        position:absolute;
+        bottom:.8in;
+        text-align:center;
+        left:3.55in;
+}
+body {
+        counter-reset:PageNumber;
+}
+body {
+        background-color:#efefef;
+}
+@media screen {
+        .page {
+                border:solid 1px #000;
+                padding:.2in 1.4in .2 1.4in;
+                margin-bottom:.2in;
+                background-color:#fff;
+                margin-left:auto;
+                margin-right: auto;
+        }
+}
