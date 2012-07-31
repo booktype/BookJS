@@ -3,17 +3,29 @@
  */
 
 function setupDocument() {
-    // TODO: wrapInner takes a long time when loading a large book
-    // $('body').wrapInner('<div id="contents" />');
+    $('body').wrapInner('<div id="contents" />');
     $('body').append('<div id="layout" />');
     $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">1</div></div>');
 }
 
 $(document).ready(function () {
     var pageCounter = 1;
-    var namedFlow = document.webkitGetFlowByName("contents");
+    var namedFlow = null;
+    var namedFlowRetries = 100;
 
     function addPageIfNeeded() {
+        // Flows become available some time after jQUery fires ready()
+        // Wait until it becomes available (or error if we waited long enough)
+        namedFlow = namedFlow || document.webkitGetFlowByName("contents");
+        if (namedFlow == null) {
+          if (namedFlowRetries-- == 0) {
+            console.error("Could not find the page flow");
+          } else {
+            setTimeout(addPageIfNeeded, 100);
+          }
+          return;
+        }
+
         // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
         if (namedFlow.firstEmptyRegionIndex == -1) {
             $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + ++pageCounter + '</div></div>');
@@ -33,7 +45,7 @@ $(document).ready(function () {
     }
 
     setupDocument();
-    setTimeout(addPageIfNeeded, 1);
+    addPageIfNeeded();
 
 });
 
