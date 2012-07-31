@@ -12,8 +12,17 @@ $(document).ready(function () {
     var pageCounter = 1;
     var namedFlow = null;
     var namedFlowRetries = 100;
+    // Some timing stats: the time it takes to add each group (in seconds)
+    // bulk adding 50 pages at a time: 7+10+12+19+24+37+22+40+44+48
+    // bulk adding 100 pages at a time: 8+17+22+35+44
+    var bulkPagesToAdd = 100; // For larger books add many pages at a time so there is less time spent reflowing text
 
-    function addPageIfNeeded() {
+    function addPage() {
+        $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + ++pageCounter + '</div></div>');
+    }
+    
+    // If text overflows from the region add more pages and then remove any empty ones
+    function addPagesIfNeeded() {
         // Flows become available some time after jQUery fires ready()
         // Wait until it becomes available (or error if we waited long enough)
         namedFlow = namedFlow || document.webkitGetFlowByName("contents");
@@ -21,23 +30,29 @@ $(document).ready(function () {
           if (namedFlowRetries-- == 0) {
             console.error("Could not find the page flow");
           } else {
-            setTimeout(addPageIfNeeded, 100);
+            setTimeout(addPagesIfNeeded, 100);
           }
           return;
         }
 
         // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
         if (namedFlow.firstEmptyRegionIndex == -1) {
-            $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + ++pageCounter + '</div></div>');
+            // Add several pages at a time
+            // console.log(new Date());
+            for (var i = 0; i < bulkPagesToAdd; i++) {
+              addPage();
+            }
 
             // The browser becomes unresponsive if we loop
             // Instead, set a timeout
-            setTimeout(addPageIfNeeded, 1);
+            setTimeout(addPagesIfNeeded, 1);
         } else {
-            // Remove the first empty page
+            // Remove the empty pages (up to bulkPagesToAdd - 1)
             // (empty page needed to test if firstEmptyRegionIndex == -1 )
-            $('#layout .page:last').detach();
-            pageCounter -= 1;
+            while (namedFlow.firstEmptyRegionIndex != -1) {
+              $('#layout .page:last').detach();
+              pageCounter -= 1;
+            }
 
             //Done flowing pages; calculate the TOC
             addFrontMatter();
@@ -45,7 +60,7 @@ $(document).ready(function () {
     }
 
     setupDocument();
-    addPageIfNeeded();
+    addPagesIfNeeded();
 
 });
 
