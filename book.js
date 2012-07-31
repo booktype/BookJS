@@ -2,14 +2,18 @@
  * (c) 2012 Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
  */
 
+var arabPageCounter = 1;
+var romanPageCounter = 1;
+
 function setupDocument() {
     $('body').wrapInner('<div id="contents" />');
-    $('body').append('<div id="layout" />');
-    $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">1</div></div>');
+    $('body').append('<div id="frontmatterRaw" />');
+    $('body').append('<div id="layout"><div id="frontmatter"/><div id="body"/></div>');
+    $('#body').append('<div class="page"><div class="contents"></div><div class="pagenumber">' +  arabPageCounter++ + '</div></div>');
 }
 
 $(document).ready(function () {
-    var pageCounter = 1;
+    
     var namedFlow = null;
     var namedFlowRetries = 100;
     // Some timing stats: the time it takes to add each group (in seconds)
@@ -17,8 +21,8 @@ $(document).ready(function () {
     // bulk adding 100 pages at a time: 8+17+22+35+44
     var bulkPagesToAdd = 100; // For larger books add many pages at a time so there is less time spent reflowing text
 
-    function addPage() {
-        $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + ++pageCounter + '</div></div>');
+    function addBodyPage() {
+        $('#body').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + arabPageCounter++ + '</div></div>');
     }
     
     // If text overflows from the region add more pages and then remove any empty ones
@@ -40,7 +44,7 @@ $(document).ready(function () {
             // Add several pages at a time
             // console.log(new Date());
             for (var i = 0; i < bulkPagesToAdd; i++) {
-              addPage();
+              addBodyPage();
             }
 
             // The browser becomes unresponsive if we loop
@@ -50,8 +54,8 @@ $(document).ready(function () {
             // Remove the empty pages (up to bulkPagesToAdd - 1)
             // (empty page needed to test if firstEmptyRegionIndex == -1 )
             while (namedFlow.firstEmptyRegionIndex != -1) {
-              $('#layout .page:last').detach();
-              pageCounter -= 1;
+              $('#body .page:last').detach();
+              arabPageCounter -= 1;
             }
 
             //Done flowing pages; calculate the TOC
@@ -65,18 +69,17 @@ $(document).ready(function () {
 });
 
 function addFrontMatter() {
-    var romanPageCounter = 0;
     var frontMatter = '';
 
     function addFrontMatterPage(content) {
-        frontMatter += '<div class="page"><div class="frontmatter">' + content + '</div><div class="pagenumber">' + romanize(++romanPageCounter) + '</div></div>';
+        frontMatter += '<div class="page"><div class="frontmatter">' + content + '</div><div class="pagenumber">' + romanize(romanPageCounter++) + '</div></div>';
     }
 
     addFrontMatterPage('<h1>Booktitle</h1> <p>by Author</p>');
 
     addFrontMatterPage(tocPage());
 
-    $('#layout').prepend(frontMatter);
+    $('#frontmatter').append(frontMatter);
 }
 
 function tocPage() {
