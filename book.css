@@ -9,9 +9,7 @@
 @page:right {
         margin-left:1.4in;
 }
-body {
-        counter-reset:PageNumber;
-}
+
 img {
         image-resolution:from-image;
 }
@@ -40,9 +38,7 @@ img {
         text-align:center;
         left:3.55in;
 }
-body {
-        counter-reset:PageNumber;
-}
+
 body {
         background-color:#efefef;
 }
