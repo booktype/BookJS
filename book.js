@@ -3,27 +3,38 @@
  */
 
 function setupDocument() {
-    $('body').wrapInner('<div id="contents" />');
+    // TODO: wrapInner takes a long time when loading a large book
+    // $('body').wrapInner('<div id="contents" />');
     $('body').append('<div id="layout" />');
     $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">1</div></div>');
 }
 
 $(document).ready(function () {
-    setupDocument();
-    var hasEmptyPage = false;
-    var fillingPages = true;
     var pageCounter = 1;
     var namedFlow = document.webkitGetFlowByName("contents");
-    while (fillingPages == true) {
-        if (namedFlow.firstEmptyRegionIndex == -1) { /* TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium. */
+
+    function addPageIfNeeded() {
+        // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
+        if (namedFlow.firstEmptyRegionIndex == -1) {
             $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + ++pageCounter + '</div></div>');
+
+            // The browser becomes unresponsive if we loop
+            // Instead, set a timeout
+            setTimeout(addPageIfNeeded, 1);
         } else {
-            fillingPages = false;
+            // Remove the first empty page
+            // (empty page needed to test if firstEmptyRegionIndex == -1 )
             $('#layout .page:last').detach();
             pageCounter -= 1;
+
+            //Done flowing pages; calculate the TOC
+            addFrontMatter();
         }
     }
-    addFrontMatter();
+
+    setupDocument();
+    setTimeout(addPageIfNeeded, 1);
+
 });
 
 function addFrontMatter() {
