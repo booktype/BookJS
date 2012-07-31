@@ -1,0 +1,1 @@
+In order to run BookJS, you need to use Chromium 22.1215 at least.

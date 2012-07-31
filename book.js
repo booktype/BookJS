@@ -1,3 +1,7 @@
+/*
+ * (c) 2012 Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
+ */
+
 function romanize(num) {
     if (!+num) return false;
     var digits = String(+num).split(""),
