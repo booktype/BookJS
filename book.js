@@ -13,7 +13,7 @@ $(document).ready(function () {
     var hasEmptyPage = false;
     var fillingPages = true;
     var pageCounter = 1;
-    var namedFlow = document.webkitGetFlowByName("article");
+    var namedFlow = document.webkitGetFlowByName("contents");
     while (fillingPages == true) {
         if (namedFlow.firstEmptyRegionIndex == -1) { /* TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium. */
             $('#layout').append('<div class="page"><div class="contents"></div><div class="pagenumber">' + ++pageCounter + '</div></div>');
@@ -53,7 +53,7 @@ function tocPage() {
 }
 
 function buildToc() {
-    var namedFlow = document.webkitGetFlowByName("article");
+    var namedFlow = document.webkitGetFlowByName("contents");
     var headlinePageList = [];
     $('#contents h1').each(function () {
         headlineContentDiv = namedFlow.getRegionsByContent(this)[0];

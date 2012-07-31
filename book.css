@@ -21,8 +21,7 @@ img {
         position:relative;
 }
 #contents {
-        -webkit-flow:'article';
-        -webkit-flow-into:article;
+        -webkit-flow-into:contents;
         position:relative;
 }
 .contents, .frontmatter {
@@ -31,8 +30,7 @@ img {
 }
 
 .contents {
-        -webkit-flow-from:article;
-        content:-webkit-from-flow('article');
+        -webkit-flow-from:contents;
 }
 .pagenumber {
         width:1in;
