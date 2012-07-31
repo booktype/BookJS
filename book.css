@@ -11,10 +11,6 @@ body {
 img {
         image-resolution:from-image;
 }
-div.pagenumber:before {
-        counter-increment:PageNumber;
-        content:counter(PageNumber) " ";
-}
 .page {
         height:10.6in;
         width:8.1in;
@@ -25,9 +21,12 @@ div.pagenumber:before {
         -webkit-flow-into:article;
         position:relative;
 }
-.contents {
+.contents, .frontmatter {
         height:9in;
         width:80%;
+}
+
+.contents {
         -webkit-flow-from:article;
         content:-webkit-from-flow('article');
 }
