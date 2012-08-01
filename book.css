@@ -6,9 +6,6 @@
         size:8.5in 11in;
         margin:.2in bleed:6pt;
 }
-@page:right {
-        margin-left:1.4in;
-}
 
 img {
         image-resolution:from-image;
@@ -22,6 +19,17 @@ img {
         -webkit-flow-into:body;
         position:relative;
 }
+#frontmatterraw {
+        -webkit-flow-into:frontmatter;
+        position:relative;
+}
+
+br.pagebreak {
+
+    -webkit-region-break-after: true;
+    
+}
+
 .contents {
         height:9in;
         width:80%;
@@ -29,6 +37,9 @@ img {
 
 #body .contents {
         -webkit-flow-from:body;
+}
+#frontmatter .contents {
+        -webkit-flow-from:frontmatter;
 }
 .pagenumber {
         width:1in;
