@@ -6,7 +6,7 @@ var arabPageCounter = 1;
 var romanPageCounter = 1;
 
 function setupDocument() {
-    $('body').wrapInner('<div id="contents" />');
+    $('body').wrapInner('<div id="bodyraw" />');
     $('body').append('<div id="frontmatterRaw" />');
     $('body').append('<div id="layout"><div id="frontmatter"/><div id="body"/></div>');
     $('#body').append('<div class="page"><div class="contents"></div><div class="pagenumber">' +  arabPageCounter++ + '</div></div>');
@@ -29,7 +29,7 @@ $(document).ready(function () {
     function addPagesIfNeeded() {
         // Flows become available some time after jQUery fires ready()
         // Wait until it becomes available (or error if we waited long enough)
-        namedFlow = namedFlow || document.webkitGetFlowByName("contents");
+        namedFlow = namedFlow || document.webkitGetFlowByName("body");
         if (namedFlow == null) {
           if (namedFlowRetries-- == 0) {
             console.error("Could not find the page flow");
@@ -72,7 +72,7 @@ function addFrontMatter() {
     var frontMatter = '';
 
     function addFrontMatterPage(content) {
-        frontMatter += '<div class="page"><div class="frontmatter">' + content + '</div><div class="pagenumber">' + romanize(romanPageCounter++) + '</div></div>';
+        frontMatter += '<div class="page"><div class="contents">' + content + '</div><div class="pagenumber">' + romanize(romanPageCounter++) + '</div></div>';
     }
 
     addFrontMatterPage('<h1>Booktitle</h1> <p>by Author</p>');
@@ -94,9 +94,9 @@ function tocPage() {
 }
 
 function buildToc() {
-    var namedFlow = document.webkitGetFlowByName("contents");
+    var namedFlow = document.webkitGetFlowByName("body");
     var headlinePageList = [];
-    $('#contents h1').each(function () {
+    $('#bodyraw h1').each(function () {
         headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
         headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
         headlineText = $(this).text();

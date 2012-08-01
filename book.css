@@ -18,17 +18,17 @@ img {
         width:8.1in;
         position:relative;
 }
-#contents {
-        -webkit-flow-into:contents;
+#bodyraw {
+        -webkit-flow-into:body;
         position:relative;
 }
-.contents, .frontmatter {
+.contents {
         height:9in;
         width:80%;
 }
 
-.contents {
-        -webkit-flow-from:contents;
+#body .contents {
+        -webkit-flow-from:body;
 }
 .pagenumber {
         width:1in;
