@@ -1,5 +1,5 @@
 /*
- * (c) 2012 Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
+ * (c) 2012 Johannes Wilm and Philip Schatz. Freely available under the AGPL. For further details see LICENSE.txt
  */
 
 var arabPageCounter = 1;
