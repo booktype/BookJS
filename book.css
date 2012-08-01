@@ -1,65 +1,65 @@
-/*
- * (c) 2012 Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
- */
-
 @page {
-        size:8.5in 11in;
-        margin:.2in bleed:6pt;
+size:8.5in 11in;
+margin:.2in bleed:6pt;
 }
 
 img {
-        image-resolution:from-image;
+image-resolution:from-image;
 }
+
 .page {
-        height:10.6in;
-        width:8.1in;
-        position:relative;
+height:10.6in;
+width:8.1in;
+position:relative;
 }
+
 #bodyraw {
-        -webkit-flow-into:body;
-        position:relative;
+-webkit-flow-into:body;
+position:relative;
 }
+
 #frontmatterraw {
-        -webkit-flow-into:frontmatter;
-        position:relative;
+-webkit-flow-into:frontmatter;
+position:relative;
 }
 
 br.pagebreak {
-
-    -webkit-region-break-after: true;
-    
+-webkit-region-break-after:true;
 }
 
 .contents {
-        height:9in;
-        width:80%;
+height:9in;
+width:80%;
 }
 
 #body .contents {
-        -webkit-flow-from:body;
+-webkit-flow-from:body;
 }
+
 #frontmatter .contents {
-        -webkit-flow-from:frontmatter;
+-webkit-flow-from:frontmatter;
 }
+
 .pagenumber {
-        width:1in;
-        padding-top:.2in;
-        position:absolute;
-        bottom:.8in;
-        text-align:center;
-        left:3.55in;
+width:1in;
+padding-top:.2in;
+position:absolute;
+bottom:.8in;
+text-align:center;
+left:3.55in;
 }
 
 body {
-        background-color:#efefef;
+background-color:#efefef;
 }
-@media screen {
-        .page {
-                border:solid 1px #000;
-                padding:.2in 1.4in .2 1.4in;
-                margin-bottom:.2in;
-                background-color:#fff;
-                margin-left:auto;
-                margin-right: auto;
-        }
+
+@media screen{
+.page {
+border:solid 1px #000;
+margin-bottom:.2in;
+background-color:#fff;
+margin-left:auto;
+margin-right:auto;
+padding:.2in 1.4in .2;
+}
 }
