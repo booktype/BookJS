@@ -24,7 +24,7 @@ position:relative;
 }
 
 br.pagebreak {
--webkit-region-break-after:true;
+-webkit-region-break-after:always;
 }
 
 .contents {
