@@ -67,8 +67,6 @@ function flowObject(name, pageCounter) {
         }
     }
 
-    var tocContents = '<h2>Table of Contents</h2>';
-
     fO.buildToc = function () {
 
         function findTocItems() {
@@ -77,9 +75,9 @@ function flowObject(name, pageCounter) {
 
             $(fO.rawselector + ' h1').each(function () {
 
-                headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
-                headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
-                headlineText = $(this).text();
+                var headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
+                var headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
+                var headlineText = $(this).text();
                 headlinePageList.push({
                     'text': headlineText,
                     'pagenumber': headlinePagenumber
@@ -90,6 +88,8 @@ function flowObject(name, pageCounter) {
 
         var tocList = findTocItems();
 
+        var tocContents = '<h2>Table of Contents</h2>';        
+        
         $.each(tocList, function (index, headline) {
             tocContents += '<div class="toc-entry">' + headline.text + ' ' + headline.pagenumber + '</div>';
         });
