@@ -66,12 +66,12 @@ function flowObject(name, pageCounter) {
 
 }
 
-function buildToc() {
+function buildToc(flowObject) {
 
-    function findTocItems() {
-        var namedFlow = document.webkitGetFlowByName("body");
+    function findTocItems(flowObject) {
+        var namedFlow = document.webkitGetFlowByName(flowObject.name);
         var headlinePageList = [];
-        $('#bodyraw h1').each(function () {
+        $(flowObject.rawselector+' h1').each(function () {
             headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
             headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
             headlineText = $(this).text();
@@ -103,7 +103,7 @@ $(document).ready(function () {
     //Done flowing body pages; calculate the TOC
     fmObject = new flowObject('frontmatter', romanPageCounter);
     $('body').append(fmObject.rawdiv);
-    fmObject.addContent('<h1>Booktitle</h1> <p>by Author</p><br class="pagebreak">' + buildToc());
+    fmObject.addContent('<h1>Booktitle</h1> <p>by Author</p><br class="pagebreak">' + buildToc(bodyObject));
     $('#layout').prepend(fmObject.div);
     fmObject.addPage();
     fmObject.addPagesIfNeeded();
