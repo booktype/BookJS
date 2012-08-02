@@ -41,12 +41,12 @@ function flowObject(name, pageCounter) {
 
     // If text overflows from the region add more pages and then remove any empty ones
     fO.addPagesIfNeeded = function () {
-        
-        if (($(fO.rawselector)[0].innerText.length>0) && (fO.pageCounter.value==1)) {
+
+        if (($(fO.rawselector)[0].innerText.length > 0) && (fO.pageCounter.value == 1)) {
             fO.addPage();
         }
 
-        namedFlow = document.webkitGetFlowByName(fO.name);        
+        namedFlow = document.webkitGetFlowByName(fO.name);
         // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
         if (namedFlow.firstEmptyRegionIndex == -1) {
             // Add several pages at a time
@@ -67,36 +67,36 @@ function flowObject(name, pageCounter) {
         }
     }
 
-     var tocContents = '<h2>Table of Contents</h2>';
-    
-    fO.buildToc = function() {
+    var tocContents = '<h2>Table of Contents</h2>';
 
-    function findTocItems() {
-        var namedFlow = document.webkitGetFlowByName(fO.name);
-        var headlinePageList = [];
-        
-        $(fO.rawselector+' h1').each(function () {
-           
-            headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
-            headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
-            headlineText = $(this).text();
-            headlinePageList.push({
-                'text': headlineText,
-                'pagenumber': headlinePagenumber
+    fO.buildToc = function () {
+
+        function findTocItems() {
+            var namedFlow = document.webkitGetFlowByName(fO.name);
+            var headlinePageList = [];
+
+            $(fO.rawselector + ' h1').each(function () {
+
+                headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
+                headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
+                headlineText = $(this).text();
+                headlinePageList.push({
+                    'text': headlineText,
+                    'pagenumber': headlinePagenumber
+                });
             });
-        });
-        return headlinePageList;
-    }
-    
-    var tocList = findTocItems();
-   
-    $.each(tocList, function (index, headline) {
-        tocContents += '<div class="toc-entry">' + headline.text + ' ' + headline.pagenumber + '</div>';
-    });
+            return headlinePageList;
+        }
 
-    return tocContents;
-}
-    
+        var tocList = findTocItems();
+
+        $.each(tocList, function (index, headline) {
+            tocContents += '<div class="toc-entry">' + headline.text + ' ' + headline.pagenumber + '</div>';
+        });
+
+        return tocContents;
+    }
+
 }
 
 
@@ -108,7 +108,7 @@ $(document).ready(function () {
     $('body').append('<div id="layout" />');
     $('#layout').append(bodyObject.div);
     bodyObject.addPagesIfNeeded();
-    
+
     //Create and flow frontmatter
     fmObject = new flowObject('frontmatter', romanPageCounter);
     $('body').append(fmObject.rawdiv);
