@@ -48,24 +48,29 @@ function flowObject(name, pageCounter) {
         }
 
         namedFlow = document.webkitGetFlowByName(fO.name);
-        // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
-        if (namedFlow.firstEmptyRegionIndex == -1) {
-            // Add several pages at a time
-            // console.log(new Date());
-            for (var i = 0; i < bulkPagesToAdd; i++) {
-                fO.addPage();
+
+        var addPagesLoop = function () {
+
+            // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
+            if (namedFlow.firstEmptyRegionIndex == -1) {
+                // Add several pages at a time
+                // console.log(new Date());
+                for (var i = 0; i < bulkPagesToAdd; i++) {
+                    fO.addPage();
+                }
+                // The browser becomes unresponsive if we loop
+                // Instead, set a timeout
+                setTimeout(addPagesLoop(), 1);
+            } else {
+                // Remove the empty pages (up to bulkPagesToAdd - 1)
+                // (empty page needed to test if firstEmptyRegionIndex == -1 )
+                while (namedFlow.firstEmptyRegionIndex != -1) {
+                    $('#' + fO.name + ' .page:last').detach();
+                    fO.pageCounter.value--;
+                }
             }
-            // The browser becomes unresponsive if we loop
-            // Instead, set a timeout
-            setTimeout(fO.addPagesIfNeeded(), 1);
-        } else {
-            // Remove the empty pages (up to bulkPagesToAdd - 1)
-            // (empty page needed to test if firstEmptyRegionIndex == -1 )
-            while (namedFlow.firstEmptyRegionIndex != -1) {
-                $('#' + fO.name + ' .page:last').detach();
-                fO.pageCounter.value--;
-            }
-        }
+        };
+        addPagesLoop();
     }
 
     fO.buildToc = function () {
@@ -89,8 +94,8 @@ function flowObject(name, pageCounter) {
 
         var tocList = findTocItems();
 
-        var tocContents = '<h2>Table of Contents</h2>';        
-        
+        var tocContents = '<h2>Table of Contents</h2>';
+
         $.each(tocList, function (index, headline) {
             tocContents += '<div class="toc-entry">' + headline.text + ' ' + headline.pagenumber + '</div>';
         });
