@@ -22,55 +22,57 @@ var arabPageCounter = new pageCounter();
 var romanPageCounter = new pageCounter(romanize);
 
 function flowObject(name, pageCounter) {
-    this.name = name;
-    this.pageCounter = pageCounter;
-    this.rawdiv = '<div id="' + name + 'raw" />';
-    var rawselector = '#' + name + 'raw';
-    this.rawselector = rawselector;
-    this.div = '<div id="' + name + '" />';
-    this.selector = '#' + name;
+    var fO = this;
+    fO.name = name;
+    fO.pageCounter = pageCounter;
+    fO.rawdiv = '<div id="' + name + 'raw" />';
+    fO.rawselector = '#' + name + 'raw';
+    fO.div = '<div id="' + name + '" />';
+    fO.selector = '#' + name;
 
-    var addPage = function () {
+    fO.addPage = function () {
         $('#' + name).append('<div class="page"><div class="contents"></div><div class="pagenumber">' + pageCounter.show() + '</div></div>');
         pageCounter.value++;
     };
-    this.addPage = addPage;
 
-    this.addContent = function (content) {
+    fO.addContent = function (content) {
         $(this.rawselector).append(content);
     }
 
     // If text overflows from the region add more pages and then remove any empty ones
-    var addPagesIfNeeded = function () {
-        namedFlow = document.webkitGetFlowByName(name);
+    fO.addPagesIfNeeded = function () {
+        namedFlow = document.webkitGetFlowByName(fO.name);
 
         // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
         if (namedFlow.firstEmptyRegionIndex == -1) {
             // Add several pages at a time
             // console.log(new Date());
             for (var i = 0; i < bulkPagesToAdd; i++) {
-                addPage();
+                fO.addPage();
             }
             // The browser becomes unresponsive if we loop
             // Instead, set a timeout
-            setTimeout(addPagesIfNeeded(), 1);
+            setTimeout(fO.addPagesIfNeeded(), 1);
         } else {
             // Remove the empty pages (up to bulkPagesToAdd - 1)
             // (empty page needed to test if firstEmptyRegionIndex == -1 )
             while (namedFlow.firstEmptyRegionIndex != -1) {
-                $('#' + name + ' .page:last').detach();
-                pageCounter.value--;
+                $('#' + fO.name + ' .page:last').detach();
+                fO.pageCounter.value--;
             }
         }
     }
-    this.addPagesIfNeeded = addPagesIfNeeded;
 
-    this.buildToc = function() {
+     var tocContents = '<h2>Table of Contents</h2>';
+    
+    fO.buildToc = function() {
 
     function findTocItems() {
-        var namedFlow = document.webkitGetFlowByName(name);
+        var namedFlow = document.webkitGetFlowByName(fO.name);
         var headlinePageList = [];
-        $(rawselector+' h1').each(function () {
+        
+        $(fO.rawselector+' h1').each(function () {
+           
             headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
             headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
             headlineText = $(this).text();
@@ -83,8 +85,7 @@ function flowObject(name, pageCounter) {
     }
     
     var tocList = findTocItems();
-    var tocContents = '<h2>Table of Contents</h2>';
-
+   
     $.each(tocList, function (index, headline) {
         tocContents += '<div class="toc-entry">' + headline.text + ' ' + headline.pagenumber + '</div>';
     });
