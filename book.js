@@ -41,8 +41,12 @@ function flowObject(name, pageCounter) {
 
     // If text overflows from the region add more pages and then remove any empty ones
     fO.addPagesIfNeeded = function () {
-        namedFlow = document.webkitGetFlowByName(fO.name);
+        
+        if (($(fO.rawselector)[0].innerText.length>0) && (fO.pageCounter.value==1)) {
+            fO.addPage();
+        }
 
+        namedFlow = document.webkitGetFlowByName(fO.name);        
         // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
         if (namedFlow.firstEmptyRegionIndex == -1) {
             // Add several pages at a time
@@ -98,17 +102,17 @@ function flowObject(name, pageCounter) {
 
 
 $(document).ready(function () {
+    //Create and flow body
     bodyObject = new flowObject('body', arabPageCounter);
     $('body').wrapInner(bodyObject.rawdiv);
     $('body').append('<div id="layout" />');
     $('#layout').append(bodyObject.div);
-    bodyObject.addPage();
     bodyObject.addPagesIfNeeded();
-    //Done flowing body pages; calculate the TOC
+    
+    //Create and flow frontmatter
     fmObject = new flowObject('frontmatter', romanPageCounter);
     $('body').append(fmObject.rawdiv);
     fmObject.addContent('<h1>Booktitle</h1> <p>by Author</p><br class="pagebreak">' + bodyObject.buildToc());
     $('#layout').prepend(fmObject.div);
-    fmObject.addPage();
     fmObject.addPagesIfNeeded();
 });
