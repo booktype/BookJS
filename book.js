@@ -42,6 +42,7 @@ function flowObject(name, pageCounter) {
     // If text overflows from the region add more pages and then remove any empty ones
     fO.addPagesIfNeeded = function () {
 
+        // If there is text to be displayed and we have not added a single page, then add the first page
         if (($(fO.rawselector)[0].innerText.length > 0) && (fO.pageCounter.value == 1)) {
             fO.addPage();
         }
