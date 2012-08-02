@@ -25,7 +25,8 @@ function flowObject(name, pageCounter) {
     this.name = name;
     this.pageCounter = pageCounter;
     this.rawdiv = '<div id="' + name + 'raw" />';
-    this.rawselector = '#' + name + 'raw';
+    var rawselector = '#' + name + 'raw';
+    this.rawselector = rawselector;
     this.div = '<div id="' + name + '" />';
     this.selector = '#' + name;
 
@@ -64,14 +65,12 @@ function flowObject(name, pageCounter) {
     }
     this.addPagesIfNeeded = addPagesIfNeeded;
 
-}
+    this.buildToc = function() {
 
-function buildToc(flowObject) {
-
-    function findTocItems(flowObject) {
-        var namedFlow = document.webkitGetFlowByName(flowObject.name);
+    function findTocItems() {
+        var namedFlow = document.webkitGetFlowByName(name);
         var headlinePageList = [];
-        $(flowObject.rawselector+' h1').each(function () {
+        $(rawselector+' h1').each(function () {
             headlineContentDiv = namedFlow.getRegionsByContent(this)[0];
             headlinePagenumber = $(headlineContentDiv).parent().find('.pagenumber').text();
             headlineText = $(this).text();
@@ -92,6 +91,10 @@ function buildToc(flowObject) {
 
     return tocContents;
 }
+    
+}
+
+
 
 $(document).ready(function () {
     bodyObject = new flowObject('body', arabPageCounter);
@@ -103,7 +106,7 @@ $(document).ready(function () {
     //Done flowing body pages; calculate the TOC
     fmObject = new flowObject('frontmatter', romanPageCounter);
     $('body').append(fmObject.rawdiv);
-    fmObject.addContent('<h1>Booktitle</h1> <p>by Author</p><br class="pagebreak">' + buildToc(bodyObject));
+    fmObject.addContent('<h1>Booktitle</h1> <p>by Author</p><br class="pagebreak">' + bodyObject.buildToc());
     $('#layout').prepend(fmObject.div);
     fmObject.addPage();
     fmObject.addPagesIfNeeded();
