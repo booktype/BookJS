@@ -51,8 +51,7 @@ function flowObject(name, pageCounter) {
 
         var addPagesLoop = function () {
 
-            // TODO: We use firstEmptyRegionIndex as overset gives us incorrect values in current Chromium.
-            if (namedFlow.firstEmptyRegionIndex == -1) {
+            if (namedFlow.overset) {
                 // Add several pages at a time
                 // console.log(new Date());
                 for (var i = 0; i < bulkPagesToAdd; i++) {

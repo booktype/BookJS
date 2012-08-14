@@ -15,12 +15,10 @@ position:relative;
 
 #bodyraw {
 -webkit-flow-into:body;
-position:relative;
 }
 
 #frontmatterraw {
 -webkit-flow-into:frontmatter;
-position:relative;
 }
 
 br.pagebreak {
