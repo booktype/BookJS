@@ -3,11 +3,12 @@
     <head>
         <script src="jquery-1.7.2.min.js" type="text/javascript"></script>
         <link href="book.css" rel="stylesheet" type="text/css" />
-        <script src="book-config.js" type="text/javascript"></script>
+        <script src="romanize.js" type="text/javascript"></script>
         <script src="book.js" type="text/javascript"></script>
     </head>
     
     <body>
+      <div id="contents">
         <h1>Introduction</h1>
         <div>1 Lorem ipsum dolor sit amet, consectetuer adipiscing
             <span class="footnote">hey</span>elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore
@@ -227,6 +228,7 @@
             Typi non habent claritatem insitam; est usus legentis in iis qui facit
             eorum claritatem. Investigationes demonstraverunt lectores legere me lius
             quod ii legunt saepius.</div>
+      </div>
     </body>
 
 </html>
