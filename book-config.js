@@ -1,23 +1,23 @@
     /* CONFIG OPTIONS */
 
-    var sectionStartMarker = 'h1';
-    var sectionTitleMarker = 'h1';
+    pagination.sectionStartMarker = 'h1';
+    pagination.sectionTitleMarker = 'h1';
 
-    var chapterStartMarker = 'h2';
-    var chapterTitleMarker = 'h2';
+    pagination.chapterStartMarker = 'h2';
+    pagination.chapterTitleMarker = 'h2';
     
-    var flowElement = "document.body";
+    pagination.flowElement = "document.body";
     
-    var alwaysEven = true;
+    pagination.alwaysEven = true;
     
-    var enableReflow = false;
+    pagination.enableReflow = false;
     
     // Currently only either enableFrontmatter or enableReflow can be used. Using both at the same time doesn't work.
-    var enableFrontmatter = true;
+    pagination.enableFrontmatter = true;
 
-    var bulkPagesToAdd = 50; // For larger chapters add many pages at a time so there is less time spent reflowing text
-    var pagesToAddIncrementRatio = 1.4; // Ratio of incrementing pages. 1.4 seems to be the fastest in most situations.
+    pagination.bulkPagesToAdd = 50; // For larger chapters add many pages at a time so there is less time spent reflowing text
+    pagination.pagesToAddIncrementRatio = 1.4; // Ratio of incrementing pages. 1.4 seems to be the fastest in most situations.
 
-    var frontmatterContents ='<div id="booktitle">Book title</div><div id="booksubtitle">Book subtitle</div><div id="bookeditors">ed. Editor 1, Editor II, Editor III</div><div class="pagebreak"></div><div id="copyrightpage">Copyright: You<br>License: CC</div><div class="pagebreak"></div>';
+    pagination.frontmatterContents ='<div id="booktitle">Book title</div><div id="booksubtitle">Book subtitle</div><div id="bookeditors">ed. Editor 1, Editor II, Editor III</div><div class="pagebreak"></div><div id="copyrightpage">Copyright: You<br>License: CC</div><div class="pagebreak"></div>';
     
     /* END CONFIG OPTIONS */
