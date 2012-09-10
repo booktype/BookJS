@@ -19,7 +19,6 @@ if (document.webkitGetNamedFlows) {
 
     pagination.enableReflow = false;
 
-    // Currently only either enableFrontmatter or enableReflow can be used. Using both at the same time doesn't work.
     pagination.enableFrontmatter = true;
 
     pagination.bulkPagesToAdd = 50; // For larger chapters add many pages at a time so there is less time spent reflowing text
@@ -282,7 +281,9 @@ if (document.webkitGetNamedFlows) {
                             fO.div.appendChild(pagination.createPages(1, false, fO.pageCounter.selector));
                         } else {
                             var emptyPage = fO.div.querySelector('.page.empty');
-                            fO.div.removeChild(emptyPage);
+                            if (emptyPage) {
+                                fO.div.removeChild(emptyPage);
+                            }
                         }
 
                     }
@@ -312,6 +313,15 @@ if (document.webkitGetNamedFlows) {
             }
 
         };
+
+        fO.enableAutoReflow = function () {
+            setInterval(function () {
+                fO.addPagesIfNeeded(1);
+                fO.removeExcessPages();
+            }, 5000);
+            //future:
+            //fO.namedFlow.addEventListener('RegionLayoutUpdated',function(){fO.addPagesIfNeeded(1);})
+        }
     }
 
     pagination.applyBookLayout = function () {
@@ -321,22 +331,16 @@ if (document.webkitGetNamedFlows) {
         //Create div for layout
         var layoutDiv = document.createElement('div');
         layoutDiv.id = 'layout';
-
+        counter = 0;
         document.body.appendChild(layoutDiv);
 
         for (var i = 0; i < bodyObjects.length; i++) {
-            var currentBodyObject = bodyObjects[i];
-            layoutDiv.appendChild(currentBodyObject.div);
-            document.body.appendChild(currentBodyObject.rawdiv);
-            currentBodyObject.setNamedFlow();
-            currentBodyObject.addPagesIfNeeded();
+            layoutDiv.appendChild(bodyObjects[i].div);
+            document.body.appendChild(bodyObjects[i].rawdiv);
+            bodyObjects[i].setNamedFlow();
+            bodyObjects[i].addPagesIfNeeded();
             if (pagination.enableReflow) {
-                setInterval(function () {
-                    currentBodyObject.addPagesIfNeeded(1);
-                    currentBodyObject.removeExcessPages();
-                }, 5000);
-                //future:
-                //currentBodyObject.namedFlow.addEventListener('RegionLayoutUpdated',function(){currentBodyObject.addPagesIfNeeded(1);})
+                bodyObjects[i].enableAutoReflow();
             }
         }
 
@@ -347,10 +351,17 @@ if (document.webkitGetNamedFlows) {
             fmObject.rawdiv.innerHTML = pagination.frontmatterContents;
             var toc = pagination.headersAndToc(bodyObjects);
             fmObject.rawdiv.appendChild(toc);
-
             layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div)
             fmObject.setNamedFlow();
             fmObject.addPagesIfNeeded();
+            if (pagination.enableReflow) {
+                setInterval(function () {
+                    var oldToc = toc;
+                    toc = pagination.headersAndToc(bodyObjects);
+                    fmObject.rawdiv.replaceChild(toc, oldToc);
+                }, 5000);
+                fmObject.enableAutoReflow();
+            }
         }
     }
 
