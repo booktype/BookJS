@@ -11,7 +11,6 @@ pagination.alwaysEven = true;
 
 pagination.enableReflow = false;
 
-// Currently only either enableFrontmatter or enableReflow can be used. Using both at the same time doesn't work.
 pagination.enableFrontmatter = true;
 
 pagination.bulkPagesToAdd = 50; // For larger chapters add many pages at a time so there is less time spent reflowing text

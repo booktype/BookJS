@@ -1,5 +1,5 @@
 /*
- * (c) 2012  Mihai Balan, Marita Fraser, Steven Levithan, Philip Schatz and Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
+ * (c) 2012  Marita Fraser, Steven Levithan, Philip Schatz and Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
  */
 var pagination = new Object;
 
