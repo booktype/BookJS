@@ -272,12 +272,10 @@ pagination.flowObject.prototype.addPagesLoop = function (pages) {
 
     var flowObject = this;
     var extraLoop = function () {
-        if (flowObject.namedFlow.overset) {
-            flowObject.addPagesLoop(pages);
-        } 
+        flowObject.addOrRemovePages(pages);  
     }
 
-    setTimeout(function(){flowObject.addOrRemovePages(pages)}, 1);
+    setTimeout(extraLoop, 1);
 
 };
 
