@@ -15,7 +15,7 @@ pagination.flowElement = "document.body";
 
 pagination.alwaysEven = false;
 
-pagination.enableReflow = false;
+pagination.enableReflow = true;
 
 pagination.enableFrontmatter = true;
 
@@ -110,6 +110,11 @@ pagination.createPages = function (num, flowName, pageCounterSelector) {
     }
     return tempRoot;
 }
+
+pagination.bodyLayoutUpdatedEvent = document.createEvent('Event');
+
+pagination.bodyLayoutUpdatedEvent.initEvent('bodyLayoutUpdated', true, true);
+
 
 pagination.headersAndToc = function (bodyObjects) {
 
@@ -215,7 +220,8 @@ pagination.flowObject = function (name, pageCounter) {
     this.rawdiv.style.webkitFlowInto = name;
 
     this.div = document.createElement('div');
-    this.div.id = name;
+    this.div.id = name;   
+
 }
 
 pagination.flowObject.prototype.redoPages = false;
@@ -281,6 +287,10 @@ pagination.flowObject.prototype.addPagesLoop = function (pages) {
 
 
 pagination.flowObject.prototype.addOrRemovePages = function (pages) {
+    if(!(this.namedFlow)) {
+        this.setNamedFlow();
+    }
+    
     if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
         this.redoPages = true;
         this.addPagesLoop(pages);
@@ -293,6 +303,9 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
             this.makeEvenPages();
         }
         pagination.numberPages(this.pageCounter);
+        if (this.name!='frontmatter') {
+            document.body.dispatchEvent(pagination.bodyLayoutUpdatedEvent);
+        }
     }
 }
 
@@ -313,9 +326,7 @@ pagination.flowObject.prototype.enableAutoReflow = function () {
     var reFlow = function () {
         flowObject.addOrRemovePages(1);
     };
-    setInterval(reFlow, 5000);
-    //future:
-    //pagination.flowObject.namedFlow.addEventListener('RegionLayoutUpdated',function(){pagination.flowObject.addOrRemovePages(1);})
+    this.namedFlow.addEventListener('webkitRegionLayoutUpdate',reFlow)
 }
 
 
@@ -332,7 +343,6 @@ pagination.applyBookLayout = function () {
     for (var i = 0; i < bodyObjects.length; i++) {
         layoutDiv.appendChild(bodyObjects[i].div);
         document.body.appendChild(bodyObjects[i].rawdiv);
-        bodyObjects[i].setNamedFlow();
         bodyObjects[i].addOrRemovePages();
         if (pagination.enableReflow) {
             bodyObjects[i].enableAutoReflow();
@@ -347,14 +357,14 @@ pagination.applyBookLayout = function () {
         var toc = pagination.headersAndToc(bodyObjects);
         fmObject.rawdiv.appendChild(toc);
         layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div)
-        fmObject.setNamedFlow();
         fmObject.addOrRemovePages();
         if (pagination.enableReflow) {
-            setInterval(function () {
+            var redoToc = function() {
                 var oldToc = toc;
                 toc = pagination.headersAndToc(bodyObjects);
                 fmObject.rawdiv.replaceChild(toc, oldToc);
-            }, 5000);
+            }
+            document.body.addEventListener('bodyLayoutUpdated',redoToc)
             fmObject.enableAutoReflow();
         }
     }
@@ -374,11 +384,11 @@ pagination.applySimpleBookLayout = function () {
 
 
 document.onreadystatechange = function () {
-    if ((pagination.autoStart == true) && (document.readyState == 'interactive')){
-        if (document.webkitGetNamedFlows) {
-            pagination.applyBookLayout();
-        } else {
+    if (pagination.autoStart == true) {
+        if ((document.readyState == 'interactive') && (!(document.webkitGetNamedFlows))) {
             pagination.applySimpleBookLayout();
+        } else if ((document.readyState == 'complete') && (document.webkitGetNamedFlows)){
+            pagination.applyBookLayout();
         }
     }
 }
