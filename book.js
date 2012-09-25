@@ -28,45 +28,55 @@ pagination.autoStart = true;
 
 /* END CONFIG OPTIONS */
 
-pagination.romanize = function (num) {
-    if (!+num) return false;
-    var digits = String(+num).split(""),
+pagination.romanize = function () {
+    var digits = String(+this.value).split(""),
         key = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC", "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
         roman = "",
         i = 3;
-    while (i--)
-    roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    while (i--) {
+        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    }
     return Array(+digits.join("") + 1).join("M") + roman;
 }
 
 
-pagination.pageCounter = function (selector, show) {
-    this.value = 0;
-    this.show = function () {
-        if (show === undefined) {
-            return this.value;
-        } else {
-            return show(this.value);
-        }
-    };
-    this.incrementAndShow = function () {
-        this.value++;
-        return this.show();
-    };
+pagination.pageCounterCreator = function (selector, show) {
     this.selector = selector;
-}
-
-pagination.arabPageCounter = new pagination.pageCounter('arabic');
-pagination.romanPageCounter = new pagination.pageCounter('roman', pagination.romanize);
-
-pagination.numberPages = function (pageCounter) {
-    pageCounter.value = 0;
-
-    var pagenumbersToNumber = document.querySelectorAll('.page .pagenumber.' + pageCounter.selector);
-    for (var i = 0; i < pagenumbersToNumber.length; i++) {
-        pagenumbersToNumber[i].innerHTML = pageCounter.incrementAndShow();
+    if (show !== undefined) {
+        this.show = show;
     }
 }
+
+pagination.pageCounterCreator.prototype.value = 0;
+
+pagination.pageCounterCreator.prototype.needsUpdate = false;
+
+pagination.pageCounterCreator.prototype.show = function(){
+    return this.value;
+}
+    
+pagination.pageCounterCreator.prototype.incrementAndShow = function () {
+    this.value++;
+    return this.show();
+};   
+
+
+pagination.pageCounterCreator.prototype.numberPages = function () {
+    if (this.needsUpdate) {
+        this.value = 0;
+        this.needsUpdate = false;
+        
+        var pagenumbersToNumber = document.querySelectorAll('.page .pagenumber.' + this.selector);
+        for (var i = 0; i < pagenumbersToNumber.length; i++) {
+            pagenumbersToNumber[i].innerHTML = this.incrementAndShow();
+        }
+    }
+}
+
+pagination.pageCounters = {};
+
+pagination.pageCounters.arab = new pagination.pageCounterCreator('arabic');
+pagination.pageCounters.roman = new pagination.pageCounterCreator('roman', pagination.romanize);
 
 
 
@@ -115,9 +125,12 @@ pagination.bodyLayoutUpdatedEvent = document.createEvent('Event');
 
 pagination.bodyLayoutUpdatedEvent.initEvent('bodyLayoutUpdated', true, true);
 
+pagination.layoutFlowFinishedEvent = document.createEvent('Event');
+
+pagination.layoutFlowFinishedEvent.initEvent('layoutFlowFinished', true, true);
 
 pagination.headersAndToc = function (bodyObjects) {
-
+    
     var currentChapterTitle = '';
     var currentSectionTitle = '';
 
@@ -184,7 +197,7 @@ pagination.createBodyObjects = function () {
     var bodyObjects = [];
     var chapterCounter = 0;
 
-    bodyObjects.push(new pagination.flowObject('bodypre', pagination.arabPageCounter));
+    bodyObjects.push(new pagination.flowObject('bodypre', pagination.pageCounters.arab));
 
     var bodyContainer = eval(pagination.flowElement);
     var bodyContents = bodyContainer.childNodes;
@@ -194,11 +207,11 @@ pagination.createBodyObjects = function () {
 
         if (bodyContents[0].nodeType == 1) {
             if (bodyContents[0].webkitMatchesSelector(pagination.chapterStartMarker)) {
-                bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.arabPageCounter));
+                bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.pageCounters.arab));
                 bodyObjects[chapterCounter].setType('chapter');
 
             } else if (bodyContents[0].webkitMatchesSelector(pagination.sectionStartMarker)) {
-                bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.arabPageCounter));
+                bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.pageCounters.arab));
                 bodyObjects[chapterCounter].setType('section');
             }
         }
@@ -275,13 +288,14 @@ pagination.flowObject.prototype.addPagesLoop = function (pages) {
         this.div.appendChild(pagination.createPages(pages, this.name, this.pageCounter.selector));
     }
 
-
-    var flowObject = this;
+    this.addOrRemovePages(pages);
+    
+    /*var flowObject = this;
     var extraLoop = function () {
         flowObject.addOrRemovePages(pages);  
     }
 
-    setTimeout(extraLoop, 1);
+    setTimeout(extraLoop, 1);*/
 
 };
 
@@ -292,6 +306,7 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
     }
     
     if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
+        this.pageCounter.needsUpdate = true;
         this.redoPages = true;
         this.addPagesLoop(pages);
     } else if (this.namedFlow.firstEmptyRegionIndex!=-1) {
@@ -302,7 +317,6 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
         if (pagination.alwaysEven) {
             this.makeEvenPages();
         }
-        pagination.numberPages(this.pageCounter);
         if (this.name!='frontmatter') {
             document.body.dispatchEvent(pagination.bodyLayoutUpdatedEvent);
         }
@@ -325,6 +339,7 @@ pagination.flowObject.prototype.enableAutoReflow = function () {
 
     var reFlow = function () {
         flowObject.addOrRemovePages(1);
+        flowObject.pageCounter.numberPages();
     };
     this.namedFlow.addEventListener('webkitRegionLayoutUpdate',reFlow)
 }
@@ -348,25 +363,32 @@ pagination.applyBookLayout = function () {
             bodyObjects[i].enableAutoReflow();
         }
     }
+    
+    pagination.pageCounters.arab.numberPages();
 
     if (pagination.enableFrontmatter) {
         //Create and flow frontmatter
-        fmObject = new pagination.flowObject('frontmatter', pagination.romanPageCounter);
+        fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman);
         document.body.appendChild(fmObject.rawdiv);
         fmObject.rawdiv.innerHTML = pagination.frontmatterContents;
         var toc = pagination.headersAndToc(bodyObjects);
         fmObject.rawdiv.appendChild(toc);
-        layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div)
+        layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
         fmObject.addOrRemovePages();
+        pagination.pageCounters.roman.numberPages();
         if (pagination.enableReflow) {
             var redoToc = function() {
                 var oldToc = toc;
                 toc = pagination.headersAndToc(bodyObjects);
                 fmObject.rawdiv.replaceChild(toc, oldToc);
-            }
-            document.body.addEventListener('bodyLayoutUpdated',redoToc)
+            };
+            document.body.addEventListener('bodyLayoutUpdated',redoToc);
             fmObject.enableAutoReflow();
+        } else {
+            document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
         }
+    } else if (!(pagination.enableReflow)) {
+        document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
     }
 }
 
