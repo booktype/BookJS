@@ -1,33 +1,33 @@
 /*
- * (c) 2012  Marita Fraser, Steven Levithan, Philip Schatz and Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
+ * (c) 2012  Aleksandar Erkalovic, Marita Fraser, Steven Levithan, Philip Schatz and Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
  */
 
 /* HOW TO CONFIGURE
 
-Using this library you can turn an HTML element into a series of pages using CSS Regions. If the borwser doesn't support CSS Reions, everything will be flown into one large page lookin container.
+Using this library you can turn an HTML element into a series of pages using CSS Regions. If the browser doesn't support CSS Regions, everything will be flown into one large page  container that looks like a very long page.
 
-In order to use this library, first link to this javascript file within your html code. Then you can change the following options to customize the pagination behavior. Make sure that the configuration options are mentioned after the link to this file.
+In order to use this library, first link to this javascript file within your html code. Then you can change the following options to customize the pagination behavior. Make sure that the configuration options are mentioned after the link to this file. Below you can see the default values for these options. You only need to specify the options if you want to deviate from the default value.
 
-pagination.config.sectionStartMarker = 'h1'; // This is the HTML element we look for to find out if a new section starts.
+pagination.config.sectionStartMarker = 'h1'; // This is the HTML element we look for to find where a new section starts.
 pagination.config.sectionTitleMarker = 'h1'; // Within the newly found section, we look for the first instance of this element to determine the title of the section.
 
-pagination.config.chapterStartMarker = 'h2'; // This is the HTML element we look for to find out if a new chapter starts.
+pagination.config.chapterStartMarker = 'h2'; // This is the HTML element we look for to find where a new chapter starts.
 pagination.config.chapterTitleMarker = 'h2'; // Within the newly found chapter, we look for the first instance of this element to determine the title of the chapter.
 
-pagination.config.flowElement = "document.body"; // The element whose contents we will flow into pages. You can use any javascript selector here, such as "document.getElementById('contents')"
+pagination.config.flowElement = "document.body"; // This specifies element whose contents we will flow into pages. You can use any javascript selector here, such as "document.getElementById('contents')"
 
-pagination.config.alwaysEven = false; // Determines whether each section and chapter should have an even number of pages. In the case of dynamic page contents, such as an editor, it is about whether the total number of pages will always be rounded up to an even number (2, 4, 6, 8, ...)
+pagination.config.alwaysEven = false; // This determines whether each section and chapter should have an even number of pages (2, 4, 6, 8, ...).
 
-pagination.config.enableReflow = true; // Whether pages should be reflown upon change of contents after the first page flow. This is important if one wants to add an editor to the contents of the pages or wants to change the length contents in other ways dynamically.
+pagination.config.enableReflow = true; // This decides whether pages should be reflown upon change of contents after the first page flow. This is important if one wants to add an HTML editor to the contents of the pages so that the contents may require more or less pages than initially or one wants to change the length contents in other ways dynamically.
 
-pagination.config.enableFrontmatter = true; // Whether a table of contents, page headers and other frontmatter contents should be added upon page creation.
+pagination.config.enableFrontmatter = true; // This resolves whether a table of contents, page headers and other frontmatter contents should be added upon page creation.
 
-pagination.config.bulkPagesToAdd = 50; // The number of pages that are initially added to each flowable part (section, chapter). For larger chapters add many pages at a time so there is less time spent reflowing text
-pagination.config.pagesToAddIncrementRatio = 1.4; // Ratio of incrementing pages. 1.4 seems to be the fastest in most situations.
+pagination.config.bulkPagesToAdd = 50; // This is the initial number of pages of each flowable part (section, chapter). After this number is added, adjustments are made by adding another bulk of pages or deletin pages individually. It takes much less time to delete pages than to add them individually, so it is a point to overshoot the target value. For larger chapters add many pages at a time so there is less time spent reflowing text
+pagination.config.pagesToAddIncrementRatio = 1.4; // This is the ratio of how the bulk of pages incremented. If the initial bulkPagestoAdd is 50 and those initial 50 pages were not enough space to fit the contents of that chapter, then next 1.4*50 = 70 are pages, for a total of 50+70 = 120 pages, etc. . 1.4 seems to be the fastest in most situations.
 
-pagination.config.frontmatterContents = ''; // Contents that is added to the frontmatter before the table of contents. This would usually be a title page and a copyright page with page breaks.
+pagination.config.frontmatterContents = ''; // These are the HTML contents that are added to the frontmatter before the table of contents. This would usually be a title page and a copyright page, including page breaks.
 
-pagination.config.autoStart = true; // Controls whether pagination should be executed automaticlaly upon page load. */
+pagination.config.autoStart = true; // This controls whether pagination should be executed automatically upon page load. */
 
 var pagination = new Object;
 
