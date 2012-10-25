@@ -2,7 +2,6 @@
  * (c) 2012  Marita Fraser, Steven Levithan, Philip Schatz and Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
  */
 
-
 /* HOW TO CONFIGURE
 
 Using this library you can turn an HTML element into a series of pages using CSS Regions. If the borwser doesn't support CSS Reions, everything will be flown into one large page lookin container.
