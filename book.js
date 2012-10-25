@@ -17,7 +17,7 @@ pagination.config.chapterTitleMarker = 'h2'; // Within the newly found chapter, 
 
 pagination.config.flowElement = "document.body"; // The element whose contents we will flow into pages. You can use any javascript selector here, such as "document.getElementById('contents')"
 
-pagination.config.alwaysEven = false; // Determines whether each section and chapter should have an even number of pages. In the case of dynamic page contents, such as an editor, it is about whether the total number of pages will always be rounded up to an eve number (2, 4, 6, 8, ...)
+pagination.config.alwaysEven = false; // Determines whether each section and chapter should have an even number of pages. In the case of dynamic page contents, such as an editor, it is about whether the total number of pages will always be rounded up to an even number (2, 4, 6, 8, ...)
 
 pagination.config.enableReflow = true; // Whether pages should be reflown upon change of contents after the first page flow. This is important if one wants to add an editor to the contents of the pages or wants to change the length contents in other ways dynamically.
 
