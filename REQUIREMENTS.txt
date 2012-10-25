@@ -1,1 +1,0 @@
-In order to run BookJS, you need to run Chromium 23.0.1246.0 or newer.

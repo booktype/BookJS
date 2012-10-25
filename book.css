@@ -1,171 +1,216 @@
+/* background color is grey */
 
-/* For non CSS Region Browsers */
-.simplepage {
-    margin-top: 40px;
-    width: 840px;
-    background-color: #fff;
-    border: 1px solid #000;
-    padding: 60px;
-    margin-left: auto;
-    margin-right: auto;
+body {
+background-color:#efefef;
 }
 
 
-img {
-    image-resolution: from-image;
+/* size of pages: A5 */
+
+@page {
+size:5.8in 8.3in; /* Setting seems to be ignored due to webkit bug */
 }
 
 .page {
-    height: 7.87in;
-    width: 5.43in;
-    position: relative;
-    page-break-after: always;
+height:8.3in;
+width:5.8in;
+page-break-after:always;
 }
 
-#toc-title:before {
-    content: "Contents";
+/* Every .page contains various elements (.contents, .header, .pagenumber) that together make out the page. The elements are placed with absolute coordinates in relation to the page and are, if not specified otherwise, centered. Pages have white background color */
+
+.page {
+position:relative;
+margin-left:auto;
+margin-right:auto;
+background-color:#fff;
 }
 
-.toc-entry {
-width: 4.1in;
-padding-top:.2in;
+/* When showing the page on the screen, put a border around the page and add a little margin beween the pages. */
+
+@media screen{
+.page {
+border:solid 1px #000;
+margin-bottom:.2in;
 }
-
-.toc-pagenumber { 
-        float:right;
-        font-weight: normal;
-        margin-left: .3in;
-        display: inline-block;
-         }
-
-
-
-#booktitle {
-    margin-top:1.7in;
-    font-size: 26px;
-    font-weight: bold;
-    text-align: center;
-}
-
-#booksubtitle{
-    font-size: 18px;
-    margin-top:.2in;
-    font-weight: bold;
-    text-align: center;
-}
-
-#bookeditors{
-    padding-top: 2in;
-    font-weight: bold;
-    text-align: center;
-    font-size: 12px;
-}
-
-#toc-title {
-    font-size: 35px;
-    font-weight: bold;
-    text-align: center;
-}
-
-
-.toc-entry.section {
-    font-weight: bold;
-}
-
-.header .initial {
-    display: none;
-}
-
-.toc-entry .initial {
-    font-weight: normal;
-}
-
-.pagebreak {
-    -webkit-region-break-after: always;
-}
-
-
-.objavi-subsection-heading {
-    line-height: 120px !important;
- /* work-around to make section title pages no longer than one page */
-}
-
-h1 {
-font-size: 14pt; 
 }
 
 .contents {
-    height: 5.97in;
-    width: 5.43in;
-    position: absolute;
-    bottom: 1.2in;
+height:6.67in;
+width:4.03in;
+position:absolute;
+bottom:.8in;
+}
+
+/* images should not overflow the contents box */
+
+img {
+max-height: 6.57in; /* page height - .1in */
+max-width: 3.93in; /* page width - .1in */
+-webkit-region-break-before: always;
+-webkit-region-break-after: always;
 }
 
 .pagenumber {
-    padding-top: .2in;
-    position: absolute;
-    bottom: .8in;
-    left: 0;
-    right: 0;
+margin-top:.2in;
+position:absolute;
+bottom:.4in;
+left:0;
+right:0;
+font-size:15px;
 }
 
 .header {
-    padding-bottom: .2in;
-    position: absolute;
-    top: .3in;
-    left: 0;
-    right: 0;
+margin-bottom:.2in;
+position:absolute;
+top:.4in;
+left:0;
+right:0;
+font-size:13px;
 }
 
-.page:nth-child(odd) .pagenumber, .page:nth-child(odd) .header {
-    margin-right: .8in;
-    text-align: right;
-}
-
-.page:nth-child(even) .pagenumber, .page:nth-child(even) .header {
-    margin-left: .8in;
-    text-align: left;
-}
-
+/* Don't display section titles in the header on odd pages */
 .page:nth-child(odd) .header .section {
-    display: none;
+display:none;
 }
 
+/* Don't display chapter titles in the header on even pages */
 .page:nth-child(even) .header .chapter {
-    display: none;
+display:none;
 }
 
+/* Centering the page number on first pages of chapters */
 .chapter .page:first-child .pagenumber {
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
+text-align: center;
+margin-left: auto;
+margin-right: auto;
 }
 
-.section .page:first-child .pagenumber, #frontmatter .page:first-child .pagenumber {
-    display: none;
+
+/* ELEMENTS OF THE TABLE OF CONTENTS */
+
+/* The title text of the TOC */
+#toc-title:before {
+content:"Contents";
 }
 
+/* Styling of the TOC title */
+#toc-title {
+font-size:22px;
+font-weight:700;
+text-align:left;
+padding-bottom:.4in;
+}
+
+/* Styling of individual toc entry */
+.toc-entry {
+width:4.2in;
+display:block;
+padding-bottom:.3in;
+}
+
+/* Page numbers of toc entries should float to the right and have normal font weight */
+.toc-entry .toc-pagenumber {
+font-weight:400;
+display:inline-block;
+vertical-align:text-bottom;
+font-size:16px;
+float:right;
+}
+
+/* special styling for TOC entries that represent sections */
+.toc-entry.section {
+font-weight:700;
+font-size:16px;
+text-transform:uppercase;
+padding-bottom:.3in;
+}
+
+/* Left and right page gutter */
+.page:nth-child(odd) .contents {
+right:.6in;
+}
+
+.page:nth-child(even) .contents {
+left:.6in;
+}
+
+/* Left and right page page numbers and headers */
+
+.page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header {
+margin-right:.6in;
+text-align:right;
+}
+
+.page:nth-child(even) .pagenumber,.page:nth-child(even) .header {
+margin-left:.6in;
+text-align:left;
+}
+
+/* No page number on section start pages and on title page */
+.section .page:first-child .pagenumber,#frontmatter .page:first-child .pagenumber {
+display:none;
+}
+
+/* No header on section and chapter start pages */
 .section .page:first-child .header,.chapter .page:first-child .header {
-    display: none;
+display:none;
 }
 
-body {
-    background-color: #efefef;
+/* Manual page breaks */
+.pagebreak {
+-webkit-region-break-after:always;
 }
 
-.page {
-    background-color: #fff;
-    margin-left: auto;
-    margin-right: auto;
-    padding: .2in 1.4in;
+/* Work-around to make section title pages no longer than one page */
+
+.objavi-subsection-heading {
+line-height:120px!important;
+font-size:22px;
+font-weight:700;
+text-align:left;
+display:none;
 }
 
-    .page {
-        border: solid 1px #000;
-    }
-@media screen {
-    .page {
-    /*    border: solid 1px #000;*/
-        margin-bottom: .2in;
-    }
+/* Custom CSS for elements that do not come directly out of body.html */
+
+#booktitle {
+margin-top:1.7in;
+font-size:26px;
+font-weight:700;
+text-align:center;
+}
+
+#booksubtitle {
+font-size:18px;
+margin-top:.2in;
+font-weight:700;
+text-align:center;
+}
+
+#bookeditors {
+padding-top:2in;
+font-weight:700;
+text-align:center;
+font-size:12px;
+}
+
+/* General CSS for contents */
+
+p {
+font-size:15px;
+line-height:20px;
+text-align:justify;
+}
+
+h1 {
+font-size:21px;
+}
+
+h2 {
+font-size:19px;
+}
+
+h3 {
+font-size:17px;
 }

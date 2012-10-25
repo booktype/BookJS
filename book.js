@@ -1,32 +1,53 @@
 /*
  * (c) 2012  Marita Fraser, Steven Levithan, Philip Schatz and Johannes Wilm. Freely available under the AGPL. For further details see LICENSE.txt
  */
+
+
+/* HOW TO CONFIGURE
+
+Using this library you can turn an HTML element into a series of pages using CSS Regions. If the borwser doesn't support CSS Reions, everything will be flown into one large page lookin container.
+
+In order to use this library, first link to this javascript file within your html code. Then you can change the following options to customize the pagination behavior. Make sure that the configuration options are mentioned after the link to this file.
+
+pagination.config.sectionStartMarker = 'h1'; // This is the HTML element we look for to find out if a new section starts.
+pagination.config.sectionTitleMarker = 'h1'; // Within the newly found section, we look for the first instance of this element to determine the title of the section.
+
+pagination.config.chapterStartMarker = 'h2'; // This is the HTML element we look for to find out if a new chapter starts.
+pagination.config.chapterTitleMarker = 'h2'; // Within the newly found chapter, we look for the first instance of this element to determine the title of the chapter.
+
+pagination.config.flowElement = "document.body"; // The element whose contents we will flow into pages. You can use any javascript selector here, such as "document.getElementById('contents')"
+
+pagination.config.alwaysEven = false; // Determines whether each section and chapter should have an even number of pages. In the case of dynamic page contents, such as an editor, it is about whether the total number of pages will always be rounded up to an eve number (2, 4, 6, 8, ...)
+
+pagination.config.enableReflow = true; // Whether pages should be reflown upon change of contents after the first page flow. This is important if one wants to add an editor to the contents of the pages or wants to change the length contents in other ways dynamically.
+
+pagination.config.enableFrontmatter = true; // Whether a table of contents, page headers and other frontmatter contents should be added upon page creation.
+
+pagination.config.bulkPagesToAdd = 50; // The number of pages that are initially added to each flowable part (section, chapter). For larger chapters add many pages at a time so there is less time spent reflowing text
+pagination.config.pagesToAddIncrementRatio = 1.4; // Ratio of incrementing pages. 1.4 seems to be the fastest in most situations.
+
+pagination.config.frontmatterContents = ''; // Contents that is added to the frontmatter before the table of contents. This would usually be a title page and a copyright page with page breaks.
+
+pagination.config.autoStart = true; // Controls whether pagination should be executed automaticlaly upon page load. */
+
 var pagination = new Object;
 
-/* CONFIG OPTIONS */
+pagination.config = {
+	'sectionStartMarker': 'h1',
+	'sectionTitleMarker': 'h1',
 
-pagination.sectionStartMarker = 'h1';
-pagination.sectionTitleMarker = 'h1';
+	'chapterStartMarker': 'h2',
+	'chapterTitleMarker': 'h2',
 
-pagination.chapterStartMarker = 'h2';
-pagination.chapterTitleMarker = 'h2';
-
-pagination.flowElement = "document.body";
-
-pagination.alwaysEven = false;
-
-pagination.enableReflow = true;
-
-pagination.enableFrontmatter = true;
-
-pagination.bulkPagesToAdd = 50; // For larger chapters add many pages at a time so there is less time spent reflowing text
-pagination.pagesToAddIncrementRatio = 1.4; // Ratio of incrementing pages. 1.4 seems to be the fastest in most situations.
-
-pagination.frontmatterContents = '';
-
-pagination.autoStart = true;
-
-/* END CONFIG OPTIONS */
+	'flowElement': 'document.body',
+	'alwaysEven': false,
+	'enableReflow': true,
+	'enableFrontmatter': true,
+	'bulkPagesToAdd': 50,
+	'pagesToAddIncreementRatio': 1.4,
+	'frontmatterContents': '',
+	'autoStart': true
+};
 
 pagination.romanize = function () {
     var digits = String(+this.value).split(""),
@@ -199,18 +220,18 @@ pagination.createBodyObjects = function () {
 
     bodyObjects.push(new pagination.flowObject('bodypre', pagination.pageCounters.arab));
 
-    var bodyContainer = eval(pagination.flowElement);
+    var bodyContainer = eval(pagination.config.flowElement);
     var bodyContents = bodyContainer.childNodes;
 
 
     for (var i = bodyContents.length; i > 0; i--) {
 
         if (bodyContents[0].nodeType == 1) {
-            if (bodyContents[0].webkitMatchesSelector(pagination.chapterStartMarker)) {
+            if (bodyContents[0].webkitMatchesSelector(pagination.config.chapterStartMarker)) {
                 bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.pageCounters.arab));
                 bodyObjects[chapterCounter].setType('chapter');
 
-            } else if (bodyContents[0].webkitMatchesSelector(pagination.sectionStartMarker)) {
+            } else if (bodyContents[0].webkitMatchesSelector(pagination.config.sectionStartMarker)) {
                 bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.pageCounters.arab));
                 bodyObjects[chapterCounter].setType('section');
             }
@@ -233,13 +254,12 @@ pagination.flowObject = function (name, pageCounter) {
     this.rawdiv.style.webkitFlowInto = name;
 
     this.div = document.createElement('div');
-    this.div.id = name;   
+    this.div.id = name;
 
+    this.bulkPagesToAdd = pagination.config.bulkPagesToAdd;   
 }
 
 pagination.flowObject.prototype.redoPages = false;
-
-pagination.flowObject.prototype.bulkPagesToAdd = pagination.bulkPagesToAdd;
 
 pagination.flowObject.prototype.setType = function (type) {
     this.type = type;
@@ -249,10 +269,10 @@ pagination.flowObject.prototype.setType = function (type) {
 pagination.flowObject.prototype.findTitle = function () {
     var titleField;
     if (this.type == 'chapter') {
-        titleField = this.rawdiv.querySelector(pagination.chapterTitleMarker);
+        titleField = this.rawdiv.querySelector(pagination.config.chapterTitleMarker);
         this.title = titleField.innerHTML;
     } else if (this.type == 'section') {
-        titleField = this.rawdiv.querySelector(pagination.sectionTitleMarker);
+        titleField = this.rawdiv.querySelector(pagination.config.sectionTitleMarker);
         this.title = titleField.innerHTML;
     }
 };
@@ -265,7 +285,8 @@ pagination.flowObject.prototype.findStartpageNumber = function () {
 };
 
 pagination.flowObject.prototype.setNamedFlow = function () {
-    this.namedFlow = document.webkitGetFlowByName(this.name);
+    var namedFlows = document.webkitGetNamedFlows();
+    this.namedFlow = namedFlows[this.name];
 }
 
 pagination.flowObject.prototype.makeEvenPages = function () {
@@ -283,19 +304,13 @@ pagination.flowObject.prototype.addPagesLoop = function (pages) {
 
     if ('undefined' === typeof (pages)) {
         this.div.appendChild(pagination.createPages(this.bulkPagesToAdd, this.name, this.pageCounter.selector));
-        this.bulkPagesToAdd = Math.floor(this.bulkPagesToAdd * pagination.pagesToAddIncrementRatio);
+        this.bulkPagesToAdd = Math.floor(this.bulkPagesToAdd * pagination.config.pagesToAddIncrementRatio);
+	console.log(this);
     } else {
         this.div.appendChild(pagination.createPages(pages, this.name, this.pageCounter.selector));
     }
 
     this.addOrRemovePages(pages);
-    
-    /*var flowObject = this;
-    var extraLoop = function () {
-        flowObject.addOrRemovePages(pages);  
-    }
-
-    setTimeout(extraLoop, 1);*/
 
 };
 
@@ -314,7 +329,7 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
         this.removeExcessPages(pages);
     } else if (this.redoPages) {
         this.redoPages = false;
-        if (pagination.alwaysEven) {
+        if (pagination.config.alwaysEven) {
             this.makeEvenPages();
         }
         if (this.name!='frontmatter') {
@@ -359,24 +374,24 @@ pagination.applyBookLayout = function () {
         layoutDiv.appendChild(bodyObjects[i].div);
         document.body.appendChild(bodyObjects[i].rawdiv);
         bodyObjects[i].addOrRemovePages();
-        if (pagination.enableReflow) {
+        if (pagination.config.enableReflow) {
             bodyObjects[i].enableAutoReflow();
         }
     }
     
     pagination.pageCounters.arab.numberPages();
 
-    if (pagination.enableFrontmatter) {
+    if (pagination.config.enableFrontmatter) {
         //Create and flow frontmatter
         fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman);
         document.body.appendChild(fmObject.rawdiv);
-        fmObject.rawdiv.innerHTML = pagination.frontmatterContents;
+        fmObject.rawdiv.innerHTML = pagination.config.frontmatterContents;
         var toc = pagination.headersAndToc(bodyObjects);
         fmObject.rawdiv.appendChild(toc);
         layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
         fmObject.addOrRemovePages();
         pagination.pageCounters.roman.numberPages();
-        if (pagination.enableReflow) {
+        if (pagination.config.enableReflow) {
             var redoToc = function() {
                 var oldToc = toc;
                 toc = pagination.headersAndToc(bodyObjects);
@@ -387,7 +402,7 @@ pagination.applyBookLayout = function () {
         } else {
             document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
         }
-    } else if (!(pagination.enableReflow)) {
+    } else if (!(pagination.config.enableReflow)) {
         document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
     }
 }
@@ -395,7 +410,7 @@ pagination.applyBookLayout = function () {
 
 
 pagination.applySimpleBookLayout = function () {
-    bodyContainer = eval(pagination.flowElement);
+    bodyContainer = eval(pagination.config.flowElement);
     simplePage = document.createElement('div');
     simplePage.classList.add('simplepage');
     simplePage.innerHTML = bodyContainer.innerHTML;
@@ -404,12 +419,20 @@ pagination.applySimpleBookLayout = function () {
     document.body.appendChild(simplePage);
 }
 
+pagination._cssRegionsCheck = function() {
+    if ((document.webkitGetNamedFlows) && (document.webkitGetNamedFlows() !== null)) {
+	return true;
+    }
+    return false;
+}
+
 
 document.onreadystatechange = function () {
-    if (pagination.autoStart == true) {
-        if ((document.readyState == 'interactive') && (!(document.webkitGetNamedFlows))) {
+    var cssRegionsPresent = pagination._cssRegionsCheck();
+    if (pagination.config.autoStart == true) {
+        if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {
             pagination.applySimpleBookLayout();
-        } else if ((document.readyState == 'complete') && (document.webkitGetNamedFlows)){
+        } else if ((document.readyState == 'complete') && (cssRegionsPresent)){
             pagination.applyBookLayout();
         }
     }

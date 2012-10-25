@@ -1,23 +1,21 @@
-/* CONFIG OPTIONS */
-pagination.sectionStartMarker = 'h1';
-pagination.sectionTitleMarker = 'h1';
+pagination.config.sectionStartMarker = 'h1';
+pagination.config.sectionTitleMarker = 'h1';
 
-pagination.chapterStartMarker = 'h2';
-pagination.chapterTitleMarker = 'h2';
+pagination.config.chapterStartMarker = 'h2';
+pagination.config.chapterTitleMarker = 'h2';
 
-pagination.flowElement = "document.body";
+pagination.config.flowElement = "document.body";
 
-pagination.alwaysEven = true;
+pagination.config.alwaysEven = true;
 
-pagination.enableReflow = false;
+pagination.config.enableReflow = false;
 
-pagination.enableFrontmatter = true;
+pagination.config.enableFrontmatter = true;
 
-pagination.bulkPagesToAdd = 50; // For larger chapters add many pages at a time so there is less time spent reflowing text
-pagination.pagesToAddIncrementRatio = 1.4; // Ratio of incrementing pages. 1.4 seems to be the fastest in most situations.
+pagination.config.bulkPagesToAdd = 50; 
 
-pagination.frontmatterContents = '<div id="booktitle">Book title</div><div id="booksubtitle">Book subtitle</div><div id="bookeditors">ed. Editor 1, Editor II, Editor III</div><div class="pagebreak"></div><div id="copyrightpage">Copyright: You<br>License: CC</div><div class="pagebreak"></div>';
+pagination.config.pagesToAddIncrementRatio = 1.4; 
 
-pagination.autoStart = true;
+pagination.config.frontmatterContents = '<div id="booktitle">Book title</div><div id="booksubtitle">Book subtitle</div><div id="bookeditors">ed. Editor 1, Editor II, Editor III</div><div class="pagebreak"></div><div id="copyrightpage">Copyright: You<br>License: CC</div><div class="pagebreak"></div>';
 
-/* END CONFIG OPTIONS */
+pagination.config.autoStart = true;

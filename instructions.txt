@@ -1,5 +1,0 @@
-Enable CSS Regions:
-- You must have a recent browsers (Tested on chrome 23+)
-- In chrome/chromium open a new tab and go to "chrome://flags/"
-- Search for "CSS Regions" and enable them
-- Restart your browser
