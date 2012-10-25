@@ -199,9 +199,11 @@ pagination.headersAndToc = function (bodyObjects) {
             var tocItemPnSpan = document.createElement('span');
             tocItemPnSpan.classList.add('toc-pagenumber');
 
-            var tocItemPnText = document.createTextNode(bodyObjects[i].startpageNumber);
+            if(typeof bodyObjects[i].startpageNumber !== 'undefined') {
+                var tocItemPnText = document.createTextNode(bodyObjects[i].startpageNumber);
+                tocItemPnSpan.appendChild(tocItemPnText);
+            }
 
-            tocItemPnSpan.appendChild(tocItemPnText);
             tocItemDiv.appendChild(tocItemPnSpan);
 
             tocDiv.appendChild(tocItemDiv);
