@@ -7,8 +7,9 @@ pagination.config.chapterTitleMarker = 'h2';
 pagination.config.flowElement = "document.body";
 
 pagination.config.alwaysEven = true;
+pagination.config.columns = 2;
 
-pagination.config.enableReflow = false;
+pagination.config.enableReflow = true;
 
 pagination.config.enableFrontmatter = true;
 

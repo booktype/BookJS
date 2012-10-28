@@ -35,12 +35,16 @@ margin-bottom:.2in;
 }
 }
 
-.contents {
+/* The .contentsContianer contains the .contents and the .footnotes */
+
+.contentsContainer {
 height:6.67in;
 width:4.03in;
 position:absolute;
 bottom:.8in;
 }
+
+
 
 /* images should not overflow the contents box */
 
@@ -127,11 +131,11 @@ padding-bottom:.3in;
 }
 
 /* Left and right page gutter */
-.page:nth-child(odd) .contents {
+.page:nth-child(odd) .contentsContainer {
 right:.6in;
 }
 
-.page:nth-child(even) .contents {
+.page:nth-child(even) .contentsContainer {
 left:.6in;
 }
 
@@ -155,6 +159,13 @@ display:none;
 /* No header on section and chapter start pages */
 .section .page:first-child .header,.chapter .page:first-child .header {
 display:none;
+}
+
+/* If footnotes are present, a margin of .2in is added between .contents and .footnotes and a black line is drawn above the footnotes. */ 
+
+.footnotes p:first-child {
+padding-top: .5em;
+border-top: 1px solid black;
 }
 
 /* Manual page breaks */
@@ -213,4 +224,10 @@ font-size:19px;
 
 h3 {
 font-size:17px;
+}
+
+.footnotes p {
+font-size:12px;
+line-height: 1em;
+margin:.25em;
 }

@@ -18,6 +18,8 @@ pagination.config.flowElement = "document.body"; // This specifies element whose
 
 pagination.config.alwaysEven = false; // This determines whether each section and chapter should have an even number of pages (2, 4, 6, 8, ...).
 
+pagination.config.columns = 1; // This specifies the number of number of columns used for the body text. 
+
 pagination.config.enableReflow = true; // This decides whether pages should be reflown upon change of contents after the first page flow. This is important if one wants to add an HTML editor to the contents of the pages so that the contents may require more or less pages than initially or one wants to change the length contents in other ways dynamically.
 
 pagination.config.enableFrontmatter = true; // This resolves whether a table of contents, page headers and other frontmatter contents should be added upon page creation.
@@ -40,6 +42,7 @@ pagination.config = {
 
 	'flowElement': 'document.body',
 	'alwaysEven': false,
+	'columns': 1,
 	'enableReflow': true,
 	'enableFrontmatter': true,
 	'bulkPagesToAdd': 50,
@@ -57,7 +60,7 @@ pagination.romanize = function () {
         roman = (key[+digits.pop() + (i * 10)] || "") + roman;
     }
     return Array(+digits.join("") + 1).join("M") + roman;
-}
+};
 
 
 pagination.pageCounterCreator = function (selector, show) {
@@ -65,7 +68,7 @@ pagination.pageCounterCreator = function (selector, show) {
     if (show !== undefined) {
         this.show = show;
     }
-}
+};
 
 pagination.pageCounterCreator.prototype.value = 0;
 
@@ -73,7 +76,7 @@ pagination.pageCounterCreator.prototype.needsUpdate = false;
 
 pagination.pageCounterCreator.prototype.show = function(){
     return this.value;
-}
+};
     
 pagination.pageCounterCreator.prototype.incrementAndShow = function () {
     this.value++;
@@ -91,17 +94,15 @@ pagination.pageCounterCreator.prototype.numberPages = function () {
             pagenumbersToNumber[i].innerHTML = this.incrementAndShow();
         }
     }
-}
+};
 
 pagination.pageCounters = {};
 
 pagination.pageCounters.arab = new pagination.pageCounterCreator('arabic');
 pagination.pageCounters.roman = new pagination.pageCounterCreator('roman', pagination.romanize);
 
-
-
-pagination.createPages = function (num, flowName, pageCounterSelector) {
-    var page, contents;
+pagination.createPages = function (num, flowName, pageCounterSelector, columns) {
+    var page, contents, footnotes, contentsContainer, column, topFloats;
     var tempRoot = document.createDocumentFragment();
     for (var i = 0; i < num; i++) {
         page = document.createElement('div');
@@ -127,11 +128,34 @@ pagination.createPages = function (num, flowName, pageCounterSelector) {
         page.appendChild(pagenumberfield);
 
         if (flowName) {
-            contents = document.createElement('div');
-            contents.classList.add('contents');
-            contents.style.webkitFlowFrom = flowName;
+            contentsContainer = document.createElement('div');
+            contentsContainer.classList.add('contentsContainer');
+            contentsContainer.style.display = '-webkit-box';
+	    contentsContainer.style.webkitBoxOrient = 'vertical';
 
-            page.appendChild(contents);
+	    topFloats = document.createElement('div');
+	    topFloats.classList.add('topFloats');
+
+	    contents = document.createElement('div');
+	    contents.classList.add('contents');
+	    contents.style.webkitBoxFlex = 1;
+	    contents.style.display = '-webkit-box';
+
+	    for (var j = 0; j < columns; j++) {
+	    	column = document.createElement('div');
+	    	column.classList.add('contents-column');
+	    	column.style.webkitFlowFrom = flowName;
+	    	column.style.webkitBoxFlex = 1;
+	    	contents.appendChild(column);
+	    }
+
+	    footnotes = document.createElement('div');
+	    footnotes.classList.add('footnotes');
+
+	    contentsContainer.appendChild(topFloats);
+            contentsContainer.appendChild(contents);
+	    contentsContainer.appendChild(footnotes);
+	    page.appendChild(contentsContainer);
         } else { // if no flowname is given, an empty page is created
             page.classList.add('empty');
         }
@@ -139,7 +163,7 @@ pagination.createPages = function (num, flowName, pageCounterSelector) {
         tempRoot.appendChild(page);
     }
     return tempRoot;
-}
+};
 
 pagination.bodyLayoutUpdatedEvent = document.createEvent('Event');
 
@@ -212,7 +236,7 @@ pagination.headersAndToc = function (bodyObjects) {
     }
 
     return tocDiv;
-}
+};
 
 pagination.createBodyObjects = function () {
     //Create body objects    
@@ -243,7 +267,7 @@ pagination.createBodyObjects = function () {
 
     return bodyObjects;
 
-}
+};
 
 
 pagination.flowObject = function (name, pageCounter) {
@@ -257,8 +281,12 @@ pagination.flowObject = function (name, pageCounter) {
     this.div = document.createElement('div');
     this.div.id = name;
 
-    this.bulkPagesToAdd = pagination.config.bulkPagesToAdd;   
-}
+    this.bulkPagesToAdd = pagination.config.bulkPagesToAdd;
+
+    this.columns = pagination.config.columns;
+};
+
+pagination.flowObject.prototype.totalPages = 0;
 
 pagination.flowObject.prototype.redoPages = false;
 
@@ -285,10 +313,25 @@ pagination.flowObject.prototype.findStartpageNumber = function () {
     }
 };
 
+pagination.flowObject.prototype.layoutFootnotes = function () {
+    var numFootnote, footnote, currentPage;
+    var allFootnotes = this.rawdiv.getElementsByClassName('footnote');
+    for (var i = 0; i < allFootnotes.length; i++) {
+	    footnote = allFootnotes[i].cloneNode(true);
+	    allFootnotes[i].style.display = 'none';
+            numFootnote = document.createElement('sup');
+            
+            numFootnote.classList.add('footnote-reference');
+	    allFootnotes[i].parentNode.insertBefore(numFootnote, allFootnotes[i]);
+	    currentPage = numFootnote;
+	
+    }
+};
+
 pagination.flowObject.prototype.setNamedFlow = function () {
     var namedFlows = document.webkitGetNamedFlows();
     this.namedFlow = namedFlows[this.name];
-}
+};
 
 pagination.flowObject.prototype.makeEvenPages = function () {
     var emptyPage = this.div.querySelector('.page.empty');
@@ -297,18 +340,19 @@ pagination.flowObject.prototype.makeEvenPages = function () {
     }
     var allPages = this.div.querySelectorAll('.page');
     if (allPages.length % 2 == 1) {
-        this.div.appendChild(pagination.createPages(1, false, this.pageCounter.selector));
+        this.div.appendChild(pagination.createPages(1, false, this.pageCounter.selector, this.columns));
     }
-}
+};
 
 pagination.flowObject.prototype.addPagesLoop = function (pages) {
 
     if ('undefined' === typeof (pages)) {
-        this.div.appendChild(pagination.createPages(this.bulkPagesToAdd, this.name, this.pageCounter.selector));
+	this.totalPages += this.bulkPagesToAdd;
+        this.div.appendChild(pagination.createPages(this.bulkPagesToAdd, this.name, this.pageCounter.selector, this.columns));
         this.bulkPagesToAdd = Math.floor(this.bulkPagesToAdd * pagination.config.pagesToAddIncrementRatio);
-	console.log(this);
     } else {
-        this.div.appendChild(pagination.createPages(pages, this.name, this.pageCounter.selector));
+	this.totalPages += pages;
+        this.div.appendChild(pagination.createPages(pages, this.name, this.pageCounter.selector, this.columns));
     }
 
     this.addOrRemovePages(pages);
@@ -320,12 +364,13 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
     if(!(this.namedFlow)) {
         this.setNamedFlow();
     }
+    console.log(this.namedFlow);
     
     if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
         this.pageCounter.needsUpdate = true;
         this.redoPages = true;
         this.addPagesLoop(pages);
-    } else if (this.namedFlow.firstEmptyRegionIndex!=-1) {
+    } else if ((this.namedFlow.firstEmptyRegionIndex!=-1) && ((this.totalPages * this.columns - this.namedFlow.firstEmptyRegionIndex) > this.columns ))  {
         this.redoPages = true;
         this.removeExcessPages(pages);
     } else if (this.redoPages) {
@@ -337,15 +382,16 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
             document.body.dispatchEvent(pagination.bodyLayoutUpdatedEvent);
         }
     }
-}
+};
 
 
 pagination.flowObject.prototype.removeExcessPages = function (pages) {
 
         var allPages = this.div.querySelectorAll('.page');
 
-        for (var i = this.namedFlow.firstEmptyRegionIndex; i < allPages.length; i++) {
-            this.div.removeChild(allPages[i]);
+        for (var i = (Math.ceil(this.namedFlow.firstEmptyRegionIndex/this.columns)); i < allPages.length; i++) {
+            	this.div.removeChild(allPages[i]);
+		this.totalPages--;
         }
     this.addOrRemovePages(pages);
 };
@@ -358,7 +404,7 @@ pagination.flowObject.prototype.enableAutoReflow = function () {
         flowObject.pageCounter.numberPages();
     };
     this.namedFlow.addEventListener('webkitRegionLayoutUpdate',reFlow)
-}
+};
 
 
 pagination.applyBookLayout = function () {
@@ -384,7 +430,9 @@ pagination.applyBookLayout = function () {
 
     if (pagination.config.enableFrontmatter) {
         //Create and flow frontmatter
-        fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman);
+        fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman, 1);
+	fmObject.columns = 1;
+	console.log(fmObject);
         document.body.appendChild(fmObject.rawdiv);
         fmObject.rawdiv.innerHTML = pagination.config.frontmatterContents;
         var toc = pagination.headersAndToc(bodyObjects);
@@ -406,11 +454,12 @@ pagination.applyBookLayout = function () {
     } else if (!(pagination.config.enableReflow)) {
         document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
     }
-}
+};
 
 
 
-pagination.applySimpleBookLayout = function () {
+pagination.applySimpleBookLayout = function () { 
+// Apply this alternative layout in case CSS Regions are not present 
     bodyContainer = eval(pagination.config.flowElement);
     simplePage = document.createElement('div');
     simplePage.classList.add('simplepage');
@@ -418,14 +467,15 @@ pagination.applySimpleBookLayout = function () {
     simplePage.id = bodyContainer.id;
     bodyContainer.innerHTML = '';
     document.body.appendChild(simplePage);
-}
+};
 
-pagination._cssRegionsCheck = function() {
+pagination._cssRegionsCheck = function() { 
+// Check whether CSS Regions are present in Chrome 23+ version
     if ((document.webkitGetNamedFlows) && (document.webkitGetNamedFlows() !== null)) {
 	return true;
     }
     return false;
-}
+};
 
 
 document.onreadystatechange = function () {
@@ -437,4 +487,4 @@ document.onreadystatechange = function () {
             pagination.applyBookLayout();
         }
     }
-}
+};
