@@ -325,6 +325,7 @@ pagination.flowObject.prototype.layoutFootnotes = function () {
 	    
 	    footnote = document.createElement('div'); // Put the footnote number and footnote text together in a div-element with the class footnote-item
 	    footnote.classList.add('footnote-item');
+	    footnote.classList.add('visible');
 	    footnote.appendChild(numFootnote);
 
 	    footnoteText = allFootnotes[i].cloneNode(true);
@@ -343,7 +344,8 @@ pagination.flowObject.prototype.layoutFootnotes = function () {
 	    if (footnoteReferencePageBeforeInsertion !== footnoteReferencePageAfterInsertion) { //If the footnote reference has been moved from oen page to another through the insertion procedure, we set the visibility of the footnote to "hidden" so that it continues to take up the same space and then insert it one more time on the page from where it now is referenced.
 	        nextpageFootnote = footnote.cloneNode(true);
 		footnote.style.visibility = 'hidden';
-		footnote.classList.remove('footnote-item');
+		footnote.classList.remove('visible');
+		footnote.classList.add('invisible');
 		
 		currentFootnoteContainer = footnoteReferencePageAfterInsertion.querySelector('.footnotes');
 		currentFootnoteContainer.appendChild(nextpageFootnote);
