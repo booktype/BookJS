@@ -1,5 +1,6 @@
-0.23.1
+0.23.1-dev
 ----
+Added footnote support for static content (reflow has to be enabled)
 Added multi column support
 
 0.23.0

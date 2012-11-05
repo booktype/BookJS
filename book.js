@@ -314,17 +314,40 @@ pagination.flowObject.prototype.findStartpageNumber = function () {
 };
 
 pagination.flowObject.prototype.layoutFootnotes = function () {
-    var numFootnote, footnote, currentPage;
-    var allFootnotes = this.rawdiv.getElementsByClassName('footnote');
+    var numFootnote, footnote, footnoteReferencePageBeforeInsertion, footnoteReferencePageAfterInsertion, currentFootnoteContainer, nextpageFootnote;
+
+    var allFootnotes = this.rawdiv.getElementsByClassName('footnote'); // Look for all the items that have "footnote" in their class list. These will be treated as footnote texts.
     for (var i = 0; i < allFootnotes.length; i++) {
-	    footnote = allFootnotes[i].cloneNode(true);
-	    allFootnotes[i].style.display = 'none';
-            numFootnote = document.createElement('sup');
-            
-            numFootnote.classList.add('footnote-reference');
-	    allFootnotes[i].parentNode.insertBefore(numFootnote, allFootnotes[i]);
-	    currentPage = numFootnote;
-	
+	    numFootnote = document.createElement('sup'); // Create a sup-element with the class "footnote-reference" that holds the current footnote number. This will be used both in the body text and in the footnote itself.
+	    numFootnote.classList.add('footnote-reference');
+	    numFootnoteContents = document.createTextNode(i+1);
+	    numFootnote.appendChild(numFootnoteContents);
+	    
+	    footnote = document.createElement('div'); // Put the footnote number and footnote text together in a div-element with the class footnote-item
+	    footnote.classList.add('footnote-item');
+	    footnote.appendChild(numFootnote);
+
+	    footnoteText = allFootnotes[i].cloneNode(true);
+	    footnote.appendChild(footnoteText);
+
+	    allFootnotes[i].style.display = 'none'; // Hide the original footnote text in the body text. We hide it instead of removing it, so that it can easily be recovered.
+           
+	    numFootnoteReference = numFootnote.cloneNode(true)
+	    allFootnotes[i].parentNode.insertBefore(numFootnoteReference, allFootnotes[i]); // Insert the footnote number in the body text just before the original footnote text appeared in the body (the text that is now hidden).
+
+	    footnoteReferencePageBeforeInsertion = this.namedFlow.getRegionsByContent(numFootnoteReference)[0].parentNode.parentNode.parentNode; // We find the page where the footnote is referenced from before the insertion procedure begins.
+            currentFootnoteContainer = footnoteReferencePageBeforeInsertion.querySelector('.footnotes');
+            currentFootnoteContainer.appendChild(footnote); // We insert the footnote in the footnote contianer of that page.
+	    footnoteReferencePageAfterInsertion = this.namedFlow.getRegionsByContent(numFootnoteReference)[0].parentNode.parentNode.parentNode; // We find the page where the footnote is referenced from after the insertion procedure has taken place.
+	    
+	    if (footnoteReferencePageBeforeInsertion !== footnoteReferencePageAfterInsertion) { //If the footnote reference has been moved from oen page to another through the insertion procedure, we set the visibility of the footnote to "hidden" so that it continues to take up the same space and then insert it one more time on the page from where it now is referenced.
+	        nextpageFootnote = footnote.cloneNode(true);
+		footnote.style.visibility = 'hidden';
+		footnote.classList.remove('footnote-item');
+		
+		currentFootnoteContainer = footnoteReferencePageAfterInsertion.querySelector('.footnotes');
+		currentFootnoteContainer.appendChild(nextpageFootnote);
+	    }
     }
 };
 
@@ -364,7 +387,6 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
     if(!(this.namedFlow)) {
         this.setNamedFlow();
     }
-    console.log(this.namedFlow);
     
     if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
         this.pageCounter.needsUpdate = true;
@@ -424,6 +446,7 @@ pagination.applyBookLayout = function () {
         if (pagination.config.enableReflow) {
             bodyObjects[i].enableAutoReflow();
         }
+	bodyObjects[i].layoutFootnotes();
     }
     
     pagination.pageCounters.arab.numberPages();
@@ -432,7 +455,6 @@ pagination.applyBookLayout = function () {
         //Create and flow frontmatter
         fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman, 1);
 	fmObject.columns = 1;
-	console.log(fmObject);
         document.body.appendChild(fmObject.rawdiv);
         fmObject.rawdiv.innerHTML = pagination.config.frontmatterContents;
         var toc = pagination.headersAndToc(bodyObjects);
