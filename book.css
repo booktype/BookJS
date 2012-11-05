@@ -226,26 +226,13 @@ h3 {
 font-size:17px;
 }
 
-.footnotes p {
+.footnotes {
 font-size:12px;
 line-height: 1em;
 margin:.25em;
 }
 
-/* Turn of for chapter 1 
-
-#body0 .contents-column:nth-child(2) {
-background-color: red;
-width:0;
-height: 0;
+.footnote-reference {
+font-size:10px;
+font-weight: bold;
 }
-*/
-
-/* Turn of for page 3, chapter 1 */
-
-#body0 .page:nth-child(3) .contents-column:nth-child(2) {
-background-color: red;
-width:0;
-height: 0;
-}
-
