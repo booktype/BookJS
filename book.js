@@ -463,7 +463,7 @@ pagination.applyBookLayout = function () {
         //Create and flow frontmatter
         fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman, 1);
 	fmObject.columns = 1;
-        contentsDiv.appendChild(fmObject.rawdiv);
+        contentsDiv.insertBefore(fmObject.rawdiv,contentsDiv.firstChild);
         fmObject.rawdiv.innerHTML = pagination.config.frontmatterContents;
         var toc = pagination.headersAndToc(bodyObjects);
         fmObject.rawdiv.appendChild(toc);
