@@ -438,12 +438,18 @@ pagination.applyBookLayout = function () {
     //Create div for layout
     var layoutDiv = document.createElement('div');
     layoutDiv.id = 'layout';
-    counter = 0;
     document.body.appendChild(layoutDiv);
+    
+    //Create div for contents
+    var contentsDiv = document.createElement('div');
+    contentsDiv.id = 'contents';
+    document.body.appendChild(contentsDiv);
+
+    counter = 0;
 
     for (var i = 0; i < bodyObjects.length; i++) {
         layoutDiv.appendChild(bodyObjects[i].div);
-        document.body.appendChild(bodyObjects[i].rawdiv);
+        contentsDiv.appendChild(bodyObjects[i].rawdiv);
         bodyObjects[i].addOrRemovePages();
         if (pagination.config.enableReflow) {
             bodyObjects[i].enableAutoReflow();
@@ -457,7 +463,7 @@ pagination.applyBookLayout = function () {
         //Create and flow frontmatter
         fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman, 1);
 	fmObject.columns = 1;
-        document.body.appendChild(fmObject.rawdiv);
+        contentsDiv.appendChild(fmObject.rawdiv);
         fmObject.rawdiv.innerHTML = pagination.config.frontmatterContents;
         var toc = pagination.headersAndToc(bodyObjects);
         fmObject.rawdiv.appendChild(toc);
