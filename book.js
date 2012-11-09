@@ -108,6 +108,7 @@ Pagination.config = {
 
 Pagination.initiate = function() {
     this.userConfigImport();
+    this.setStyle();
 }
 
 Pagination.userConfigImport = function() {
@@ -118,7 +119,15 @@ Pagination.userConfigImport = function() {
     }
 }
 
-
+Pagination.setStyle = function() {
+    var stylesheet = document.createElement('style');
+    stylesheet.innerHTML = ".contentsContainer {display: -webkit-box; -webkit-box-orient: vertical;}"
+        + " .contents {display: -webkit-box; -webkit-box-flex: 1}"
+        + " .contents-column {-webkit-box-flex: 1}"
+        + " .footnotes .invisible {visibility: hidden}"
+	+ " #contents .footnote {display: none}";
+    document.head.appendChild(stylesheet);
+}
 
 Pagination.romanize = function () {
     // Create roman numeral representations of numbers.
@@ -202,22 +211,16 @@ Pagination.createPages = function (num, flowName, pageCounterSelector, columns) 
         if (flowName) {
             contentsContainer = document.createElement('div');
             contentsContainer.classList.add('contentsContainer');
-            contentsContainer.style.display = '-webkit-box';
-	    contentsContainer.style.webkitBoxOrient = 'vertical';
 
 	    topFloats = document.createElement('div');
 	    topFloats.classList.add('topFloats');
 
 	    contents = document.createElement('div');
 	    contents.classList.add('contents');
-	    contents.style.webkitBoxFlex = 1;
-	    contents.style.display = '-webkit-box';
 
 	    for (var j = 0; j < columns; j++) {
 	    	column = document.createElement('div');
 	    	column.classList.add('contents-column');
-	    	column.style.webkitFlowFrom = flowName;
-	    	column.style.webkitBoxFlex = 1;
 	    	contents.appendChild(column);
 	    }
 
@@ -434,7 +437,6 @@ Pagination.flowObject = function (name, pageCounter) {
 
     this.rawdiv = document.createElement('div');
     this.rawdiv.id = name + 'raw';
-    this.rawdiv.style.webkitFlowInto = name;
 
     this.div = document.createElement('div');
     this.div.id = name;
@@ -454,6 +456,7 @@ Pagination.flowObject.prototype.overset = false;
 Pagination.flowObject.prototype.firstEmptyRegionIndex = -1;
 
 Pagination.flowObject.prototype.initiate = function () {
+    this.setStyle();
     this.namedFlow = document.webkitGetNamedFlows()[this.name];
     this.addOrRemovePages();
     this.setupReflow();
@@ -461,7 +464,12 @@ Pagination.flowObject.prototype.initiate = function () {
     this.pageCounter.numberPages();
 }
 
-
+Pagination.flowObject.prototype.setStyle = function() {
+    var stylesheet = document.createElement('style');
+    stylesheet.innerHTML = "#"+this.name+" .contents-column {-webkit-flow-from:"+this.name+";}"
+    + " #"+this.name+"raw {-webkit-flow-into:"+this.name+";}";
+    document.head.appendChild(stylesheet);
+}
 
 Pagination.flowObject.prototype.setType = function (type) {
     this.type = type;
@@ -503,8 +511,6 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
 
 	    footnoteText = allFootnotes[i].cloneNode(true);
 	    footnote.appendChild(footnoteText);
-
-	    allFootnotes[i].style.display = 'none'; // Hide the original footnote text in the body text. We hide it instead of removing it, so that it can easily be recovered.
            
 	    numFootnoteReference = numFootnote.cloneNode(true)
 	    allFootnotes[i].parentNode.insertBefore(numFootnoteReference, allFootnotes[i]); // Insert the footnote number in the body text just before the original footnote text appeared in the body (the text that is now hidden).
@@ -516,7 +522,6 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
 	    
 	    if (footnoteReferencePageBeforeInsertion !== footnoteReferencePageAfterInsertion) { //If the footnote reference has been moved from oen page to another through the insertion procedure, we set the visibility of the footnote to "hidden" so that it continues to take up the same space and then insert it one more time on the page from where it now is referenced.
 	        nextpageFootnote = footnote.cloneNode(true);
-		footnote.style.visibility = 'hidden';
 		footnote.classList.remove('visible');
 		footnote.classList.add('invisible');
 		
