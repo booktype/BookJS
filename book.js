@@ -12,10 +12,11 @@
  *
  * HOWTO
  *
- * In order to use this library, link to the corresponding file as well as this javascript file within your html
- * code. If you need to set custom options, set them before including this file
- * by defining an object named paginationConfig and setting the customization
- * options as keys within this object. Like this:
+ * In order to use this library, link to the corresponding file as well as this
+ * javascript file within your html code. If you need to set custom options, 
+ * set them before including this file by defining an object named 
+ * paginationConfig and setting the customization options as keys within this 
+ * object. Like this:
  *
  * <link href="book.css" rel="stylesheet" type="text/css" />
  * <script type="text/javascript">
