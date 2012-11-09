@@ -17,6 +17,13 @@ width:5.8in;
 page-break-after:always;
 }
 
+/* height of pages when no CSS regions present: auto. Also add some padding. */
+
+.page.simple {
+height:auto;
+padding: 1in;
+}
+
 /* Every .page contains various elements (.contents, .header, .pagenumber) that together make out the page. The elements are placed with absolute coordinates in relation to the page and are, if not specified otherwise, centered. Pages have white background color */
 
 .page {
