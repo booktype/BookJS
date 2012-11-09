@@ -54,12 +54,6 @@
  *
  * columns: 1 -- This specifies the number of number of columns used for the
  * body text. 
- *
- * enableReflow: true -- This decides whether pages should be reflown upon
- * change of contents after the first page flow. This is important if one wants
- * to add an HTML editor to the contents of the pages so that the contents may
- * require more or less pages than initially or one wants to change the length
- * contents in other ways dynamically.
  * 
  * enableFrontmatter: true -- This resolves whether a table of contents, page\
  * headers and other frontmatter contents should be added upon page creation.
@@ -107,7 +101,6 @@ Pagination.config = {
 	'flowElement': 'document.body',
 	'alwaysEven': false,
 	'columns': 1,
-	'enableReflow': true,
 	'enableFrontmatter': true,
 	'bulkPagesToAdd': 50,
 	'pagesToAddIncreementRatio': 1.4,
@@ -534,9 +527,7 @@ Pagination.applyBookLayout = function () {
         layoutDiv.appendChild(bodyObjects[i].div);
         contentsDiv.appendChild(bodyObjects[i].rawdiv);
         bodyObjects[i].addOrRemovePages();
-        if (Pagination.config.enableReflow) {
-            bodyObjects[i].enableAutoReflow();
-        }
+        bodyObjects[i].enableAutoReflow();
 	bodyObjects[i].layoutFootnotes();
     }
     
@@ -553,20 +544,15 @@ Pagination.applyBookLayout = function () {
         layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
         fmObject.addOrRemovePages();
         Pagination.pageCounters.roman.numberPages();
-        if (Pagination.config.enableReflow) {
-            var redoToc = function() {
-                var oldToc = toc;
-                toc = Pagination.headersAndToc(bodyObjects);
-                fmObject.rawdiv.replaceChild(toc, oldToc);
-            };
-            document.body.addEventListener('bodyLayoutUpdated',redoToc);
-            fmObject.enableAutoReflow();
-        } else {
-            document.body.dispatchEvent(Pagination.layoutFlowFinishedEvent);
-        }
-    } else if (!(Pagination.config.enableReflow)) {
-        document.body.dispatchEvent(Pagination.layoutFlowFinishedEvent);
+        var redoToc = function() {
+            var oldToc = toc;
+            toc = Pagination.headersAndToc(bodyObjects);
+            fmObject.rawdiv.replaceChild(toc, oldToc);
+        };
+        document.body.addEventListener('bodyLayoutUpdated',redoToc);
+        fmObject.enableAutoReflow();
     }
+    document.dispatchEvent(Pagination.layoutFlowFinishedEvent);
 };
 
 
@@ -596,7 +582,7 @@ Pagination.autoStartInitiator = function () {
     var cssRegionsPresent = Pagination._cssRegionsCheck();
     if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {    
         Pagination.applySimpleBookLayout();
-    } else if ((document.readyState == 'complete') && (cssRegionsPresent)){      
+    } else if ((document.readyState == 'complete') && (cssRegionsPresent)) {      
         Pagination.applyBookLayout();
     }
 }

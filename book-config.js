@@ -6,7 +6,6 @@ paginationConfig = {
     'flowElement': "document.body",
     'alwaysEven': true,
     'columns': 2,
-    'enableReflow': true,
     'enableFrontmatter': true,
     'bulkPagesToAdd': 50, 
     'pagesToAddIncrementRatio': 1.4, 
@@ -17,3 +16,4 @@ paginationConfig = {
 	+ '<div class="pagebreak"></div>',
     'autoStart': true,
 }
+
