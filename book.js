@@ -94,10 +94,8 @@ var Pagination = new Object;
 Pagination.config = {
 	'sectionStartMarker': 'h1',
 	'sectionTitleMarker': 'h1',
-
 	'chapterStartMarker': 'h2',
 	'chapterTitleMarker': 'h2',
-
 	'flowElement': 'document.body',
 	'alwaysEven': false,
 	'columns': 1,
@@ -119,6 +117,8 @@ Pagination.userConfigImport = function() {
 	}
     }
 }
+
+
 
 Pagination.romanize = function () {
     // Create roman numeral representations of numbers.
@@ -198,6 +198,7 @@ Pagination.createPages = function (num, flowName, pageCounterSelector, columns) 
 
         page.appendChild(pagenumberfield);
 
+	// If flowName is given, create a page with content flow.
         if (flowName) {
             contentsContainer = document.createElement('div');
             contentsContainer.classList.add('contentsContainer');
@@ -227,7 +228,7 @@ Pagination.createPages = function (num, flowName, pageCounterSelector, columns) 
             contentsContainer.appendChild(contents);
 	    contentsContainer.appendChild(footnotes);
 	    page.appendChild(contentsContainer);
-	// If no flowname is given, an empty page is created.
+	// If no flowName is given, an empty page is created.
         } else {	    
             page.classList.add('empty');
         }
@@ -244,6 +245,10 @@ Pagination.bodyLayoutUpdatedEvent.initEvent('bodyLayoutUpdated', true, true);
 Pagination.layoutFlowFinishedEvent = document.createEvent('Event');
 
 Pagination.layoutFlowFinishedEvent.initEvent('layoutFlowFinished', true, true);
+
+Pagination.pageLayoutUpdateEvent = document.createEvent('Event');
+
+Pagination.pageLayoutUpdateEvent.initEvent('pageLayoutUpdated', true, true);
 
 Pagination.headersAndToc = function (bodyObjects) {
     
@@ -345,6 +350,83 @@ Pagination.createBodyObjects = function () {
 
 };
 
+Pagination.applyBookLayout = function () {
+
+    var bodyObjects = Pagination.createBodyObjects();
+
+    //Create div for layout
+    var layoutDiv = document.createElement('div');
+    layoutDiv.id = 'layout';
+    document.body.appendChild(layoutDiv);
+    
+    //Create div for contents
+    var contentsDiv = document.createElement('div');
+    contentsDiv.id = 'contents';
+    document.body.appendChild(contentsDiv);
+
+    counter = 0;
+
+    for (var i = 0; i < bodyObjects.length; i++) {
+        layoutDiv.appendChild(bodyObjects[i].div);
+        contentsDiv.appendChild(bodyObjects[i].rawdiv);
+	bodyObjects[i].initiate();
+    }
+    
+    Pagination.pageCounters.arab.numberPages();
+
+    if (Pagination.config.enableFrontmatter) {
+        //Create and flow frontmatter
+        fmObject = new Pagination.flowObject('frontmatter', Pagination.pageCounters.roman, 1);
+	fmObject.columns = 1;
+        contentsDiv.insertBefore(fmObject.rawdiv,contentsDiv.firstChild);
+        fmObject.rawdiv.innerHTML = Pagination.config.frontmatterContents;
+        var toc = Pagination.headersAndToc(bodyObjects);
+        fmObject.rawdiv.appendChild(toc);
+        layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
+        fmObject.initiate();
+        var redoToc = function() {
+            var oldToc = toc;
+            toc = Pagination.headersAndToc(bodyObjects);
+            fmObject.rawdiv.replaceChild(toc, oldToc);
+        };
+        document.body.addEventListener('bodyLayoutUpdated',redoToc);
+    }
+    document.dispatchEvent(Pagination.layoutFlowFinishedEvent);
+};
+
+
+
+Pagination.applySimpleBookLayout = function () { 
+    // Apply this alternative layout in case CSS Regions are not present 
+    bodyContainer = eval(Pagination.config.flowElement);
+    simplePage = document.createElement('div');
+    simplePage.classList.add('page');
+    simplePage.classList.add('simple');
+    simplePage.innerHTML = bodyContainer.innerHTML;
+    simplePage.id = bodyContainer.id;
+    bodyContainer.innerHTML = '';
+    document.body.appendChild(simplePage);
+};
+
+Pagination._cssRegionsCheck = function() { 
+    // Check whether CSS Regions are present in Chrome 23+ version
+    if ((document.webkitGetNamedFlows) && (document.webkitGetNamedFlows() !== null)) {
+	return true;
+    }
+    return false;
+};
+
+Pagination.autoStartInitiator = function () {
+    // To be executed upon document loading.
+    var cssRegionsPresent = Pagination._cssRegionsCheck();
+    if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {    
+        Pagination.applySimpleBookLayout();
+    } else if ((document.readyState == 'complete') && (cssRegionsPresent)) {      
+        Pagination.applyBookLayout();
+    }
+}
+
+
 
 Pagination.flowObject = function (name, pageCounter) {
     this.name = name;
@@ -360,11 +442,26 @@ Pagination.flowObject = function (name, pageCounter) {
     this.bulkPagesToAdd = Pagination.config.bulkPagesToAdd;
 
     this.columns = Pagination.config.columns;
+
 };
 
 Pagination.flowObject.prototype.totalPages = 0;
 
 Pagination.flowObject.prototype.redoPages = false;
+
+Pagination.flowObject.prototype.overset = false;
+
+Pagination.flowObject.prototype.firstEmptyRegionIndex = -1;
+
+Pagination.flowObject.prototype.initiate = function () {
+    this.namedFlow = document.webkitGetNamedFlows()[this.name];
+    this.addOrRemovePages();
+    this.setupReflow();
+    this.layoutFootnotes();
+    this.pageCounter.numberPages();
+}
+
+
 
 Pagination.flowObject.prototype.setType = function (type) {
     this.type = type;
@@ -429,11 +526,6 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
     }
 };
 
-Pagination.flowObject.prototype.setNamedFlow = function () {
-    var namedFlows = document.webkitGetNamedFlows();
-    this.namedFlow = namedFlows[this.name];
-};
-
 Pagination.flowObject.prototype.makeEvenPages = function () {
     var emptyPage = this.div.querySelector('.page.empty');
     if (emptyPage) {
@@ -455,17 +547,12 @@ Pagination.flowObject.prototype.addPagesLoop = function (pages) {
 	this.totalPages += pages;
         this.div.appendChild(Pagination.createPages(pages, this.name, this.pageCounter.selector, this.columns));
     }
-
     this.addOrRemovePages(pages);
-
 };
 
 
 Pagination.flowObject.prototype.addOrRemovePages = function (pages) {
-    if(!(this.namedFlow)) {
-        this.setNamedFlow();
-    }
-    
+
     if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
         this.pageCounter.needsUpdate = true;
         this.redoPages = true;
@@ -496,96 +583,30 @@ Pagination.flowObject.prototype.removeExcessPages = function (pages) {
     this.addOrRemovePages(pages);
 };
 
-Pagination.flowObject.prototype.enableAutoReflow = function () {
+
+Pagination.flowObject.prototype.setupReflow = function () {
     var flowObject = this;
 
+    var checkOverset = function () {
+    // Something has changed in the contents of this flow. Check if the overset has changed, and if it has, emit a pageLayoutUpdateEvent. 
+        if ((flowObject.namedFlow.overset !== flowObject.overset) || (flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)){
+            flowObject.overset = flowObject.namedFlow.overset;
+            flowObject.firstEmptyRegionIndex = flowObject.namedFlow.firstEmptyRegionIndex;
+	    flowObject.namedFlow.dispatchEvent(Pagination.pageLayoutUpdateEvent);
+        }
+    }
+    this.namedFlow.addEventListener('webkitRegionLayoutUpdate',checkOverset);
+
     var reFlow = function () {
+    // The page layout has changed. Reflow by adding pages one by one.
         flowObject.addOrRemovePages(1);
         flowObject.pageCounter.numberPages();
-    };
-    this.namedFlow.addEventListener('webkitRegionLayoutUpdate',reFlow)
-};
-
-
-Pagination.applyBookLayout = function () {
-
-    var bodyObjects = Pagination.createBodyObjects();
-
-    //Create div for layout
-    var layoutDiv = document.createElement('div');
-    layoutDiv.id = 'layout';
-    document.body.appendChild(layoutDiv);
+    };    
+    this.namedFlow.addEventListener('pageLayoutUpdated',reFlow);
     
-    //Create div for contents
-    var contentsDiv = document.createElement('div');
-    contentsDiv.id = 'contents';
-    document.body.appendChild(contentsDiv);
-
-    counter = 0;
-
-    for (var i = 0; i < bodyObjects.length; i++) {
-        layoutDiv.appendChild(bodyObjects[i].div);
-        contentsDiv.appendChild(bodyObjects[i].rawdiv);
-        bodyObjects[i].addOrRemovePages();
-        bodyObjects[i].enableAutoReflow();
-	bodyObjects[i].layoutFootnotes();
-    }
-    
-    Pagination.pageCounters.arab.numberPages();
-
-    if (Pagination.config.enableFrontmatter) {
-        //Create and flow frontmatter
-        fmObject = new Pagination.flowObject('frontmatter', Pagination.pageCounters.roman, 1);
-	fmObject.columns = 1;
-        contentsDiv.insertBefore(fmObject.rawdiv,contentsDiv.firstChild);
-        fmObject.rawdiv.innerHTML = Pagination.config.frontmatterContents;
-        var toc = Pagination.headersAndToc(bodyObjects);
-        fmObject.rawdiv.appendChild(toc);
-        layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
-        fmObject.addOrRemovePages();
-        Pagination.pageCounters.roman.numberPages();
-        var redoToc = function() {
-            var oldToc = toc;
-            toc = Pagination.headersAndToc(bodyObjects);
-            fmObject.rawdiv.replaceChild(toc, oldToc);
-        };
-        document.body.addEventListener('bodyLayoutUpdated',redoToc);
-        fmObject.enableAutoReflow();
-    }
-    document.dispatchEvent(Pagination.layoutFlowFinishedEvent);
 };
 
 
-
-Pagination.applySimpleBookLayout = function () { 
-    // Apply this alternative layout in case CSS Regions are not present 
-    bodyContainer = eval(Pagination.config.flowElement);
-    simplePage = document.createElement('div');
-    simplePage.classList.add('page');
-    simplePage.classList.add('simple');
-    simplePage.innerHTML = bodyContainer.innerHTML;
-    simplePage.id = bodyContainer.id;
-    bodyContainer.innerHTML = '';
-    document.body.appendChild(simplePage);
-};
-
-Pagination._cssRegionsCheck = function() { 
-    // Check whether CSS Regions are present in Chrome 23+ version
-    if ((document.webkitGetNamedFlows) && (document.webkitGetNamedFlows() !== null)) {
-	return true;
-    }
-    return false;
-};
-
-Pagination.autoStartInitiator = function () {
-    // To be executed upon document loading.
-    var cssRegionsPresent = Pagination._cssRegionsCheck();
-    if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {    
-        Pagination.applySimpleBookLayout();
-    } else if ((document.readyState == 'complete') && (cssRegionsPresent)) {      
-        Pagination.applyBookLayout();
-    }
-}
 
 Pagination.initiate();
 
