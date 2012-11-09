@@ -1,78 +1,102 @@
-/**
- * (c) 2012  Aleksandar Erkalovic, Marita Fraser, Steven Levithan, 
+/*!
+ * BookJS v.0.23.1-dev
+ * Copyright 2012  Aleksandar Erkalovic, Marita Fraser, Steven Levithan, 
  * Philip Schatz and Johannes Wilm. Freely available under the AGPL. For
  * further details see LICENSE.txt
  *
- * Using this library you can turn an HTML element into a series of pages using
- * CSS Regions. If the browser doesn't support CSS Regions, everything will be
- * flown into one large page  container that looks like a very long page.
+ * Using this library you can turn an HTML element into a series
+ * of pages using CSS Regions. If the browser doesn't support CSS Regions,
+ * everything will be flown into one large page  container that looks like a
+ * very long page.
  *
- * In order to use this library, first link to this javascript file within your
- * html code. Then you can change the following options to customize the
- * pagination behavior. Make sure that the configuration options are mentioned
- * after the link to this file. Below you can see the default values for these
- * options. You only need to specify the options if you want to deviate from
- * the default value.
  *
- * pagination.config.sectionStartMarker = 'h1'; This is the HTML element we 
- * look for to find where a new section starts.
+ * HOWTO
  *
- * pagination.config.sectionTitleMarker = 'h1'; Within the newly found section,
- * we look for the first instance of this element to determine the title of
- * the section.
+ * In order to use this library, link to the corresponding file as well as this javascript file within your html
+ * code. If you need to set custom options, set them before including this file
+ * by defining an object named paginationConfig and setting the customization
+ * options as keys within this object. Like this:
  *
- * pagination.config.chapterStartMarker = 'h2'; This is the HTML element we
- * look for to find where a new chapter starts.
+ * <link href="book.css" rel="stylesheet" type="text/css" />
+ * <script type="text/javascript">
+ *     paginationConfig = {
+ *         'sectionStartMarker': 'h3',
+ *	   'columns': 3,
+ *         'autoStart': false,
+ *     }
+ * </script>
+ * <script src="book.js" type="text/javascript"></script>
  *
- * pagination.config.chapterTitleMarker = 'h2'; Within the newly found chapter,
- * we look for the first instance of this element to determine the title of the
- * chapter.
+ * The following options are available to customize the pagination behavior. In
+ * the descriptions below you can see the default values for these options. You
+ * only need to specify the options if you want to deviate from the default 
+ * value.
  *
- * pagination.config.flowElement = "document.body"; This specifies element
- * whose contents we will flow into pages. You can use any javascript selector
+ * sectionStartMarker: h1 -- This is the HTML element we look for to find where
+ * a new section starts.
+ *
+ * sectionTitleMarker: h1 -- Within the newly found section, we look for the
+ * first instance of this element to determine the title of the section.
+ *
+ * chapterStartMarker: h2 -- This is the HTML element we look for to find where
+ * a new chapter starts.
+ *
+ * chapterTitleMarker: h2 -- Within the newly found chapter, we look for the
+ * first instance of this element to determine the title of the chapter.
+ *
+ * flowElement: document.body -- This specifies element the container element
+ * of the content we will flow into pages. You can use any javascript selector
  * here, such as "document.getElementById('contents')" .
  * 
- * pagination.config.alwaysEven = false; This determines whether each section
- * and chapter should have an even number of pages (2, 4, 6, 8, ...).
+ * alwaysEven: false -- This determines whether each section and chapter should
+ * have an even number of pages (2, 4, 6, 8, ...).
  *
- * pagination.config.columns = 1; This specifies the number of number of
- * columns used for the body text. 
+ * columns: 1 -- This specifies the number of number of columns used for the
+ * body text. 
  *
- * pagination.config.enableReflow = true; This decides whether pages should be
- * reflown upon change of contents after the first page flow. This is important
- * if one wants to add an HTML editor to the contents of the pages so that the
- * contents may require more or less pages than initially or one wants to
- * change the length contents in other ways dynamically.
+ * enableReflow: true -- This decides whether pages should be reflown upon
+ * change of contents after the first page flow. This is important if one wants
+ * to add an HTML editor to the contents of the pages so that the contents may
+ * require more or less pages than initially or one wants to change the length
+ * contents in other ways dynamically.
  * 
- * pagination.config.enableFrontmatter = true; This resolves whether a table of
- * contents, page headers and other frontmatter contents should be added upon
- * page creation.
+ * enableFrontmatter: true -- This resolves whether a table of contents, page\
+ * headers and other frontmatter contents should be added upon page creation.
  *
- * pagination.config.bulkPagesToAdd = 50; This is the initial number of pages
- * of each flowable part (section, chapter). After this number is added,
- * adjustments are made by adding another bulk of pages or deletin pages
- * individually. It takes much less time to delete pages than to add them
- * individually, so it is a point to overshoot the target value. For larger
- * chapters add many pages at a time so there is less time spent reflowing
- * text.
+ * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
+ * part (section, chapter). After this number is added, adjustments are made by
+ * adding another bulk of pages or deletin pages individually. It takes much 
+ * less time to delete pages than to add them individually, so it is a point to
+ * overshoot the target value. For larger chapters add many pages at a time so 
+ * there is less time spent reflowing text.
  *
- * pagination.config.pagesToAddIncrementRatio = 1.4; This is the ratio of how
- * the bulk of pages incremented. If the initial bulkPagestoAdd is 50 and those
- * initial 50 pages were not enough space to fit the contents of that chapter,
- * then next 1.4*50 = 70 are pages, for a total of 50+70 = 120 pages, etc. . 
- * 1.4 seems to be the fastest in most situations.
+ * pagesToAddIncrementRatio: 1.4 -- This is the ratio of how the bulk of pages 
+ * incremented. If the initial bulkPagestoAdd is 50 and those initial 50 pages
+ * were not enough space to fit the contents of that chapter, then next
+ * 1.4 * 50 = 70 are pages, for a total of 50+70 = 120 pages, etc. .  1.4 seems
+ * to be the fastest in most situations.
  *
- * pagination.config.frontmatterContents = ''; These are the HTML contents that
- * are added to the frontmatter before the table of contents. This would
- * usually be a title page and a copyright page, including page breaks.
+ * frontmatterContents: none -- These are the HTML contents that are added to
+ * the frontmatter before the table of contents. This would usually be a title 
+ * page and a copyright page, including page breaks.
  *
- * pagination.config.autoStart = true; This controls whether pagination should
- * be executed automatically upon page load.
+ * autoStart: true -- This controls whether pagination should be executed 
+ * automatically upon page load. If it is set to false, pagination has to be
+ * initiated manually by calling Pagination.applyBookLayout() or 
+ * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
+ * Check Pagination._cssRegionCheck() to see if CSS Regions are present.
  */
 
-var pagination = new Object;
 
-pagination.config = {
+
+/*
+ * The Pagination object represents all the pagination functionality which is
+ * added to its namespace.
+ */ 
+
+var Pagination = new Object;
+
+Pagination.config = {
 	'sectionStartMarker': 'h1',
 	'sectionTitleMarker': 'h1',
 
@@ -90,7 +114,20 @@ pagination.config = {
 	'autoStart': true
 };
 
-pagination.romanize = function () {
+Pagination.initiate = function() {
+    this.userConfigImport();
+}
+
+Pagination.userConfigImport = function() {
+    if (window.paginationConfig) {
+	for (var key in paginationConfig) {
+	    Pagination.config[key] = paginationConfig[key];
+	}
+    }
+}
+
+Pagination.romanize = function () {
+    // Create roman numeral representations of numbers.
     var digits = String(+this.value).split(""),
         key = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC", "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
         roman = "",
@@ -102,28 +139,28 @@ pagination.romanize = function () {
 };
 
 
-pagination.pageCounterCreator = function (selector, show) {
+Pagination.pageCounterCreator = function (selector, show) {
     this.selector = selector;
     if (show !== undefined) {
         this.show = show;
     }
 };
 
-pagination.pageCounterCreator.prototype.value = 0;
+Pagination.pageCounterCreator.prototype.value = 0;
 
-pagination.pageCounterCreator.prototype.needsUpdate = false;
+Pagination.pageCounterCreator.prototype.needsUpdate = false;
 
-pagination.pageCounterCreator.prototype.show = function(){
+Pagination.pageCounterCreator.prototype.show = function(){
     return this.value;
 };
     
-pagination.pageCounterCreator.prototype.incrementAndShow = function () {
+Pagination.pageCounterCreator.prototype.incrementAndShow = function () {
     this.value++;
     return this.show();
 };   
 
 
-pagination.pageCounterCreator.prototype.numberPages = function () {
+Pagination.pageCounterCreator.prototype.numberPages = function () {
     if (this.needsUpdate) {
         this.value = 0;
         this.needsUpdate = false;
@@ -135,12 +172,13 @@ pagination.pageCounterCreator.prototype.numberPages = function () {
     }
 };
 
-pagination.pageCounters = {};
+Pagination.pageCounters = {};
 
-pagination.pageCounters.arab = new pagination.pageCounterCreator('arabic');
-pagination.pageCounters.roman = new pagination.pageCounterCreator('roman', pagination.romanize);
+Pagination.pageCounters.arab = new Pagination.pageCounterCreator('arabic');
+Pagination.pageCounters.roman = new Pagination.pageCounterCreator('roman', Pagination.romanize);
 
-pagination.createPages = function (num, flowName, pageCounterSelector, columns) {
+Pagination.createPages = function (num, flowName, pageCounterSelector, columns) {
+    // Create the DOM structure of each page.
     var page, contents, footnotes, contentsContainer, column, topFloats;
     var tempRoot = document.createDocumentFragment();
     for (var i = 0; i < num; i++) {
@@ -195,7 +233,8 @@ pagination.createPages = function (num, flowName, pageCounterSelector, columns) 
             contentsContainer.appendChild(contents);
 	    contentsContainer.appendChild(footnotes);
 	    page.appendChild(contentsContainer);
-        } else { // if no flowname is given, an empty page is created
+	// If no flowname is given, an empty page is created.
+        } else {	    
             page.classList.add('empty');
         }
 
@@ -204,15 +243,15 @@ pagination.createPages = function (num, flowName, pageCounterSelector, columns) 
     return tempRoot;
 };
 
-pagination.bodyLayoutUpdatedEvent = document.createEvent('Event');
+Pagination.bodyLayoutUpdatedEvent = document.createEvent('Event');
 
-pagination.bodyLayoutUpdatedEvent.initEvent('bodyLayoutUpdated', true, true);
+Pagination.bodyLayoutUpdatedEvent.initEvent('bodyLayoutUpdated', true, true);
 
-pagination.layoutFlowFinishedEvent = document.createEvent('Event');
+Pagination.layoutFlowFinishedEvent = document.createEvent('Event');
 
-pagination.layoutFlowFinishedEvent.initEvent('layoutFlowFinished', true, true);
+Pagination.layoutFlowFinishedEvent.initEvent('layoutFlowFinished', true, true);
 
-pagination.headersAndToc = function (bodyObjects) {
+Pagination.headersAndToc = function (bodyObjects) {
     
     var currentChapterTitle = '';
     var currentSectionTitle = '';
@@ -281,26 +320,26 @@ pagination.headersAndToc = function (bodyObjects) {
  * Creates objects for each item in the body (section start, chapter)
  */
 
-pagination.createBodyObjects = function () {
+Pagination.createBodyObjects = function () {
     //    
     var bodyObjects = [];
     var chapterCounter = 0;
 
-    bodyObjects.push(new pagination.flowObject('bodypre', pagination.pageCounters.arab));
+    bodyObjects.push(new Pagination.flowObject('bodypre', Pagination.pageCounters.arab));
 
-    var bodyContainer = eval(pagination.config.flowElement);
+    var bodyContainer = eval(Pagination.config.flowElement);
     var bodyContents = bodyContainer.childNodes;
 
 
     for (var i = bodyContents.length; i > 0; i--) {
 
         if (bodyContents[0].nodeType == 1) {
-            if (bodyContents[0].webkitMatchesSelector(pagination.config.chapterStartMarker)) {
-                bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.pageCounters.arab));
+            if (bodyContents[0].webkitMatchesSelector(Pagination.config.chapterStartMarker)) {
+                bodyObjects.push(new Pagination.flowObject('body' + chapterCounter++, Pagination.pageCounters.arab));
                 bodyObjects[chapterCounter].setType('chapter');
 
-            } else if (bodyContents[0].webkitMatchesSelector(pagination.config.sectionStartMarker)) {
-                bodyObjects.push(new pagination.flowObject('body' + chapterCounter++, pagination.pageCounters.arab));
+            } else if (bodyContents[0].webkitMatchesSelector(Pagination.config.sectionStartMarker)) {
+                bodyObjects.push(new Pagination.flowObject('body' + chapterCounter++, Pagination.pageCounters.arab));
                 bodyObjects[chapterCounter].setType('section');
             }
         }
@@ -313,7 +352,7 @@ pagination.createBodyObjects = function () {
 };
 
 
-pagination.flowObject = function (name, pageCounter) {
+Pagination.flowObject = function (name, pageCounter) {
     this.name = name;
     this.pageCounter = pageCounter;
 
@@ -324,39 +363,39 @@ pagination.flowObject = function (name, pageCounter) {
     this.div = document.createElement('div');
     this.div.id = name;
 
-    this.bulkPagesToAdd = pagination.config.bulkPagesToAdd;
+    this.bulkPagesToAdd = Pagination.config.bulkPagesToAdd;
 
-    this.columns = pagination.config.columns;
+    this.columns = Pagination.config.columns;
 };
 
-pagination.flowObject.prototype.totalPages = 0;
+Pagination.flowObject.prototype.totalPages = 0;
 
-pagination.flowObject.prototype.redoPages = false;
+Pagination.flowObject.prototype.redoPages = false;
 
-pagination.flowObject.prototype.setType = function (type) {
+Pagination.flowObject.prototype.setType = function (type) {
     this.type = type;
     this.div.classList.add(type);
 };
 
-pagination.flowObject.prototype.findTitle = function () {
+Pagination.flowObject.prototype.findTitle = function () {
     var titleField;
     if (this.type == 'chapter') {
-        titleField = this.rawdiv.querySelector(pagination.config.chapterTitleMarker);
+        titleField = this.rawdiv.querySelector(Pagination.config.chapterTitleMarker);
         this.title = titleField.innerHTML;
     } else if (this.type == 'section') {
-        titleField = this.rawdiv.querySelector(pagination.config.sectionTitleMarker);
+        titleField = this.rawdiv.querySelector(Pagination.config.sectionTitleMarker);
         this.title = titleField.innerHTML;
     }
 };
 
-pagination.flowObject.prototype.findStartpageNumber = function () {
+Pagination.flowObject.prototype.findStartpageNumber = function () {
     if (this.rawdiv.innerText.length > 0) {
         var startpageNumberField = this.div.querySelector('.pagenumber');
         this.startpageNumber = startpageNumberField.innerText;
     }
 };
 
-pagination.flowObject.prototype.layoutFootnotes = function () {
+Pagination.flowObject.prototype.layoutFootnotes = function () {
     var numFootnote, footnote, footnoteReferencePageBeforeInsertion, footnoteReferencePageAfterInsertion, currentFootnoteContainer, nextpageFootnote;
 
     var allFootnotes = this.rawdiv.getElementsByClassName('footnote'); // Look for all the items that have "footnote" in their class list. These will be treated as footnote texts.
@@ -396,31 +435,31 @@ pagination.flowObject.prototype.layoutFootnotes = function () {
     }
 };
 
-pagination.flowObject.prototype.setNamedFlow = function () {
+Pagination.flowObject.prototype.setNamedFlow = function () {
     var namedFlows = document.webkitGetNamedFlows();
     this.namedFlow = namedFlows[this.name];
 };
 
-pagination.flowObject.prototype.makeEvenPages = function () {
+Pagination.flowObject.prototype.makeEvenPages = function () {
     var emptyPage = this.div.querySelector('.page.empty');
     if (emptyPage) {
         this.div.removeChild(emptyPage);
     }
     var allPages = this.div.querySelectorAll('.page');
     if (allPages.length % 2 == 1) {
-        this.div.appendChild(pagination.createPages(1, false, this.pageCounter.selector, this.columns));
+        this.div.appendChild(Pagination.createPages(1, false, this.pageCounter.selector, this.columns));
     }
 };
 
-pagination.flowObject.prototype.addPagesLoop = function (pages) {
+Pagination.flowObject.prototype.addPagesLoop = function (pages) {
 
     if ('undefined' === typeof (pages)) {
 	this.totalPages += this.bulkPagesToAdd;
-        this.div.appendChild(pagination.createPages(this.bulkPagesToAdd, this.name, this.pageCounter.selector, this.columns));
-        this.bulkPagesToAdd = Math.floor(this.bulkPagesToAdd * pagination.config.pagesToAddIncrementRatio);
+        this.div.appendChild(Pagination.createPages(this.bulkPagesToAdd, this.name, this.pageCounter.selector, this.columns));
+        this.bulkPagesToAdd = Math.floor(this.bulkPagesToAdd * Pagination.config.pagesToAddIncrementRatio);
     } else {
 	this.totalPages += pages;
-        this.div.appendChild(pagination.createPages(pages, this.name, this.pageCounter.selector, this.columns));
+        this.div.appendChild(Pagination.createPages(pages, this.name, this.pageCounter.selector, this.columns));
     }
 
     this.addOrRemovePages(pages);
@@ -428,7 +467,7 @@ pagination.flowObject.prototype.addPagesLoop = function (pages) {
 };
 
 
-pagination.flowObject.prototype.addOrRemovePages = function (pages) {
+Pagination.flowObject.prototype.addOrRemovePages = function (pages) {
     if(!(this.namedFlow)) {
         this.setNamedFlow();
     }
@@ -442,17 +481,17 @@ pagination.flowObject.prototype.addOrRemovePages = function (pages) {
         this.removeExcessPages(pages);
     } else if (this.redoPages) {
         this.redoPages = false;
-        if (pagination.config.alwaysEven) {
+        if (Pagination.config.alwaysEven) {
             this.makeEvenPages();
         }
         if (this.name!='frontmatter') {
-            document.body.dispatchEvent(pagination.bodyLayoutUpdatedEvent);
+            document.body.dispatchEvent(Pagination.bodyLayoutUpdatedEvent);
         }
     }
 };
 
 
-pagination.flowObject.prototype.removeExcessPages = function (pages) {
+Pagination.flowObject.prototype.removeExcessPages = function (pages) {
 
         var allPages = this.div.querySelectorAll('.page');
 
@@ -463,7 +502,7 @@ pagination.flowObject.prototype.removeExcessPages = function (pages) {
     this.addOrRemovePages(pages);
 };
 
-pagination.flowObject.prototype.enableAutoReflow = function () {
+Pagination.flowObject.prototype.enableAutoReflow = function () {
     var flowObject = this;
 
     var reFlow = function () {
@@ -474,9 +513,9 @@ pagination.flowObject.prototype.enableAutoReflow = function () {
 };
 
 
-pagination.applyBookLayout = function () {
+Pagination.applyBookLayout = function () {
 
-    var bodyObjects = pagination.createBodyObjects();
+    var bodyObjects = Pagination.createBodyObjects();
 
     //Create div for layout
     var layoutDiv = document.createElement('div');
@@ -494,46 +533,46 @@ pagination.applyBookLayout = function () {
         layoutDiv.appendChild(bodyObjects[i].div);
         contentsDiv.appendChild(bodyObjects[i].rawdiv);
         bodyObjects[i].addOrRemovePages();
-        if (pagination.config.enableReflow) {
+        if (Pagination.config.enableReflow) {
             bodyObjects[i].enableAutoReflow();
         }
 	bodyObjects[i].layoutFootnotes();
     }
     
-    pagination.pageCounters.arab.numberPages();
+    Pagination.pageCounters.arab.numberPages();
 
-    if (pagination.config.enableFrontmatter) {
+    if (Pagination.config.enableFrontmatter) {
         //Create and flow frontmatter
-        fmObject = new pagination.flowObject('frontmatter', pagination.pageCounters.roman, 1);
+        fmObject = new Pagination.flowObject('frontmatter', Pagination.pageCounters.roman, 1);
 	fmObject.columns = 1;
         contentsDiv.insertBefore(fmObject.rawdiv,contentsDiv.firstChild);
-        fmObject.rawdiv.innerHTML = pagination.config.frontmatterContents;
-        var toc = pagination.headersAndToc(bodyObjects);
+        fmObject.rawdiv.innerHTML = Pagination.config.frontmatterContents;
+        var toc = Pagination.headersAndToc(bodyObjects);
         fmObject.rawdiv.appendChild(toc);
         layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
         fmObject.addOrRemovePages();
-        pagination.pageCounters.roman.numberPages();
-        if (pagination.config.enableReflow) {
+        Pagination.pageCounters.roman.numberPages();
+        if (Pagination.config.enableReflow) {
             var redoToc = function() {
                 var oldToc = toc;
-                toc = pagination.headersAndToc(bodyObjects);
+                toc = Pagination.headersAndToc(bodyObjects);
                 fmObject.rawdiv.replaceChild(toc, oldToc);
             };
             document.body.addEventListener('bodyLayoutUpdated',redoToc);
             fmObject.enableAutoReflow();
         } else {
-            document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
+            document.body.dispatchEvent(Pagination.layoutFlowFinishedEvent);
         }
-    } else if (!(pagination.config.enableReflow)) {
-        document.body.dispatchEvent(pagination.layoutFlowFinishedEvent);
+    } else if (!(Pagination.config.enableReflow)) {
+        document.body.dispatchEvent(Pagination.layoutFlowFinishedEvent);
     }
 };
 
 
 
-pagination.applySimpleBookLayout = function () { 
-// Apply this alternative layout in case CSS Regions are not present 
-    bodyContainer = eval(pagination.config.flowElement);
+Pagination.applySimpleBookLayout = function () { 
+    // Apply this alternative layout in case CSS Regions are not present 
+    bodyContainer = eval(Pagination.config.flowElement);
     simplePage = document.createElement('div');
     simplePage.classList.add('page');
     simplePage.classList.add('simple');
@@ -543,22 +582,27 @@ pagination.applySimpleBookLayout = function () {
     document.body.appendChild(simplePage);
 };
 
-pagination._cssRegionsCheck = function() { 
-// Check whether CSS Regions are present in Chrome 23+ version
+Pagination._cssRegionsCheck = function() { 
+    // Check whether CSS Regions are present in Chrome 23+ version
     if ((document.webkitGetNamedFlows) && (document.webkitGetNamedFlows() !== null)) {
 	return true;
     }
     return false;
 };
 
-
-document.onreadystatechange = function () {
-    var cssRegionsPresent = pagination._cssRegionsCheck();
-    if (pagination.config.autoStart == true) {
-        if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {
-            pagination.applySimpleBookLayout();
-        } else if ((document.readyState == 'complete') && (cssRegionsPresent)){
-            pagination.applyBookLayout();
-        }
+Pagination.autoStartInitiator = function () {
+    // To be executed upon document loading.
+    var cssRegionsPresent = Pagination._cssRegionsCheck();
+    if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {    
+        Pagination.applySimpleBookLayout();
+    } else if ((document.readyState == 'complete') && (cssRegionsPresent)){      
+        Pagination.applyBookLayout();
     }
-};
+}
+
+Pagination.initiate();
+
+if (Pagination.config.autoStart === true) {
+    // Hook Pagination.autoStartInitiator to document loading stage if 
+    document.addEventListener("readystatechange", Pagination.autoStartInitiator);
+}

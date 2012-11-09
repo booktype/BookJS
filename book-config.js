@@ -1,22 +1,19 @@
-pagination.config.sectionStartMarker = 'h1';
-pagination.config.sectionTitleMarker = 'h1';
-
-pagination.config.chapterStartMarker = 'h2';
-pagination.config.chapterTitleMarker = 'h2';
-
-pagination.config.flowElement = "document.body";
-
-pagination.config.alwaysEven = true;
-pagination.config.columns = 2;
-
-pagination.config.enableReflow = true;
-
-pagination.config.enableFrontmatter = true;
-
-pagination.config.bulkPagesToAdd = 50; 
-
-pagination.config.pagesToAddIncrementRatio = 1.4; 
-
-pagination.config.frontmatterContents = '<div id="booktitle">Book title</div><div id="booksubtitle">Book subtitle</div><div id="bookeditors">ed. Editor 1, Editor II, Editor III</div><div class="pagebreak"></div><div id="copyrightpage">Copyright: You<br>License: CC</div><div class="pagebreak"></div>';
-
-pagination.config.autoStart = true;
+paginationConfig = {
+    'sectionStartMarker': 'h1',
+    'sectionTitleMarker': 'h1',
+    'chapterStartMarker': 'h2',
+    'chapterTitleMarker': 'h2',
+    'flowElement': "document.body",
+    'alwaysEven': true,
+    'columns': 2,
+    'enableReflow': true,
+    'enableFrontmatter': true,
+    'bulkPagesToAdd': 50, 
+    'pagesToAddIncrementRatio': 1.4, 
+    'frontmatterContents': '<div id="booktitle">Book title</div>'
+	+ '<div id="booksubtitle">Book subtitle</div><div id="bookeditors">'
+	+ 'ed. Editor 1, Editor II, Editor III</div><div class="pagebreak">'
+	+ '</div><div id="copyrightpage">Copyright: You<br>License: CC</div>'
+	+ '<div class="pagebreak"></div>',
+    'autoStart': true,
+}
