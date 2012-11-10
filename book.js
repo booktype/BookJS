@@ -525,7 +525,11 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     this.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkAllFootnotePlacements);
 
     var reFlow = function () {
+        flowObject.namedFlow.removeEventListener('webkitRegionLayoutUpdate', checkAllFootnotePlacements);
+
         flowObject.layoutFootnotes();
+
+        flowObject.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkAllFootnotePlacements);
     }
 
     this.namedFlow.addEventListener('footnotesNeedMove', reFlow);
