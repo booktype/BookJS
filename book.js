@@ -141,7 +141,6 @@ Pagination.romanize = function () {
     return Array(+digits.join("") + 1).join("M") + roman;
 };
 
-
 Pagination.pageCounterCreator = function (selector, show) {
     this.selector = selector;
     if (show !== undefined) {
@@ -241,17 +240,23 @@ Pagination.createPages = function (num, flowName, pageCounterSelector, columns) 
     return tempRoot;
 };
 
-Pagination.bodyLayoutUpdatedEvent = document.createEvent('Event');
+Pagination.events = {};
 
-Pagination.bodyLayoutUpdatedEvent.initEvent('bodyLayoutUpdated', true, true);
+Pagination.events.bodyLayoutUpdated = document.createEvent('Event');
 
-Pagination.layoutFlowFinishedEvent = document.createEvent('Event');
+Pagination.events.bodyLayoutUpdated.initEvent('bodyLayoutUpdated', true, true);
 
-Pagination.layoutFlowFinishedEvent.initEvent('layoutFlowFinished', true, true);
+Pagination.events.layoutFlowFinished = document.createEvent('Event');
 
-Pagination.pageLayoutUpdateEvent = document.createEvent('Event');
+Pagination.events.layoutFlowFinished.initEvent('layoutFlowFinished', true, true);
 
-Pagination.pageLayoutUpdateEvent.initEvent('pageLayoutUpdated', true, true);
+Pagination.events.pageLayoutUpdate = document.createEvent('Event');
+
+Pagination.events.pageLayoutUpdate.initEvent('pageLayoutUpdated', true, true);
+
+Pagination.events.footnotesNeedMove = document.createEvent('Event');
+
+Pagination.events.footnotesNeedMove.initEvent('footnotesNeedMove', true, true);
 
 Pagination.headersAndToc = function (bodyObjects) {
     
@@ -394,7 +399,7 @@ Pagination.applyBookLayout = function () {
         };
         document.body.addEventListener('bodyLayoutUpdated',redoToc);
     }
-    document.dispatchEvent(Pagination.layoutFlowFinishedEvent);
+    document.dispatchEvent(Pagination.events.layoutFlowFinished);
 };
 
 
@@ -444,7 +449,8 @@ Pagination.flowObject = function (name, pageCounter) {
     this.bulkPagesToAdd = Pagination.config.bulkPagesToAdd;
 
     this.columns = Pagination.config.columns;
-
+    
+    this.footnotes = [];
 };
 
 Pagination.flowObject.prototype.totalPages = 0;
@@ -460,7 +466,10 @@ Pagination.flowObject.prototype.initiate = function () {
     this.namedFlow = document.webkitGetNamedFlows()[this.name];
     this.addOrRemovePages();
     this.setupReflow();
+    this.findAllFootnotes();
+    this.addFootnoteReferences();
     this.layoutFootnotes();
+    this.setupFootnoteReflow();
     this.pageCounter.numberPages();
 }
 
@@ -494,39 +503,113 @@ Pagination.flowObject.prototype.findStartpageNumber = function () {
     }
 };
 
-Pagination.flowObject.prototype.layoutFootnotes = function () {
-    var numFootnote, footnote, footnoteReferencePageBeforeInsertion, footnoteReferencePageAfterInsertion, currentFootnoteContainer, nextpageFootnote;
+Pagination.flowObject.prototype.findFootnoteReferencePage = function(footnoteReference) {
+    return this.namedFlow.getRegionsByContent(footnoteReference)[0].parentNode.parentNode.parentNode;
+}
 
+Pagination.flowObject.prototype.findFootnotePage = function(footnote) {
+    return footnote.parentNode.parentNode.parentNode;
+}
+
+Pagination.flowObject.prototype.compareReferenceAndFootnotePage = function(footnoteObject) {
+    // Check whether a footnote and it's corresponding reference in the text are on the same page.
+    var referencePage = this.findFootnoteReferencePage(footnoteObject['reference']);
+    var footnotePage = this.findFootnotePage(footnoteObject['item']);
+
+    if (footnotePage === referencePage) {
+	return true;
+    } else {
+	return false;
+    }
+}
+
+
+Pagination.flowObject.prototype.setupFootnoteReflow = function() {
+    var flowObject = this;
+
+    var checkAllFootnotePlacements = function() {
+        flowObject.checkAllFootnotePlacements();
+    }
+
+    this.namedFlow.addEventListener('webkitRegionLayoutUpdate',checkAllFootnotePlacements);
+
+    var reFlow = function() {
+        flowObject.layoutFootnotes();
+    }
+
+    this.namedFlow.addEventListener('footnotesNeedMove',reFlow);
+}
+
+Pagination.flowObject.prototype.checkAllFootnotePlacements = function() {
+    console.log('checking footnote placements for: '+this.name);
+    for (var i = 0; i < this.footnotes.length; i++) {
+	if(!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
+            console.log('need to reflow footnotes');
+	    this.namedFlow.dispatchEvent(Pagination.events.footnotesNeedMove);
+	}    
+    }
+}
+
+Pagination.flowObject.prototype.findAllFootnotes = function () {
     var allFootnotes = this.rawdiv.getElementsByClassName('footnote'); // Look for all the items that have "footnote" in their class list. These will be treated as footnote texts.
     for (var i = 0; i < allFootnotes.length; i++) {
-	    numFootnote = document.createElement('sup'); // Create a sup-element with the class "footnote-reference" that holds the current footnote number. This will be used both in the body text and in the footnote itself.
+	    var footnoteObject = {}; // We create this object so that we can find the footnote item and reference again later on.
+	    
+            footnoteObject['original'] = allFootnotes[i];
+
+	    var numFootnote = document.createElement('sup'); // Create a sup-element with the class "footnote-reference" that holds the current footnote number. This will be used both in the body text and in the footnote itself.
 	    numFootnote.classList.add('footnote-reference');
 	    numFootnoteContents = document.createTextNode(i+1);
 	    numFootnote.appendChild(numFootnoteContents);
 	    
-	    footnote = document.createElement('div'); // Put the footnote number and footnote text together in a div-element with the class footnote-item
+	    var footnote = document.createElement('div'); // Put the footnote number and footnote text together in a div-element with the class footnote-item
 	    footnote.classList.add('footnote-item');
 	    footnote.classList.add('visible');
 	    footnote.appendChild(numFootnote);
 
-	    footnoteText = allFootnotes[i].cloneNode(true);
+	    var footnoteText = allFootnotes[i].cloneNode(true);
 	    footnote.appendChild(footnoteText);
-           
-	    numFootnoteReference = numFootnote.cloneNode(true)
-	    allFootnotes[i].parentNode.insertBefore(numFootnoteReference, allFootnotes[i]); // Insert the footnote number in the body text just before the original footnote text appeared in the body (the text that is now hidden).
 
-	    footnoteReferencePageBeforeInsertion = this.namedFlow.getRegionsByContent(numFootnoteReference)[0].parentNode.parentNode.parentNode; // We find the page where the footnote is referenced from before the insertion procedure begins.
-            currentFootnoteContainer = footnoteReferencePageBeforeInsertion.querySelector('.footnotes');
-            currentFootnoteContainer.appendChild(footnote); // We insert the footnote in the footnote contianer of that page.
-	    footnoteReferencePageAfterInsertion = this.namedFlow.getRegionsByContent(numFootnoteReference)[0].parentNode.parentNode.parentNode; // We find the page where the footnote is referenced from after the insertion procedure has taken place.
-	    
-	    if (footnoteReferencePageBeforeInsertion !== footnoteReferencePageAfterInsertion) { //If the footnote reference has been moved from oen page to another through the insertion procedure, we set the visibility of the footnote to "hidden" so that it continues to take up the same space and then insert it one more time on the page from where it now is referenced.
-	        nextpageFootnote = footnote.cloneNode(true);
-		footnote.classList.remove('visible');
-		footnote.classList.add('invisible');
-		
-		currentFootnoteContainer = footnoteReferencePageAfterInsertion.querySelector('.footnotes');
-		currentFootnoteContainer.appendChild(nextpageFootnote);
+	    footnoteObject['item'] = footnote;
+           
+	    numFootnoteReference = numFootnote.cloneNode(true);
+
+            footnoteObject['reference'] = numFootnoteReference;
+
+            this.footnotes.push(footnoteObject);
+    }
+}
+
+Pagination.flowObject.prototype.addFootnoteReferences = function () {
+    for (var i = 0; i < this.footnotes.length; i++) {
+        this.footnotes[i]['original'].parentNode.insertBefore(this.footnotes[i]['reference'], this.footnotes[i]['original']); // Insert the footnote number in the body text just before the original footnote text appears).
+    }
+}
+
+Pagination.flowObject.prototype.layoutFootnotes = function () {
+    console.log('layouting footnotes');
+    for (var i = 0; i < this.footnotes.length; i++) {
+
+       if ('hidden' in this.footnotes[i]) {
+           this.footnotes[i]['hidden'].parentNode.removeChild(this.footnotes[i]['hidden']);
+           delete this.footnotes[i]['hidden'];
+       }
+
+        var footnoteReferencePage = this.findFootnoteReferencePage(this.footnotes[i]['reference']); // We find the page where the footnote is referenced from.
+        var currentFootnoteContainer = footnoteReferencePage.querySelector('.footnotes');
+        currentFootnoteContainer.appendChild(this.footnotes[i]['item']); // We insert the footnote in the footnote container of that page.
+
+	if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
+                // If the footnote reference has been moved from one page to another through the insertion procedure, we set the visibility of the footnote to "hidden" so that it continues to take up the same space and then insert it one more time on the page from where it now is referenced.
+                this.footnotes[i]['hidden'] = this.footnotes[i]['item'];
+                this.footnotes[i]['item'] = this.footnotes[i]['hidden'].cloneNode(true);
+ 
+		this.footnotes[i]['hidden'].classList.remove('visible');
+		this.footnotes[i]['hidden'].classList.add('invisible');
+
+		footnoteReferencePage = this.findFootnoteReferencePage(this.footnotes[i]['reference']); // We find the page where the footnote is referenced from now.
+		currentFootnoteContainer = footnoteReferencePage.querySelector('.footnotes');
+		currentFootnoteContainer.appendChild(this.footnotes[i]['item']);
 	    }
     }
 };
@@ -571,7 +654,7 @@ Pagination.flowObject.prototype.addOrRemovePages = function (pages) {
             this.makeEvenPages();
         }
         if (this.name!='frontmatter') {
-            document.body.dispatchEvent(Pagination.bodyLayoutUpdatedEvent);
+            document.body.dispatchEvent(Pagination.events.bodyLayoutUpdated);
         }
     }
 };
@@ -593,11 +676,11 @@ Pagination.flowObject.prototype.setupReflow = function () {
     var flowObject = this;
 
     var checkOverset = function () {
-    // Something has changed in the contents of this flow. Check if the overset has changed, and if it has, emit a pageLayoutUpdateEvent. 
+    // Something has changed in the contents of this flow. Check if the overset has changed, and if it has, emit a pageLayoutUpdate event. 
         if ((flowObject.namedFlow.overset !== flowObject.overset) || (flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)){
             flowObject.overset = flowObject.namedFlow.overset;
             flowObject.firstEmptyRegionIndex = flowObject.namedFlow.firstEmptyRegionIndex;
-	    flowObject.namedFlow.dispatchEvent(Pagination.pageLayoutUpdateEvent);
+	    flowObject.namedFlow.dispatchEvent(Pagination.events.pageLayoutUpdate);
         }
     }
     this.namedFlow.addEventListener('webkitRegionLayoutUpdate',checkOverset);
