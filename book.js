@@ -186,7 +186,10 @@ Pagination.pageCounterCreator.prototype.numberPages = function () {
     this.value = 0;
     this.needsUpdate = false;
 
-    var pagenumbersToNumber = document.querySelectorAll('.page .pagenumber.' + this.cssClass);
+    var pagenumbersToNumber = document.querySelectorAll(
+        '.page .pagenumber.' 
+        + this.cssClass
+    );
     for (var i = 0; i < pagenumbersToNumber.length; i++) {
         pagenumbersToNumber[i].innerHTML = this.incrementAndShow();
     }
@@ -197,10 +200,15 @@ Pagination.pageCounters = {};
 // typically these are two -- roman for the frontmatter and arab for the main
 // body contents. 
 
-Pagination.pageCounters.arab = new Pagination.pageCounterCreator('arabic');
+Pagination.pageCounters.arab = new Pagination.pageCounterCreator(
+    'arabic'
+);
 // arab is the page counter used by the main body contents.
 
-Pagination.pageCounters.roman = new Pagination.pageCounterCreator('roman', Pagination.romanize);
+Pagination.pageCounters.roman = new Pagination.pageCounterCreator(
+    'roman', 
+    Pagination.romanize
+);
 // roman is the page counter used by the frontmatter.
 
 Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
@@ -268,22 +276,38 @@ Pagination.events = {};
 // Pagination.events represents all the evenets created specifically by BookJs.
 
 Pagination.events.bodyLayoutUpdated = document.createEvent('Event');
-Pagination.events.bodyLayoutUpdated.initEvent('bodyLayoutUpdated', true, true);
+Pagination.events.bodyLayoutUpdated.initEvent(
+    'bodyLayoutUpdated', 
+    true, 
+    true
+);
 // bodyLayoutUpdated is emitted when pages have been added or removed from any
 // body flowObject.
 
 Pagination.events.layoutFlowFinished = document.createEvent('Event');
-Pagination.events.layoutFlowFinished.initEvent('layoutFlowFinished', true, true);
+Pagination.events.layoutFlowFinished.initEvent(
+    'layoutFlowFinished', 
+    true, 
+    true
+);
 // layoutFlowFinished is emitted the first time the flow of the entire book has
 // been created.
 
 Pagination.events.pageLayoutUpdate = document.createEvent('Event');
-Pagination.events.pageLayoutUpdate.initEvent('pageLayoutUpdated', true, true);
+Pagination.events.pageLayoutUpdate.initEvent(
+    'pageLayoutUpdated', 
+    true, 
+    true
+);
 // pageLayoutUpdated is emitted when new pages have to added or excess pages be
 // removed.
 
 Pagination.events.footnotesNeedMove = document.createEvent('Event');
-Pagination.events.footnotesNeedMove.initEvent('footnotesNeedMove', true, true);
+Pagination.events.footnotesNeedMove.initEvent(
+    'footnotesNeedMove', 
+    true, 
+    true
+);
 // footnotesNeedMove is emitted when at least one footnote no longer is on the
 // page of the reference page it corresponds to.
 
@@ -342,7 +366,9 @@ Pagination.headersAndToc = function (bodyObjects) {
             tocItemPnSpan.classList.add('toc-pagenumber');
 
             if (typeof bodyObjects[i].startpageNumber !== 'undefined') {
-                var tocItemPnText = document.createTextNode(bodyObjects[i].startpageNumber);
+                var tocItemPnText = document.createTextNode(
+                    bodyObjects[i].startpageNumber
+                );
                 tocItemPnSpan.appendChild(tocItemPnText);
             }
 
@@ -365,7 +391,12 @@ Pagination.createBodyObjects = function () {
     var bodyObjects = [];
     var chapterCounter = 0;
 
-    bodyObjects.push(new Pagination.flowObject('bodypre', Pagination.pageCounters.arab));
+    bodyObjects.push(
+        new Pagination.flowObject(
+            'bodypre',
+            Pagination.pageCounters.arab
+        )
+    );
 
     var bodyContainer = eval(Pagination.config.flowElement);
     var bodyContents = bodyContainer.childNodes;
@@ -374,12 +405,30 @@ Pagination.createBodyObjects = function () {
     for (var i = bodyContents.length; i > 0; i--) {
 
         if (bodyContents[0].nodeType == 1) {
-            if (bodyContents[0].webkitMatchesSelector(Pagination.config.chapterStartMarker)) {
-                bodyObjects.push(new Pagination.flowObject('body' + chapterCounter++, Pagination.pageCounters.arab));
+            if (
+                bodyContents[0].webkitMatchesSelector(
+                    Pagination.config.chapterStartMarker
+                )
+            ) {
+                bodyObjects.push(
+                    new Pagination.flowObject(
+                        'body' + chapterCounter++, 
+                        Pagination.pageCounters.arab
+                    )
+                );
                 bodyObjects[chapterCounter].setType('chapter');
 
-            } else if (bodyContents[0].webkitMatchesSelector(Pagination.config.sectionStartMarker)) {
-                bodyObjects.push(new Pagination.flowObject('body' + chapterCounter++, Pagination.pageCounters.arab));
+            } else if (
+                bodyContents[0].webkitMatchesSelector(
+                    Pagination.config.sectionStartMarker
+                )
+            ) {
+                bodyObjects.push(
+                    new Pagination.flowObject(
+                        'body' + chapterCounter++, 
+                        Pagination.pageCounters.arab
+                    )
+                );
                 bodyObjects[chapterCounter].setType('section');
             }
         }
@@ -418,7 +467,11 @@ Pagination.applyBookLayout = function () {
 
     if (Pagination.config.enableFrontmatter) {
         //Create and flow frontmatter
-        fmObject = new Pagination.flowObject('frontmatter', Pagination.pageCounters.roman, 1);
+        fmObject = new Pagination.flowObject(
+            'frontmatter', 
+            Pagination.pageCounters.roman, 
+            1
+        );
         fmObject.columns = 1;
         contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
         fmObject.rawdiv.innerHTML = Pagination.config.frontmatterContents;
@@ -452,7 +505,14 @@ Pagination.applySimpleBookLayout = function () {
 
 Pagination._cssRegionsCheck = function () {
     // Check whether CSS Regions are present in Chrome 23+ version
-    if ((document.webkitGetNamedFlows) && (document.webkitGetNamedFlows() !== null)) {
+    if (
+        (
+            document.webkitGetNamedFlows
+        ) 
+        && (
+            document.webkitGetNamedFlows() !== null
+        )
+    ) {
         return true;
     }
     return false;
@@ -520,7 +580,8 @@ Pagination.flowObject.prototype.initiate = function () {
 
 Pagination.flowObject.prototype.setStyle = function () {
     // Create a style element for this flowObject and add it to the header in
-    // the DOM. That way it will not be mixing with the DOM of the main contents.
+    // the DOM. That way it will not be mixing with the DOM of the
+    // contents.
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = "#" + this.name 
     + " .contents-column {-webkit-flow-from:" + this.name + ";}" 
@@ -538,10 +599,14 @@ Pagination.flowObject.prototype.findTitle = function () {
     // Find the title of section or chapter that this flowObject is covering.
     var titleField;
     if (this.type == 'chapter') {
-        titleField = this.rawdiv.querySelector(Pagination.config.chapterTitleMarker);
+        titleField = this.rawdiv.querySelector(
+            Pagination.config.chapterTitleMarker
+        );
         this.title = titleField.innerHTML;
     } else if (this.type == 'section') {
-        titleField = this.rawdiv.querySelector(Pagination.config.sectionTitleMarker);
+        titleField = this.rawdiv.querySelector(
+            Pagination.config.sectionTitleMarker
+        );
         this.title = titleField.innerHTML;
     }
 };
@@ -554,18 +619,27 @@ Pagination.flowObject.prototype.findStartpageNumber = function () {
     }
 };
 
-Pagination.flowObject.prototype.findFootnoteReferencePage = function (footnoteReference) {
-    return this.namedFlow.getRegionsByContent(footnoteReference)[0].parentNode.parentNode.parentNode;
+Pagination.flowObject.prototype.findFootnoteReferencePage = 
+    function (footnoteReference) {
+    return this.namedFlow.getRegionsByContent(
+        footnoteReference
+    )[0].parentNode.parentNode.parentNode;
 }
 
 Pagination.flowObject.prototype.findFootnotePage = function (footnote) {
     return footnote.parentNode.parentNode.parentNode;
 }
 
-Pagination.flowObject.prototype.compareReferenceAndFootnotePage = function (footnoteObject) {
-    // Check whether a footnote and it's corresponding reference in the text are on the same page.
-    var referencePage = this.findFootnoteReferencePage(footnoteObject['reference']);
-    var footnotePage = this.findFootnotePage(footnoteObject['item']);
+Pagination.flowObject.prototype.compareReferenceAndFootnotePage = 
+    function (footnoteObject) {
+    // Check whether a footnote and it's corresponding reference in the text
+    // are on the same page.
+    var referencePage = this.findFootnoteReferencePage(
+        footnoteObject['reference']
+    );
+    var footnotePage = this.findFootnotePage(
+        footnoteObject['item']
+    );
 
     if (footnotePage === referencePage) {
         return true;
@@ -582,14 +656,23 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         flowObject.checkAllFootnotePlacements();
     }
 
-    this.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkAllFootnotePlacements);
+    this.namedFlow.addEventListener(
+        'webkitRegionLayoutUpdate', 
+        checkAllFootnotePlacements
+    );
 
     var reFlow = function () {
-        flowObject.namedFlow.removeEventListener('webkitRegionLayoutUpdate', checkAllFootnotePlacements);
+        flowObject.namedFlow.removeEventListener(
+            'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );
 
         flowObject.layoutFootnotes();
 
-        flowObject.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkAllFootnotePlacements);
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );
     }
 
     this.namedFlow.addEventListener('footnotesNeedMove', reFlow);
@@ -644,7 +727,9 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
 
 Pagination.flowObject.prototype.addFootnoteReferences = function () {
     for (var i = 0; i < this.footnotes.length; i++) {
-        this.footnotes[i]['original'].parentNode.insertBefore(this.footnotes[i]['reference'], this.footnotes[i]['original']); 
+        this.footnotes[i]['original'].parentNode.insertBefore(
+            this.footnotes[i]['reference'], this.footnotes[i]['original']
+        ); 
         // Insert the footnote number in the body text just before the original
         // footnote text appears).
     }
@@ -654,13 +739,19 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
     for (var i = 0; i < this.footnotes.length; i++) {
 
         if ('hidden' in this.footnotes[i]) {
-            this.footnotes[i]['hidden'].parentNode.removeChild(this.footnotes[i]['hidden']);
+            this.footnotes[i]['hidden'].parentNode.removeChild(
+                this.footnotes[i]['hidden']
+            );
             delete this.footnotes[i]['hidden'];
         }
 
-        var footnoteReferencePage = this.findFootnoteReferencePage(this.footnotes[i]['reference']); 
+        var footnoteReferencePage = this.findFootnoteReferencePage(
+            this.footnotes[i]['reference']
+        ); 
         // We find the page where the footnote is referenced from.
-        var currentFootnoteContainer = footnoteReferencePage.querySelector('.footnotes');
+        var currentFootnoteContainer = footnoteReferencePage.querySelector(
+            '.footnotes'
+        );
         currentFootnoteContainer.appendChild(this.footnotes[i]['item']); 
         // We insert the footnote in the footnote container of that page.
 
@@ -671,14 +762,20 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
             // same space and then insert it one more time on the page from
             // where it now is referenced.
             this.footnotes[i]['hidden'] = this.footnotes[i]['item'];
-            this.footnotes[i]['item'] = this.footnotes[i]['hidden'].cloneNode(true);
+            this.footnotes[i]['item'] = this.footnotes[i]['hidden'].cloneNode(
+                true
+            );
 
             this.footnotes[i]['hidden'].classList.remove('visible');
             this.footnotes[i]['hidden'].classList.add('invisible');
 
-            footnoteReferencePage = this.findFootnoteReferencePage(this.footnotes[i]['reference']); 
+            footnoteReferencePage = this.findFootnoteReferencePage(
+                this.footnotes[i]['reference']
+            ); 
             // We find the page where the footnote is referenced from now.
-            currentFootnoteContainer = footnoteReferencePage.querySelector('.footnotes');
+            currentFootnoteContainer = footnoteReferencePage.querySelector(
+                '.footnotes'
+            );
             currentFootnoteContainer.appendChild(this.footnotes[i]['item']);
         }
     }
@@ -696,7 +793,14 @@ Pagination.flowObject.prototype.makeEvenPages = function () {
     }
     var allPages = this.div.querySelectorAll('.page');
     if (allPages.length % 2 == 1) {
-        this.div.appendChild(Pagination.createPages(1, false, this.pageCounter.cssClass, this.columns));
+        this.div.appendChild(
+            Pagination.createPages(
+                1, 
+                false, 
+                this.pageCounter.cssClass, 
+                this.columns
+            )
+        );
     }
 };
 
@@ -707,10 +811,26 @@ Pagination.flowObject.prototype.addPagesLoop = function (numberOfPages) {
     // It is a point to overshoot the target, as it is more costly to add than
     // to remove pages. 
     if ('undefined' === typeof (numberOfPages)) {
-        this.div.appendChild(Pagination.createPages(this.bulkPagesToAdd, this.name, this.pageCounter.cssClass, this.columns));
-        this.bulkPagesToAdd = Math.floor(this.bulkPagesToAdd * Pagination.config.pagesToAddIncrementRatio);
+        this.div.appendChild(
+            Pagination.createPages(
+                this.bulkPagesToAdd, 
+                this.name, 
+                this.pageCounter.cssClass, 
+                this.columns
+            )
+        );
+        this.bulkPagesToAdd = Math.floor(
+            this.bulkPagesToAdd * Pagination.config.pagesToAddIncrementRatio
+        );
     } else {
-        this.div.appendChild(Pagination.createPages(numberOfPages, this.name, this.pageCounter.cssClass, this.columns));
+        this.div.appendChild(
+            Pagination.createPages(
+                numberOfPages, 
+                this.name, 
+                this.pageCounter.cssClass, 
+                this.columns
+            )
+        );
     }
     this.addOrRemovePages(numberOfPages);
 };
@@ -725,10 +845,18 @@ Pagination.flowObject.prototype.addOrRemovePages = function (pages) {
         this.pageCounter.needsUpdate = true;
         this.redoPages = true;
         this.addPagesLoop(pages);
-    } else if ((this.namedFlow.firstEmptyRegionIndex != -1) 
-        && ((this.namedFlow.getRegions().length - this.namedFlow.firstEmptyRegionIndex) > this.columns)) {
+    } else if (
+        (this.namedFlow.firstEmptyRegionIndex != -1) 
+        && (
+            (
+                this.namedFlow.getRegions().length 
+                - this.namedFlow.firstEmptyRegionIndex
+            ) > this.columns
+           )
+              ) {
         // If there are excess regions, and the number of empty regions is
-        // equal to or higher than the number of columns, we need to remove pages.
+        // equal to or higher than the number of columns, we need to remove
+        // pages.
         this.redoPages = true;
         this.removeExcessPages(pages);
     } else if (this.redoPages) {
@@ -754,7 +882,13 @@ Pagination.flowObject.prototype.removeExcessPages = function (pages) {
 
     var allPages = this.div.querySelectorAll('.page');
 
-    for (var i = (Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns)); i < allPages.length; i++) {
+    for (
+        var i = (
+            Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns)
+        );
+        i < allPages.length; 
+        i++
+    ) {
         this.div.removeChild(allPages[i]);
     }
     this.addOrRemovePages(pages);
@@ -770,11 +904,21 @@ Pagination.flowObject.prototype.setupReflow = function () {
         // Something has changed in the contents of this flow. Check if the
         // values of overset or firstEmptyRegionIndex have changed. If this is
         // the case, emit a pageLayoutUpdate event. 
-        if ((flowObject.namedFlow.overset !== flowObject.overset) 
-            || (flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)) {
+        if (
+            (
+                flowObject.namedFlow.overset !== flowObject.overset
+            ) 
+            || (
+                flowObject.namedFlow.firstEmptyRegionIndex 
+                    !== flowObject.firstEmptyRegionIndex
+            )
+           ) {
             flowObject.overset = flowObject.namedFlow.overset;
-            flowObject.firstEmptyRegionIndex = flowObject.namedFlow.firstEmptyRegionIndex;
-            flowObject.namedFlow.dispatchEvent(Pagination.events.pageLayoutUpdate);
+            flowObject.firstEmptyRegionIndex = 
+                flowObject.namedFlow.firstEmptyRegionIndex;
+            flowObject.namedFlow.dispatchEvent(
+                Pagination.events.pageLayoutUpdate
+            );
         }
     }
     this.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkOverset);
@@ -795,5 +939,8 @@ Pagination.initiate();
 if (Pagination.config.autoStart === true) {
     // Hook Pagination.autoStartInitiator to document loading stage if
     // autoStart is set to true.
-    document.addEventListener("readystatechange", Pagination.autoStartInitiator);
+    document.addEventListener(
+        "readystatechange", 
+        Pagination.autoStartInitiator
+    );
 }
