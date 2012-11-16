@@ -60,7 +60,7 @@
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
- * adding another bulk of pages or deletin pages individually. It takes much 
+ * adding another bulk of pages or deleting pages individually. It takes much 
  * less time to delete pages than to add them individually, so it is a point to
  * overshoot the target value. For larger chapters add many pages at a time so 
  * there is less time spent reflowing text.
@@ -81,10 +81,7 @@
  * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
  * Check Pagination._cssRegionCheck() to see if CSS Regions are present.
  */
-/*
- * The Pagination object represents all the pagination functionality which is
- * added to its namespace.
- */
+ 
 var Pagination = new Object;
 // Pagination is the object that contains the namespace used by BookJS.
 
@@ -104,9 +101,54 @@ Pagination.config = {
     'autoStart': true
 };
 
+// help functions
+
+Pagination.romanize = function () {
+    // Create roman numeral representations of numbers.
+    var digits = String(+this.value).split(""),
+        key = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM", "",
+        "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC", "", "I", "II", 
+        "III", "IV", "V", "VI", "VII", "VIII", "IX"],
+        roman = "",
+        i = 3;
+    while (i--) {
+        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    }
+    return Array(+digits.join("") + 1).join("M") + roman;
+};
+
+Pagination.createRandomId = function(base) {
+    // Create a random CSS Id that is not in use already.
+    var stillSearchingForUniqueId = true;
+    var randomId;
+    while(stillSearchingForUniqueId) {
+        randomId = base + Math.floor(Math.random() * 100000);
+        if(!document.getElementById(randomId)) {
+            stillSearchingForUniqueId = false;
+        }
+    }  
+    return randomId;
+};
+
+Pagination.setupManualCssTrigger = function() {
+    // Setup a styleshett that lets us trigegr CSS evaluation manually. This is
+    // to get around a bug in CSS Regions.
+    this.triggerStylesheet = document.createElement('style');
+    document.head.appendChild(this.triggerStylesheet);
+}
+
+Pagination.manualCssTrigger = function() {
+    // Manually trigger CSS evaluation. This to get around above mentioned bug.
+    Pagination.triggerStylesheet.innerHTML = '';
+    Pagination.triggerStylesheet.innerHTML = '.trigger {trigger: trigger;}';
+}
+
 Pagination.initiate = function () {
     // Initiate BookJS by importing user set config options and setting basic
     // CSS style.
+    
+    this.setupManualCssTrigger();
+    
     this.userConfigImport();
     this.setStyle();
 }
@@ -129,24 +171,16 @@ Pagination.setStyle = function () {
     ".contentsContainer {display: -webkit-box; -webkit-box-orient: vertical;}"
     + " .contents {display: -webkit-box; -webkit-box-flex: 1}" 
     + " .contents-column {-webkit-box-flex: 1}"
-    + " .footnotes .invisible {visibility: hidden}" 
-    + " #contents .footnote {display: none}";
+    + " body {counter-reset: footnote footnote-reference;}"
+    + " .footnote::before {counter-increment: footnote-reference;"
+    + " content: counter(footnote-reference);}" 
+    + " .footnote > * > *::before {counter-increment: footnote;"
+    + " content: counter(footnote);}"
+    + ".footnote > * > * {display: block;}";
     document.head.appendChild(stylesheet);
 }
 
-Pagination.romanize = function () {
-    // Create roman numeral representations of numbers.
-    var digits = String(+this.value).split(""),
-        key = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM", "",
-        "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC", "", "I", "II", 
-        "III", "IV", "V", "VI", "VII", "VIII", "IX"],
-        roman = "",
-        i = 3;
-    while (i--) {
-        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
-    }
-    return Array(+digits.join("") + 1).join("M") + roman;
-};
+
 
 Pagination.pageCounterCreator = function (cssClass, show) {
     // Create a pagecounter. cssClass is the CSS class employed by this page
@@ -310,6 +344,15 @@ Pagination.events.footnotesNeedMove.initEvent(
 );
 // footnotesNeedMove is emitted when at least one footnote no longer is on the
 // page of the reference page it corresponds to.
+
+Pagination.events.redoFootnotes = document.createEvent('Event');
+Pagination.events.redoFootnotes.initEvent(
+    'redoFootnotes', 
+    true, 
+    true
+);
+// redoFootnotes is being listened to by BookJS to see when footnotes need to
+// be refound and redrawn. This can be used by editors who need to add new footnotes. 
 
 
 Pagination.headersAndToc = function (bodyObjects) {
@@ -548,6 +591,10 @@ Pagination.flowObject = function (name, pageCounter) {
     this.columns = Pagination.config.columns;
 
     this.footnotes = [];
+    
+    this.footnoteStylesheet = document.createElement('style');
+    document.head.appendChild(this.footnoteStylesheet);
+    
 };
 
 Pagination.flowObject.prototype.redoPages = false;
@@ -572,7 +619,6 @@ Pagination.flowObject.prototype.initiate = function () {
     this.addOrRemovePages();
     this.setupReflow();
     this.findAllFootnotes();
-    this.addFootnoteReferences();
     this.layoutFootnotes();
     this.setupFootnoteReflow();
     this.pageCounter.numberPages();
@@ -619,14 +665,19 @@ Pagination.flowObject.prototype.findStartpageNumber = function () {
     }
 };
 
-Pagination.flowObject.prototype.findFootnoteReferencePage = 
+// Footnote handling
+
+Pagination.flowObject.prototype.findFootnoteReferencePage =
     function (footnoteReference) {
+        // Find the page where the reference to the footnote in the text is
+        // placed.
     return this.namedFlow.getRegionsByContent(
         footnoteReference
     )[0].parentNode.parentNode.parentNode;
 }
 
 Pagination.flowObject.prototype.findFootnotePage = function (footnote) {
+    // Find the page where the footnote itself is currently placed.
     return footnote.parentNode.parentNode.parentNode;
 }
 
@@ -635,13 +686,15 @@ Pagination.flowObject.prototype.compareReferenceAndFootnotePage =
     // Check whether a footnote and it's corresponding reference in the text
     // are on the same page.
     var referencePage = this.findFootnoteReferencePage(
-        footnoteObject['reference']
+        //footnoteObject['reference']
+        document.getElementById(footnoteObject['id'])
     );
     var footnotePage = this.findFootnotePage(
         footnoteObject['item']
     );
 
     if (footnotePage === referencePage) {
+        //console.log('ARE THE SAME');
         return true;
     } else {
         return false;
@@ -650,35 +703,179 @@ Pagination.flowObject.prototype.compareReferenceAndFootnotePage =
 
 
 Pagination.flowObject.prototype.setupFootnoteReflow = function () {
+    // Connect footnote reflow events with triggers.
     var flowObject = this;
 
     var checkAllFootnotePlacements = function () {
         flowObject.checkAllFootnotePlacements();
     }
 
+    // For Chrome 24 and lower
     this.namedFlow.addEventListener(
         'webkitRegionLayoutUpdate', 
         checkAllFootnotePlacements
     );
-
+    
+    // For Chrome 25 and higher
+    this.namedFlow.addEventListener(
+        'regionlayoutupdate', 
+        checkAllFootnotePlacements
+    );
+    
+    
     var reFlow = function () {
+        // For Chrome 24 and lower
         flowObject.namedFlow.removeEventListener(
             'webkitRegionLayoutUpdate', 
             checkAllFootnotePlacements
         );
-
+        // For Chrome 25 and higher
+        flowObject.namedFlow.removeEventListener(
+            'regionlayoutupdate', 
+            checkAllFootnotePlacements
+        );
+        console.log('layout footnotes');
         flowObject.layoutFootnotes();
 
+        // For Chrome 24 and lower
         flowObject.namedFlow.addEventListener(
             'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );
+        
+        // For Chrome 25 and higher
+        flowObject.namedFlow.addEventListener(
+            'regionlayoutupdate', 
             checkAllFootnotePlacements
         );
     }
 
     this.namedFlow.addEventListener('footnotesNeedMove', reFlow);
+    
+    var redoFootnotes = function() {
+        flowObject.namedFlow.removeEventListener(
+            'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );
+        // For Chrome 25 and higher
+        flowObject.namedFlow.removeEventListener(
+            'regionlayoutupdate', 
+            checkAllFootnotePlacements
+        );
+        console.log('layout footnotes');
+        flowObject.redoFootnotes();
+
+        // For Chrome 24 and lower
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );
+        
+        // For Chrome 25 and higher
+        flowObject.namedFlow.addEventListener(
+            'regionlayoutupdate', 
+            checkAllFootnotePlacements
+        );
+    }
+    
+    this.rawdiv.addEventListener('redoFootnotes', redoFootnotes);
+    
+     // CSS Regions has a bug that means that the size of footnotes is not
+     // recalculated automatically as they grow larger. This is why we
+     // trigger CSS reevalution manually upon footnote content change.    
+    
+    // PROBLEM: This doesn't work together with the CheckSpacerSize function
+    // below as it trigegrs regionlayoutupdate events all over the place!
+
+     // For Chrome 24 and lower 
+      /*  this.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate',
+            Pagination.manualCssTrigger);
+     // For Chrome 25 and higher
+        this.namedFlow.addEventListener(
+            'regionlayoutupdate',
+            Pagination.manualCssTrigger);*/
+        
+        
+        var checkSpacerSize = function() {
+        // Check whether footnotes are still as large as the spacer that was
+        // put in their place. If not, the spacer most likely has to be
+        // replaced by the footnote in its original location.    
+            
+        // For Chrome 24 and lower 
+        flowObject.namedFlow.removeEventListener(
+            'webkitRegionLayoutUpdate',
+            checkSpacerSize);
+        // For Chrome 25 and higher
+        flowObject.namedFlow.removeEventListener(
+            'regionlayoutupdate',
+            checkSpacerSize);        
+            
+        for (var i=0; i<flowObject.footnotes.length; i++ ) {
+            console.log('checking spacer size: '+flowObject.footnotes[i]['id']);
+            if ('hidden' in flowObject.footnotes[i]) {
+                if (flowObject.footnotes[i]['item'].clientHeight < flowObject.footnotes[i]['hidden'].clientHeight) {
+                    // The footnote is smaller than its space holder on another
+                    // page. It means the footnote has been shortened and we
+                    // need to reflow footnotes!
+                    flowObject.namedFlow.dispatchEvent(Pagination.events.footnotesNeedMove);
+                }
+            }
+        }
+        // For Chrome 24 and lower 
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate',
+            checkSpacerSize);
+        // For Chrome 25 and higher
+        flowObject.namedFlow.addEventListener(
+            'regionlayoutupdate',
+            checkSpacerSize);    
+        };
+        
+
+        
+        // For Chrome 24 and lower 
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate',
+            checkSpacerSize);
+        // For Chrome 25 and higher
+        flowObject.namedFlow.addEventListener(
+            'regionlayoutupdate',
+            checkSpacerSize);    
+        
+
 }
 
+Pagination.flowObject.prototype.redoFootnotes = function () {
+    // Go through all footnotes and check whether they are still where the
+    // reference to them is placed.
+    for (var i = 0; i < this.footnotes.length; i++) {
+        // Go through all footnotes, removing all spacer blocks and footnote
+        // references from the DOM.
+
+        if ('hidden' in this.footnotes[i]) {
+            this.footnotes[i]['hidden'].parentNode.removeChild(
+                this.footnotes[i]['hidden']
+            );
+        }
+
+        if (this.footnotes[i]['item'].parentNode !== null) {
+            this.footnotes[i]['item'].parentNode.removeChild(
+                this.footnotes[i]['item']
+            ); 
+        }
+    }
+    // Start out with no footnotes.
+    this.footnotes=[];
+    
+    // Find footnotes from scratch.
+    this.findAllFootnotes();
+}
+
+
 Pagination.flowObject.prototype.checkAllFootnotePlacements = function () {
+    // Go through all footnotes and check whether they are still where the
+    // reference to them is placed.
     for (var i = 0; i < this.footnotes.length; i++) {
         if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
             this.namedFlow.dispatchEvent(Pagination.events.footnotesNeedMove);
@@ -686,57 +883,87 @@ Pagination.flowObject.prototype.checkAllFootnotePlacements = function () {
     }
 }
 
+
+
 Pagination.flowObject.prototype.findAllFootnotes = function () {
-    var allFootnotes = this.rawdiv.getElementsByClassName('footnote'); 
+    
+    // Find all the footnotes in the text and prepare them for flow.
+
+    // Remove all previous footnote stylesheet rules.
+    this.footnoteStylesheet.innerHTML='';
+
     // Look for all the items that have "footnote" in their class list. These
     // will be treated as footnote texts.
+    var allFootnotes = this.rawdiv.getElementsByClassName('footnote'); 
+
     for (var i = 0; i < allFootnotes.length; i++) {
+        
+        if (allFootnotes[i].id==='') {
+            // If footnote has no id, create one, so that we can target it
+            // using CSS rules.
+            allFootnotes[i].id = Pagination.createRandomId('footnote');
+        }
+        
+        var footnoteId = allFootnotes[i].id;
+        
+        this.footnoteStylesheet.innerHTML += 
+            '#' + footnoteId 
+            + ' > * {-webkit-flow-into: ' + footnoteId + ';} '
+            + '#' + footnoteId 
+            + 'FlowTo {-webkit-flow-from: ' + footnoteId + ';} ';
+        
+
         var footnoteObject = {}; 
         // We create this object so that we can find the footnote item and
         // reference again later on.
+        
+        footnoteObject['reference'] = allFootnotes[i];
 
-        footnoteObject['original'] = allFootnotes[i];
+        var footnoteFlowTo = document.createElement('div');
+        
+        footnoteFlowTo.id = footnoteId + 'FlowTo';
 
-        var numFootnote = document.createElement('sup'); 
-        // Create a sup-element with the class "footnote-reference" that holds 
-        // the current footnote number. This will be used both in the body text
-        // and in the footnote itself.
-        numFootnote.classList.add('footnote-reference');
-        numFootnoteContents = document.createTextNode(i + 1);
-        numFootnote.appendChild(numFootnoteContents);
+        footnoteFlowTo.classList.add('footnoteItem');
+        
+        footnoteObject['item'] = footnoteFlowTo;
 
-        var footnote = document.createElement('div'); 
-        // Put the footnote number and footnote text together in a div-element
-        // with the class footnote-item.
-        footnote.classList.add('footnote-item');
-        footnote.classList.add('visible');
-        footnote.appendChild(numFootnote);
-
-        var footnoteText = allFootnotes[i].cloneNode(true);
-        footnote.appendChild(footnoteText);
-
-        footnoteObject['item'] = footnote;
-
-        numFootnoteReference = numFootnote.cloneNode(true);
-
-        footnoteObject['reference'] = numFootnoteReference;
+        footnoteObject['id'] = footnoteId;
 
         this.footnotes.push(footnoteObject);
-    }
-}
+        
 
-Pagination.flowObject.prototype.addFootnoteReferences = function () {
-    for (var i = 0; i < this.footnotes.length; i++) {
-        this.footnotes[i]['original'].parentNode.insertBefore(
-            this.footnotes[i]['reference'], this.footnotes[i]['original']
-        ); 
-        // Insert the footnote number in the body text just before the original
-        // footnote text appears).
+                
+        /*var footnoteFlow = document.webkitGetNamedFlows()[footnoteObject['id']]; 
+        console.log(
+            'footnoteFlow: '+ footnoteObject['id']
+        );*/
+        var flowObject = this;
+        
+        
+        
+        // CSS Regions has a bug that means that the size of footnotes is not
+        // recalculated automatically as they grow larger. This is why we
+        // trigger CSS reevalution manually upon footnote content change.    
+/*
+        // For Chrome 24 and lower 
+        footnoteFlow.addEventListener(
+            'webkitRegionLayoutUpdate',
+            Pagination.manualCssTrigger);
+        // For Chrome 25 and higher
+        footnoteFlow.addEventListener(
+            'regionlayoutupdate',
+            Pagination.manualCssTrigger);    */
+        
     }
+
 }
 
 Pagination.flowObject.prototype.layoutFootnotes = function () {
+    // Layout all footnotes
+    
     for (var i = 0; i < this.footnotes.length; i++) {
+        // Go through all footnotes, delete the spacer blocks if they have any
+        // and remove the footnote itself from the DOM.
 
         if ('hidden' in this.footnotes[i]) {
             this.footnotes[i]['hidden'].parentNode.removeChild(
@@ -745,44 +972,63 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
             delete this.footnotes[i]['hidden'];
         }
 
+        if (this.footnotes[i]['item'].parentNode !== null) {
+            this.footnotes[i]['item'].parentNode.removeChild(
+                this.footnotes[i]['item']
+            );
+        }
+    }
+        
+    for (var i = 0; i < this.footnotes.length; i++) {
+        // Go through the footnotes again, this time with the purpose of
+        // placing them correctly.
+        
         var footnoteReferencePage = this.findFootnoteReferencePage(
-            this.footnotes[i]['reference']
+            document.getElementById(this.footnotes[i]['id'])
         ); 
         // We find the page where the footnote is referenced from.
-        var currentFootnoteContainer = footnoteReferencePage.querySelector(
+        var firstFootnoteContainer = footnoteReferencePage.querySelector(
             '.footnotes'
         );
-        currentFootnoteContainer.appendChild(this.footnotes[i]['item']); 
+        firstFootnoteContainer.appendChild(this.footnotes[i]['item']); 
         // We insert the footnote in the footnote container of that page.
 
+        console.log('Comparing for '+this.footnotes[i]['id'])
         if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
             // If the footnote reference has been moved from one page to
-            // another through the insertion procedure, we set the visibility
-            // of the footnote to "hidden" so that it continues to take up the
-            // same space and then insert it one more time on the page from
-            // where it now is referenced.
-            this.footnotes[i]['hidden'] = this.footnotes[i]['item'];
-            this.footnotes[i]['item'] = this.footnotes[i]['hidden'].cloneNode(
-                true
-            );
-
-            this.footnotes[i]['hidden'].classList.remove('visible');
-            this.footnotes[i]['hidden'].classList.add('invisible');
-
-            footnoteReferencePage = this.findFootnoteReferencePage(
+            // another through the insertion procedure, we move the footnote to
+            // where it is referenced from now and create an empty div 
+            // ('hidden') and set it in it's place.
+                        
+            this.footnotes[i]['hidden'] = document.createElement('div');
+            
+            this.footnotes[i]['hidden'].style.height = (
+                this.footnotes[i]['item'].clientHeight
+            )+'px';
+       
+            this.footnotes[i]['hidden'].id = this.footnotes[i]['id'] + 'hidden';
+            
+            var newFootnoteReferencePage = this.findFootnoteReferencePage(
                 this.footnotes[i]['reference']
             ); 
-            // We find the page where the footnote is referenced from now.
-            currentFootnoteContainer = footnoteReferencePage.querySelector(
+            // We find the page where the footnote is referenced from now and
+            // move the footnote there.
+            var newFootnoteContainer = newFootnoteReferencePage.querySelector(
                 '.footnotes'
             );
-            currentFootnoteContainer.appendChild(this.footnotes[i]['item']);
+            
+            // We then insert the hidden element into the container where the
+            // footnote was previously so that the body text doesn't flow back.
+            firstFootnoteContainer.replaceChild(
+                this.footnotes[i]['hidden'],
+                this.footnotes[i]['item']
+            );
+            newFootnoteContainer.appendChild(this.footnotes[i]['item']);
+            
+            
         }
     }
 };
-
-
-
 
 
 Pagination.flowObject.prototype.makeEvenPages = function () {
@@ -921,7 +1167,10 @@ Pagination.flowObject.prototype.setupReflow = function () {
             );
         }
     }
+    // For Chrome 24 and lower 
     this.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkOverset);
+    // For Chrome 25 and higher
+    this.namedFlow.addEventListener('regionlayoutupdate', checkOverset);    
 
     var reFlow = function () {
         // The page layout has changed. Reflow by adding pages one by one.

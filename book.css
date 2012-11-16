@@ -228,20 +228,24 @@ font-size:17px;
 
 /* Styling of footnotes */
 
-.footnotes {
+.footnote > * > * {
 font-size:12px;
 line-height: 1em;
 margin:.25em;
 }
 
-.footnote-reference {
+.footnote > * > *::before, .footnote::before {
+position: relative; top: -0.5em; font-size: 80%;
+}
+
+.footnote {
 font-size:10px;
 font-weight: bold;
 }
 
 /* If footnotes are present, a margin of .2in is added between .contents and .footnotes and a black line is drawn above the footnotes. */ 
 
-.footnotes div:first-child {
+.footnotes div.footnoteItem:first-child {
 padding-top: .5em;
 border-top: 1px solid black;
 }
