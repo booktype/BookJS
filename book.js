@@ -96,7 +96,7 @@ Pagination.config = {
     'columns': 1,
     'enableFrontmatter': true,
     'bulkPagesToAdd': 50,
-    'pagesToAddIncreementRatio': 1.4,
+    'pagesToAddIncrementRatio': 1.4,
     'frontmatterContents': '',
     'autoStart': true
 };
@@ -788,15 +788,15 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     // below as it trigegrs regionlayoutupdate events all over the place!
 
      // For Chrome 24 and lower 
-      /*  this.namedFlow.addEventListener(
+        this.namedFlow.addEventListener(
             'webkitRegionLayoutUpdate',
             Pagination.manualCssTrigger);
      // For Chrome 25 and higher
         this.namedFlow.addEventListener(
             'regionlayoutupdate',
-            Pagination.manualCssTrigger);*/
+            Pagination.manualCssTrigger);
         
-        
+        /*
         var checkSpacerSize = function() {
         // Check whether footnotes are still as large as the spacer that was
         // put in their place. If not, the spacer most likely has to be
@@ -842,7 +842,7 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         flowObject.namedFlow.addEventListener(
             'regionlayoutupdate',
             checkSpacerSize);    
-        
+        */
 
 }
 
