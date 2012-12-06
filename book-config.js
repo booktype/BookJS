@@ -15,5 +15,6 @@ paginationConfig = {
 	+ '</div><div id="copyrightpage">Copyright: You<br>License: CC</div>'
 	+ '<div class="pagebreak"></div>',
     'autoStart': true,
+    'pageOffset': 0
 }
 

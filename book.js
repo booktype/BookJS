@@ -98,7 +98,8 @@ Pagination.config = {
     'bulkPagesToAdd': 50,
     'pagesToAddIncrementRatio': 1.4,
     'frontmatterContents': '',
-    'autoStart': true
+    'autoStart': true,
+    'pageOffset': 0
 };
 
 // help functions
@@ -217,7 +218,10 @@ Pagination.pageCounterCreator.prototype.numberPages = function () {
     // If the pages associated with this page counter need to be updated, go
     // through all of them from the start of the book and number them, thereby
     // potentially removing old page numbers.
-    this.value = 0;
+
+    // Set this externally now, allowing for pageOffset from config for arab numbering.
+    // this.value = 0; 
+
     this.needsUpdate = false;
 
     var pagenumbersToNumber = document.querySelectorAll(
@@ -506,6 +510,16 @@ Pagination.applyBookLayout = function () {
         bodyObjects[i].initiate();
     }
 
+    // See if we have an offset value set and if so, update page start value
+    if (Pagination.config.pageOffset != 0) {
+        Pagination.pageCounters.arab.value = Pagination.config.pageOffset;
+    }
+    // Set to 0 otherwise 
+    else {
+        Pagination.pageCounters.arab.value = 0; 
+    }
+
+    // Call the updater
     Pagination.pageCounters.arab.numberPages();
 
     if (Pagination.config.enableFrontmatter) {
