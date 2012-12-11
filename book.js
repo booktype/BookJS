@@ -1,5 +1,5 @@
 /*!
- * BookJS v.0.23.1-dev
+ * BookJS v.0.23.1
  * Copyright 2012  Aleksandar Erkalovic, Marita Fraser, Steven Levithan, 
  * Philip Schatz and Johannes Wilm. Freely available under the AGPL. For
  * further details see LICENSE.txt
