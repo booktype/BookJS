@@ -1,3 +1,7 @@
+0.25.0-dev
+----
+Increased requirement to Chrome 25
+
 0.23.1
 ----
 Added footnote support for static content (reflow has to be enabled)

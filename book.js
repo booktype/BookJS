@@ -1,5 +1,5 @@
 /*!
- * BookJS v.0.23.1-dev
+ * BookJS v.0.25.0-dev
  * Copyright 2012  Aleksandar Erkalovic, Marita Fraser, Steven Levithan, 
  * Philip Schatz and Johannes Wilm. Freely available under the AGPL. For
  * further details see LICENSE.txt
@@ -710,13 +710,6 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         flowObject.checkAllFootnotePlacements();
     }
 
-    // For Chrome 24 and lower
-    this.namedFlow.addEventListener(
-        'webkitRegionLayoutUpdate', 
-        checkAllFootnotePlacements
-    );
-    
-    // For Chrome 25 and higher
     this.namedFlow.addEventListener(
         'regionlayoutupdate', 
         checkAllFootnotePlacements
@@ -724,12 +717,6 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     
     
     var reFlow = function () {
-        // For Chrome 24 and lower
-        flowObject.namedFlow.removeEventListener(
-            'webkitRegionLayoutUpdate', 
-            checkAllFootnotePlacements
-        );
-        // For Chrome 25 and higher
         flowObject.namedFlow.removeEventListener(
             'regionlayoutupdate', 
             checkAllFootnotePlacements
@@ -737,13 +724,6 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         console.log('layout footnotes');
         flowObject.layoutFootnotes();
 
-        // For Chrome 24 and lower
-        flowObject.namedFlow.addEventListener(
-            'webkitRegionLayoutUpdate', 
-            checkAllFootnotePlacements
-        );
-        
-        // For Chrome 25 and higher
         flowObject.namedFlow.addEventListener(
             'regionlayoutupdate', 
             checkAllFootnotePlacements
@@ -754,24 +734,12 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     
     var redoFootnotes = function() {
         flowObject.namedFlow.removeEventListener(
-            'webkitRegionLayoutUpdate', 
-            checkAllFootnotePlacements
-        );
-        // For Chrome 25 and higher
-        flowObject.namedFlow.removeEventListener(
             'regionlayoutupdate', 
             checkAllFootnotePlacements
         );
         console.log('layout footnotes');
         flowObject.redoFootnotes();
 
-        // For Chrome 24 and lower
-        flowObject.namedFlow.addEventListener(
-            'webkitRegionLayoutUpdate', 
-            checkAllFootnotePlacements
-        );
-        
-        // For Chrome 25 and higher
         flowObject.namedFlow.addEventListener(
             'regionlayoutupdate', 
             checkAllFootnotePlacements
@@ -787,11 +755,6 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     // PROBLEM: This doesn't work together with the CheckSpacerSize function
     // below as it trigegrs regionlayoutupdate events all over the place!
 
-     // For Chrome 24 and lower 
-        this.namedFlow.addEventListener(
-            'webkitRegionLayoutUpdate',
-            Pagination.manualCssTrigger);
-     // For Chrome 25 and higher
         this.namedFlow.addEventListener(
             'regionlayoutupdate',
             Pagination.manualCssTrigger);
@@ -802,11 +765,6 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         // put in their place. If not, the spacer most likely has to be
         // replaced by the footnote in its original location.    
             
-        // For Chrome 24 and lower 
-        flowObject.namedFlow.removeEventListener(
-            'webkitRegionLayoutUpdate',
-            checkSpacerSize);
-        // For Chrome 25 and higher
         flowObject.namedFlow.removeEventListener(
             'regionlayoutupdate',
             checkSpacerSize);        
@@ -822,11 +780,7 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
                 }
             }
         }
-        // For Chrome 24 and lower 
-        flowObject.namedFlow.addEventListener(
-            'webkitRegionLayoutUpdate',
-            checkSpacerSize);
-        // For Chrome 25 and higher
+
         flowObject.namedFlow.addEventListener(
             'regionlayoutupdate',
             checkSpacerSize);    
@@ -834,11 +788,6 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         
 
         
-        // For Chrome 24 and lower 
-        flowObject.namedFlow.addEventListener(
-            'webkitRegionLayoutUpdate',
-            checkSpacerSize);
-        // For Chrome 25 and higher
         flowObject.namedFlow.addEventListener(
             'regionlayoutupdate',
             checkSpacerSize);    
@@ -945,11 +894,6 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         // recalculated automatically as they grow larger. This is why we
         // trigger CSS reevalution manually upon footnote content change.    
 /*
-        // For Chrome 24 and lower 
-        footnoteFlow.addEventListener(
-            'webkitRegionLayoutUpdate',
-            Pagination.manualCssTrigger);
-        // For Chrome 25 and higher
         footnoteFlow.addEventListener(
             'regionlayoutupdate',
             Pagination.manualCssTrigger);    */
@@ -1167,9 +1111,6 @@ Pagination.flowObject.prototype.setupReflow = function () {
             );
         }
     }
-    // For Chrome 24 and lower 
-    this.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkOverset);
-    // For Chrome 25 and higher
     this.namedFlow.addEventListener('regionlayoutupdate', checkOverset);    
 
     var reFlow = function () {
