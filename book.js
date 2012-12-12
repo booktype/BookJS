@@ -130,24 +130,9 @@ Pagination.createRandomId = function(base) {
     return randomId;
 };
 
-Pagination.setupManualCssTrigger = function() {
-    // Setup a styleshett that lets us trigegr CSS evaluation manually. This is
-    // to get around a bug in CSS Regions.
-    this.triggerStylesheet = document.createElement('style');
-    document.head.appendChild(this.triggerStylesheet);
-}
-
-Pagination.manualCssTrigger = function() {
-    // Manually trigger CSS evaluation. This to get around above mentioned bug.
-    Pagination.triggerStylesheet.innerHTML = '';
-    Pagination.triggerStylesheet.innerHTML = '.trigger {trigger: trigger;}';
-}
-
 Pagination.initiate = function () {
     // Initiate BookJS by importing user set config options and setting basic
     // CSS style.
-    
-    this.setupManualCssTrigger();
     
     this.userConfigImport();
     this.setStyle();
@@ -694,7 +679,6 @@ Pagination.flowObject.prototype.compareReferenceAndFootnotePage =
     );
 
     if (footnotePage === referencePage) {
-        //console.log('ARE THE SAME');
         return true;
     } else {
         return false;
@@ -711,21 +695,20 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     }
 
     this.namedFlow.addEventListener(
-        'regionlayoutupdate', 
+        'webkitregionlayoutupdate', 
         checkAllFootnotePlacements
     );
     
     
     var reFlow = function () {
         flowObject.namedFlow.removeEventListener(
-            'regionlayoutupdate', 
+            'webkitregionlayoutupdate', 
             checkAllFootnotePlacements
         );
-        console.log('layout footnotes');
         flowObject.layoutFootnotes();
 
         flowObject.namedFlow.addEventListener(
-            'regionlayoutupdate', 
+            'webkitregionlayoutupdate', 
             checkAllFootnotePlacements
         );
     }
@@ -734,14 +717,13 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     
     var redoFootnotes = function() {
         flowObject.namedFlow.removeEventListener(
-            'regionlayoutupdate', 
+            'webkitregionlayoutupdate', 
             checkAllFootnotePlacements
         );
-        console.log('layout footnotes');
         flowObject.redoFootnotes();
 
         flowObject.namedFlow.addEventListener(
-            'regionlayoutupdate', 
+            'webkitregionlayoutupdate', 
             checkAllFootnotePlacements
         );
     }
@@ -751,26 +733,17 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
      // CSS Regions has a bug that means that the size of footnotes is not
      // recalculated automatically as they grow larger. This is why we
      // trigger CSS reevalution manually upon footnote content change.    
-    
-    // PROBLEM: This doesn't work together with the CheckSpacerSize function
-    // below as it trigegrs regionlayoutupdate events all over the place!
-
-        this.namedFlow.addEventListener(
-            'regionlayoutupdate',
-            Pagination.manualCssTrigger);
         
-        /*
+        
         var checkSpacerSize = function() {
         // Check whether footnotes are still as large as the spacer that was
         // put in their place. If not, the spacer most likely has to be
-        // replaced by the footnote in its original location.    
-            
+        // replaced by the footnote in its original location.       
         flowObject.namedFlow.removeEventListener(
-            'regionlayoutupdate',
+            'webkitregionlayoutupdate',
             checkSpacerSize);        
             
         for (var i=0; i<flowObject.footnotes.length; i++ ) {
-            console.log('checking spacer size: '+flowObject.footnotes[i]['id']);
             if ('hidden' in flowObject.footnotes[i]) {
                 if (flowObject.footnotes[i]['item'].clientHeight < flowObject.footnotes[i]['hidden'].clientHeight) {
                     // The footnote is smaller than its space holder on another
@@ -782,16 +755,16 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         }
 
         flowObject.namedFlow.addEventListener(
-            'regionlayoutupdate',
+            'webkitregionlayoutupdate',
             checkSpacerSize);    
         };
         
 
         
         flowObject.namedFlow.addEventListener(
-            'regionlayoutupdate',
+            'webkitregionlayoutupdate',
             checkSpacerSize);    
-        */
+        
 
 }
 
@@ -879,13 +852,6 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         footnoteObject['id'] = footnoteId;
 
         this.footnotes.push(footnoteObject);
-        
-
-                
-        /*var footnoteFlow = document.webkitGetNamedFlows()[footnoteObject['id']]; 
-        console.log(
-            'footnoteFlow: '+ footnoteObject['id']
-        );*/
         var flowObject = this;
         
         
@@ -895,7 +861,7 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         // trigger CSS reevalution manually upon footnote content change.    
 /*
         footnoteFlow.addEventListener(
-            'regionlayoutupdate',
+            'webkitregionlayoutupdate',
             Pagination.manualCssTrigger);    */
         
     }
@@ -937,7 +903,6 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
         firstFootnoteContainer.appendChild(this.footnotes[i]['item']); 
         // We insert the footnote in the footnote container of that page.
 
-        console.log('Comparing for '+this.footnotes[i]['id'])
         if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
             // If the footnote reference has been moved from one page to
             // another through the insertion procedure, we move the footnote to
@@ -1111,7 +1076,7 @@ Pagination.flowObject.prototype.setupReflow = function () {
             );
         }
     }
-    this.namedFlow.addEventListener('regionlayoutupdate', checkOverset);    
+    this.namedFlow.addEventListener('webkitregionlayoutupdate', checkOverset);    
 
     var reFlow = function () {
         // The page layout has changed. Reflow by adding pages one by one.
