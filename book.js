@@ -1,5 +1,5 @@
 /*!
- * BookJS v.0.25.0
+ * BookJS v.0.25.1-dev
  * Copyright 2012  Aleksandar Erkalovic, Marita Fraser, Steven Levithan, 
  * Philip Schatz and Johannes Wilm. Freely available under the AGPL. For
  * further details see LICENSE.txt
@@ -656,10 +656,6 @@ Pagination.flowObject.prototype.findFootnoteReferencePage =
     function (footnoteReference) {
         // Find the page where the reference to the footnote in the text is
         // placed.
-console.log(footnoteReference);
-console.log(this.namedFlow.getRegionsByContent(
-        footnoteReference
-    ));
     var footnoteReferenceNode = this.namedFlow.getRegionsByContent(
         footnoteReference
     )[0];
