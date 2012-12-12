@@ -6,7 +6,7 @@ paginationConfig = {
     'flowElement': "document.body",
     'alwaysEven': true,
     'columns': 2,
-    'enableFrontmatter': true,
+    'enableFrontmatter': false,
     'bulkPagesToAdd': 50, 
     'pagesToAddIncrementRatio': 1.4, 
     'frontmatterContents': '<div id="booktitle">Book title</div>'
