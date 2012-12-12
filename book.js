@@ -159,7 +159,7 @@ Pagination.setStyle = function () {
     + " body {counter-reset: footnote footnote-reference;}"
     + " .footnote::before {counter-increment: footnote-reference;"
     + " content: counter(footnote-reference);}" 
-    + " .footnote > * > *::before {counter-increment: footnote;"
+    + " .footnote > * > *:first-child::before {counter-increment: footnote;"
     + " content: counter(footnote);}"
     + ".footnote > * > * {display: block;}";
     document.head.appendChild(stylesheet);
@@ -652,13 +652,20 @@ Pagination.flowObject.prototype.findStartpageNumber = function () {
 
 // Footnote handling
 
-Pagination.flowObject.prototype.findFootnoteReferencePage =
+Pagination.flowObject.prototype.findFootnoteReferencePage =   
     function (footnoteReference) {
         // Find the page where the reference to the footnote in the text is
         // placed.
-    return this.namedFlow.getRegionsByContent(
+console.log(footnoteReference);
+console.log(this.namedFlow.getRegionsByContent(
         footnoteReference
-    )[0].parentNode.parentNode.parentNode;
+    ));
+    var footnoteReferenceNode = this.namedFlow.getRegionsByContent(
+        footnoteReference
+    )[0];
+    if (footnoteReferenceNode) {
+        return footnoteReferenceNode.parentNode.parentNode.parentNode;
+    }
 }
 
 Pagination.flowObject.prototype.findFootnotePage = function (footnote) {
@@ -670,9 +677,15 @@ Pagination.flowObject.prototype.compareReferenceAndFootnotePage =
     function (footnoteObject) {
     // Check whether a footnote and it's corresponding reference in the text
     // are on the same page.
+    var footnoteReference = document.getElementById(footnoteObject['id']);
+    if (footnoteReference===null) {
+        // It seems this footnote had been deleted, so we will dispatch an event thjat will redo all footnotes.
+        this.rawdiv.dispatchEvent(Pagination.events.redoFootnotes);
+        return false;
+    }
+
     var referencePage = this.findFootnoteReferencePage(
-        //footnoteObject['reference']
-        document.getElementById(footnoteObject['id'])
+        footnoteReference
     );
     var footnotePage = this.findFootnotePage(
         footnoteObject['item']
@@ -854,15 +867,6 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         this.footnotes.push(footnoteObject);
         var flowObject = this;
         
-        
-        
-        // CSS Regions has a bug that means that the size of footnotes is not
-        // recalculated automatically as they grow larger. This is why we
-        // trigger CSS reevalution manually upon footnote content change.    
-/*
-        footnoteFlow.addEventListener(
-            'webkitregionlayoutupdate',
-            Pagination.manualCssTrigger);    */
         
     }
 
