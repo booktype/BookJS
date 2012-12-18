@@ -153,9 +153,10 @@ Pagination.setStyle = function () {
     // head of the DOM.
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = 
-    ".contentsContainer {display: -webkit-box; -webkit-box-orient: vertical;}"
-    + " .contents {display: -webkit-box; -webkit-box-flex: 1}" 
-    + " .contents-column {-webkit-box-flex: 1}"
+    ".contentsContainer {display: -webkit-flex; -webkit-flex-direction: column;}"
+    + " .contents {display: -webkit-flex; -webkit-flex: 1;}" 
+    + " .contents {height: 0px;}" // There seems to be a bug in the new flexbox model code which requires the height to be set to an arbitrary value (which is ignored).
+    + " .contents-column {-webkit-flex: 1;}"
     + " body {counter-reset: footnote footnote-reference;}"
     + " .footnote::before {counter-increment: footnote-reference;"
     + " content: counter(footnote-reference);}" 
@@ -700,6 +701,7 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     var flowObject = this;
 
     var checkAllFootnotePlacements = function () {
+
         flowObject.checkAllFootnotePlacements();
     }
 
