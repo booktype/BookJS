@@ -1,54 +1,44 @@
 /* background color is grey */
 
 body {
-background-color:#efefef;
+background-color:#efefef; /* SET AUTOMATICALLY */
 }
 
 
 /* size of pages: A5 */
 
-@page {
-size:5.8in 8.3in; /* Setting seems to be ignored due to webkit bug */
-}
-
 .page {
-height:8.3in;
-width:5.8in;
-page-break-after:always;
+height:8.3in; /* SET AUTOMATICALLY */
+width:5.8in; /* SET AUTOMATICALLY */
 }
 
 /* height of pages when no CSS regions present: auto. Also add some padding. */
 
 .page.simple {
-height:auto;
-padding: 1in;
+padding: 1in; /* SET AUTOMATICALLY */
 }
 
 /* Every .page contains various elements (.contents, .header, .pagenumber) that together make out the page. The elements are placed with absolute coordinates in relation to the page and are, if not specified otherwise, centered. Pages have white background color */
 
 .page {
-position:relative;
-margin-left:auto;
-margin-right:auto;
-background-color:#fff;
+background-color:#fff; /* SET AUTOMATICALLY */
 }
 
 /* When showing the page on the screen, put a border around the page and add a little margin beween the pages. */
 
 @media screen{
 .page {
-border:solid 1px #000;
-margin-bottom:.2in;
+border:solid 1px #000; /* SET AUTOMATICALLY */
+margin-bottom:.2in; /* SET AUTOMATICALLY */
 }
 }
 
 /* The .contentsContianer contains the .contents and the .footnotes */
 
 .contentsContainer {
-height:6.67in;
-width:4.03in;
-position:absolute;
-bottom:.8in;
+height:6.67in; /* SET AUTOMATICALLY */
+width:4.03in; /* SET AUTOMATICALLY */
+bottom:.8in; /* SET AUTOMATICALLY */
 }
 
 
@@ -56,27 +46,23 @@ bottom:.8in;
 /* images should not overflow the contents box */
 
 img {
-max-height: 6.57in; /* page height - .1in */
-max-width: 3.93in; /* page width - .1in */
--webkit-region-break-before: always;
--webkit-region-break-after: always;
+max-height: 6.57in; /* SET AUTOMATICALLY */
+max-width: 3.93in; /* SET AUTOMATICALLY */
 }
 
 .pagenumber {
-margin-top:.2in;
-position:absolute;
-bottom:.4in;
-left:0;
-right:0;
+margin-top:.2in; /* SET AUTOMATICALLY */
+bottom:.4in; /* SET AUTOMATICALLY */
+left:0; /* SET AUTOMATICALLY */
+right:0; /* SET AUTOMATICALLY */
 font-size:15px;
 }
 
 .header {
-margin-bottom:.2in;
-position:absolute;
-top:.4in;
-left:0;
-right:0;
+margin-bottom:.2in; /* SET AUTOMATICALLY */
+top:.4in; /* SET AUTOMATICALLY */
+left:0; /* SET AUTOMATICALLY */
+right:0; /* SET AUTOMATICALLY */
 font-size:13px;
 }
 
@@ -102,7 +88,7 @@ margin-right: auto;
 
 /* The title text of the TOC */
 #toc-title:before {
-content:"Contents";
+content:"Contents"; /* SET AUTOMATICALLY */
 }
 
 /* Styling of the TOC title */
@@ -126,7 +112,7 @@ font-weight:400;
 display:inline-block;
 vertical-align:text-bottom;
 font-size:16px;
-float:right;
+float:right; /* SET AUTOMATICALLY */
 }
 
 /* special styling for TOC entries that represent sections */
@@ -139,23 +125,23 @@ padding-bottom:.3in;
 
 /* Left and right page gutter */
 .page:nth-child(odd) .contentsContainer {
-right:.6in;
+right:.6in; /* SET AUTOMATICALLY */
 }
 
 .page:nth-child(even) .contentsContainer {
-left:.6in;
+left:.6in; /* SET AUTOMATICALLY */
 }
 
 /* Left and right page page numbers and headers */
 
 .page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header {
-margin-right:.6in;
-text-align:right;
+right:.6in; /* SET AUTOMATICALLY */
+text-align:right; /* SET AUTOMATICALLY */
 }
 
 .page:nth-child(even) .pagenumber,.page:nth-child(even) .header {
-margin-left:.6in;
-text-align:left;
+left:.6in; /* SET AUTOMATICALLY */
+text-align:left; /* SET AUTOMATICALLY */
 }
 
 /* No page number on section start pages and on title page */
@@ -168,10 +154,6 @@ display:none;
 display:none;
 }
 
-/* Manual page breaks */
-.pagebreak {
--webkit-region-break-after:always;
-}
 
 /* Work-around to make section title pages no longer than one page */
 
@@ -229,13 +211,13 @@ font-size:17px;
 /* Styling of footnotes */
 
 .footnote > * > * {
-font-size:12px;
+font-size: 0.7em; /* SET AUTOMATICALLY */
 line-height: 1em;
-margin:.25em;
+margin:.25em; /* SET AUTOMATICALLY */
 }
 
 .footnote > * > *::before, .footnote::before {
-position: relative; top: -0.5em; font-size: 80%;
+position: relative; top: -0.5em; font-size: 80%; /* SET AUTOMATICALLY */
 }
 
 .footnote {

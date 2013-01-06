@@ -12,11 +12,13 @@
  *
  * HOWTO
  *
- * In order to use this library, link to the corresponding file as well as this
- * javascript file within your html code. If you need to set custom options, 
- * set them before including this file by defining an object named 
- * paginationConfig and setting the customization options as keys within this 
- * object. Like this:
+ * In order to use this library, link to this javascript file within your html
+ * code.
+ * If you need to set custom options, set them before including this javascript
+ * file by defining an object named paginationConfig and setting the
+ * customization options as keys within this object. If you want to style the 
+ * output in a specific way, customize the book.css file and include it, like 
+ * this:
  *
  * <link href="book.css" rel="stylesheet" type="text/css" />
  * <script type="text/javascript">
@@ -136,6 +138,7 @@ Pagination.initiate = function () {
     
     this.userConfigImport();
     this.setStyle();
+    this.setPageStyle();
 }
 
 Pagination.userConfigImport = function () {
@@ -153,17 +156,55 @@ Pagination.setStyle = function () {
     // head of the DOM.
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = 
-    ".contentsContainer {display: -webkit-flex; -webkit-flex-direction: column;}"
-    + " .contents {display: -webkit-flex; -webkit-flex: 1;}" 
-    + " .contents {height: 0px;}" // There seems to be a bug in the new flexbox model code which requires the height to be set to an arbitrary value (which is ignored).
-    + " .contents-column {-webkit-flex: 1;}"
-    + " body {counter-reset: footnote footnote-reference;}"
-    + " .footnote::before {counter-increment: footnote-reference;"
-    + " content: counter(footnote-reference);}" 
-    + " .footnote > * > *:first-child::before {counter-increment: footnote;"
-    + " content: counter(footnote);}"
-    + ".footnote > * > * {display: block;}";
+    ".contentsContainer {display: -webkit-flex; " 
+    + "-webkit-flex-direction: column; position: absolute;} "
+    + ".contents {display: -webkit-flex; -webkit-flex: 1;} " 
+    + ".contents {height: 0px;} " 
+    // There seems to be a bug in the new flexbox model code which requires the
+    // height to be set to an arbitrary value (which is ignored).
+    + ".contents-column {-webkit-flex: 1;} "
+    + "body {counter-reset: footnote footnote-reference;} "
+    + ".footnote::before {counter-increment: footnote-reference; "
+    + "content: counter(footnote-reference);} " 
+    + ".footnote > * > *:first-child::before {counter-increment: footnote; "
+    + "content: counter(footnote);} "
+    + ".footnote > * > * {display: block;} "
+    + ".page {page-break-after: always; position: relative;} "
+    + "img {-webkit-region-break-before: always; "
+    + "-webkit-region-break-after: always;} "
+    + ".pagenumber, .header {position: absolute;} "
+    + ".pagebreak {-webkit-region-break-after: always;} "
+    + ".page.simple {height: auto;} "
+    + ".page {margin-left:auto; margin-right:auto;} ";
     document.head.appendChild(stylesheet);
+}
+
+Pagination.setPageStyle = function() {
+    // Set style for a particular page size.
+    var stylesheet = document.createElement('style');
+    stylesheet.innerHTML = 
+    ".page {height:8.3in; width:5.8in; background-color: #fff;} "
+    + "body {background-color: #efefef;} "
+    + ".page.simple {padding: 1in;} "
+    + "@media screen{.page {border:solid 1px #000; margin-bottom:.2in;}} "
+    + ".contentsContainer {height:6.67in; width:4.03in; bottom:.8in;} "
+    + "img {max-height: 6.57in; max-width: 3.93in;} "
+    // max-height: page height - .1in
+    // max-width: page width - .1in
+    + ".pagenumber {margin-top:.2in;bottom:.4in;left:0;right:0;} "
+    + ".header {margin-bottom:.2in;top:.4in;left:0;right:0;} "
+    + "#toc-title:before {content:'Contents';} "
+    + ".page:nth-child(odd) .contentsContainer {right:.6in;} "
+    + ".page:nth-child(even) .contentsContainer {left:.6in;} "
+    + ".page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header { "
+    + "right:.6in; text-align:right;} "
+    + ".page:nth-child(even) .pagenumber,.page:nth-child(even) .header { "
+    + "left:.6in; text-align:left;} "
+    + ".footnote > * > * {font-size: 0.7em; margin:.25em;} "
+    + ".footnote > * > *::before, .footnote::before {position: relative; "
+    + "top: -0.5em; font-size: 80%;} "
+    + ".toc-entry .toc-pagenumber {float:right}";
+    document.head.insertBefore(stylesheet,document.head.firstChild);
 }
 
 
@@ -353,10 +394,10 @@ Pagination.headersAndToc = function (bodyObjects) {
     var tocDiv = document.createElement('div');
     tocDiv.id = 'toc';
 
-    tocTitleDiv = document.createElement('div');
-    tocTitleDiv.id = 'toc-title';
+    tocTitleH1 = document.createElement('h1');
+    tocTitleH1.id = 'toc-title';
 
-    tocDiv.appendChild(tocTitleDiv);
+    tocDiv.appendChild(tocTitleH1);
 
 
 
@@ -676,7 +717,7 @@ Pagination.flowObject.prototype.compareReferenceAndFootnotePage =
     // are on the same page.
     var footnoteReference = document.getElementById(footnoteObject['id']);
     if (footnoteReference===null) {
-        // It seems this footnote had been deleted, so we will dispatch an event thjat will redo all footnotes.
+        // It seems this footnote had been deleted, so we will dispatch an event that will redo all footnotes.
         this.rawdiv.dispatchEvent(Pagination.events.redoFootnotes);
         return false;
     }
@@ -739,11 +780,7 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
         );
     }
     
-    this.rawdiv.addEventListener('redoFootnotes', redoFootnotes);
-    
-     // CSS Regions has a bug that means that the size of footnotes is not
-     // recalculated automatically as they grow larger. This is why we
-     // trigger CSS reevalution manually upon footnote content change.    
+    this.rawdiv.addEventListener('redoFootnotes', redoFootnotes);  
         
         
         var checkSpacerSize = function() {
