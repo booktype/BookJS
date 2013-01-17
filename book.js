@@ -194,7 +194,9 @@ Pagination.initiate = function () {
     this.userConfigImport();
     this.setStyle();
     this.setPageStyle();
-    document.head.insertBefore(Pagination.pageStyleSheet,document.head.firstChild);
+    document.head.insertBefore(
+        Pagination.pageStyleSheet,
+        document.head.firstChild);
 }
 
 Pagination.userConfigImport = function () {
@@ -451,7 +453,8 @@ Pagination.events.redoFootnotes.initEvent(
     true
 );
 // redoFootnotes is being listened to by BookJS to see when footnotes need to
-// be refound and redrawn. This can be used by editors who need to add new footnotes. 
+// be refound and redrawn. This can be used by editors who need to add new 
+// footnotes. 
 
 
 Pagination.headersAndToc = function (bodyObjects) {
@@ -789,7 +792,8 @@ Pagination.flowObject.prototype.compareReferenceAndFootnotePage =
     // are on the same page.
     var footnoteReference = document.getElementById(footnoteObject['id']);
     if (footnoteReference===null) {
-        // It seems this footnote had been deleted, so we will dispatch an event that will redo all footnotes.
+        // It seems this footnote had been deleted, so we will dispatch an 
+        // event that will redo all footnotes.
         this.rawdiv.dispatchEvent(Pagination.events.redoFootnotes);
         return false;
     }
@@ -865,11 +869,14 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
             
         for (var i=0; i<flowObject.footnotes.length; i++ ) {
             if ('hidden' in flowObject.footnotes[i]) {
-                if (flowObject.footnotes[i]['item'].clientHeight < flowObject.footnotes[i]['hidden'].clientHeight) {
+                if (flowObject.footnotes[i]['item'].clientHeight 
+                    < flowObject.footnotes[i]['hidden'].clientHeight) {
                     // The footnote is smaller than its space holder on another
                     // page. It means the footnote has been shortened and we
                     // need to reflow footnotes!
-                    flowObject.namedFlow.dispatchEvent(Pagination.events.footnotesNeedMove);
+                    flowObject.namedFlow.dispatchEvent(
+                        Pagination.events.footnotesNeedMove
+                    );
                 }
             }
         }

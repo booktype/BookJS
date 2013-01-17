@@ -9,9 +9,9 @@ paginationConfig = {
     'enableFrontmatter': true,
     'bulkPagesToAdd': 50, 
     'pagesToAddIncrementRatio': 1.4, 
-    'frontmatterContents': '<div id="booktitle">Book title</div>'
-	+ '<div id="booksubtitle">Book subtitle</div><div id="bookeditors">'
-	+ 'ed. Editor 1, Editor II, Editor III</div><div class="pagebreak">'
+    'frontmatterContents': '<h1>Book title</h1>'
+	+ '<h3>Book subtitle</h3><h5>'
+	+ 'ed. Editor 1, Editor II, Editor III</h5><div class="pagebreak">'
 	+ '</div><div id="copyrightpage">Copyright: You<br>License: CC</div>'
 	+ '<div class="pagebreak"></div>',
     'autoStart': true,
