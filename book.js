@@ -82,6 +82,38 @@
  * initiated manually by calling Pagination.applyBookLayout() or 
  * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
  * Check Pagination._cssRegionCheck() to see if CSS Regions are present.
+ *
+ * ----------
+ * page style setup
+ * ----------
+ * 
+ * These settings provide a way to do simple styling of the page. These 
+ * settings are different from the baove ones in that they can be overriden 
+ * through CSS to provide more advanced designs (see the above note on 
+ * book.css).
+ * 
+ * outerMargin: .5 (inch)-- This controls the margin on the outer part of the 
+ * page.
+ * 
+ * innerMargin: .8 (inch)-- This controls the margin on the inenr part of the 
+ * page.
+ * 
+ * contentsTopMargin: .8 (inch)-- This controls the margin between the top of 
+ * the page and the top of the contents.
+ * 
+ * headerTopMargin: .3 (inch) -- This controls the margin between the top of 
+ * the page and the top of the page headers.
+ * 
+ * contentsBottomMargin: .8 (inch) -- This controls the margin between the 
+ * bottom of the page and the bottom of the contents.
+ * 
+ * pagenumberBottomMargin: .3 (inch) -- This controls the margin between the 
+ * bottom of the page and the bottom of the page number.
+ * 
+ * pageHeight: 8.3 (inch) -- This controls the height of the page.
+ * 
+ * pageWidth: 5.8 (inch) -- This controls the width of the page.
+ * 
  */
  
 var Pagination = new Object;
@@ -100,7 +132,15 @@ Pagination.config = {
     'bulkPagesToAdd': 50,
     'pagesToAddIncrementRatio': 1.4,
     'frontmatterContents': '',
-    'autoStart': true
+    'autoStart': true,
+    'outerMargin': .5,
+    'innerMargin': .8,
+    'contentsTopMargin': .8,
+    'headerTopMargin': .3,
+    'contentsBottomMargin': .8,
+    'pagenumberBottomMargin': .3,
+    'pageHeight': 8.3,
+    'pageWidth': 5.8,
 };
 
 // help functions
@@ -158,10 +198,10 @@ Pagination.setStyle = function () {
     stylesheet.innerHTML = 
     ".contentsContainer {display: -webkit-flex; " 
     + "-webkit-flex-direction: column; position: absolute;} "
-    + ".contents {display: -webkit-flex; -webkit-flex: 1;} " 
-    + ".contents {height: 0px;} " 
+    + ".contents {display: -webkit-flex; -webkit-flex: 1;} "
     // There seems to be a bug in the new flexbox model code which requires the
     // height to be set to an arbitrary value (which is ignored).
+    + ".contents {height: 0px;} " 
     + ".contents-column {-webkit-flex: 1;} "
     + "body {counter-reset: footnote footnote-reference;} "
     + ".footnote::before {counter-increment: footnote-reference; "
@@ -181,25 +221,42 @@ Pagination.setStyle = function () {
 
 Pagination.setPageStyle = function() {
     // Set style for a particular page size.
+    var contentsWidth = Pagination.config['pageWidth'] 
+    - Pagination.config['innerMargin'] 
+    - Pagination.config['outerMargin'];
+    var contentsHeight = Pagination.config['pageHeight']
+    - Pagination.config['contentsTopMargin']
+    - Pagination.config['contentsBottomMargin'];
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = 
-    ".page {height:8.3in; width:5.8in; background-color: #fff;} "
+    ".page {height:" + Pagination.config['pageHeight'] + "in; width:" 
+    + Pagination.config['pageWidth'] + "in; background-color: #fff;} "
     + "body {background-color: #efefef;} "
+    // A .page.simple is employed when CSS Regions are not accessible
     + ".page.simple {padding: 1in;} "
+    // To give the appearance on the screen of pages, add a space of .2in
     + "@media screen{.page {border:solid 1px #000; margin-bottom:.2in;}} "
-    + ".contentsContainer {height:6.67in; width:4.03in; bottom:.8in;} "
-    + "img {max-height: 6.57in; max-width: 3.93in;} "
+    + ".contentsContainer {height:"+contentsHeight+"in;"
+    + "width:"+contentsWidth+"in;"
+    + "bottom:"+Pagination.config['contentsBottomMargin']+"in;} "
+    + "img {max-height: "+(contentsHeight-.1)+"in; max-width: "+(contentsWidth-.1)+"in;} "
     // max-height: page height - .1in
     // max-width: page width - .1in
-    + ".pagenumber {margin-top:.2in;bottom:.4in;left:0;right:0;} "
-    + ".header {margin-bottom:.2in;top:.4in;left:0;right:0;} "
+    + ".pagenumber {bottom:"+Pagination.config['pagenumberBottomMargin']+"in;} "
+    + ".header {top:"+Pagination.config['headerTopMargin']+"in;} "
     + "#toc-title:before {content:'Contents';} "
-    + ".page:nth-child(odd) .contentsContainer {right:.6in;} "
-    + ".page:nth-child(even) .contentsContainer {left:.6in;} "
+    + ".page:nth-child(odd) .contentsContainer, "
+    + ".page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header {"
+    + "right:"+Pagination.config['outerMargin'] +"in;"
+    + "left:"+Pagination.config['innerMargin'] +"in;} "
+    + ".page:nth-child(even) .contentsContainer, "
+    + ".page:nth-child(even) .pagenumber,.page:nth-child(even) .header {"
+    + "right:"+Pagination.config['innerMargin'] +"in;"
+    + "left:"+Pagination.config['outerMargin'] +"in;} "
     + ".page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header { "
-    + "right:.6in; text-align:right;} "
+    + "text-align:right;} "
     + ".page:nth-child(even) .pagenumber,.page:nth-child(even) .header { "
-    + "left:.6in; text-align:left;} "
+    + "text-align:left;} "
     + ".footnote > * > * {font-size: 0.7em; margin:.25em;} "
     + ".footnote > * > *::before, .footnote::before {position: relative; "
     + "top: -0.5em; font-size: 80%;} "
