@@ -83,9 +83,7 @@
  * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
  * Check Pagination._cssRegionCheck() to see if CSS Regions are present.
  *
- * ----------
- * page style setup
- * ----------
+ * Page style setup
  * 
  * These settings provide a way to do simple styling of the page. These 
  * settings are different from the baove ones in that they can be overriden 
@@ -113,6 +111,21 @@
  * pageHeight: 8.3 (inch) -- This controls the height of the page.
  * 
  * pageWidth: 5.8 (inch) -- This controls the width of the page.
+ * 
+ * 
+ * Methods
+ * 
+ * Changing the page style after initialization
+ * 
+ * At times the user might want to change th page design or page size after 
+ * BookJS has started -- for example to look at the same text in different page
+ * sizes. To do this, he has to change all the page style options which are now
+ * located inside Pagination.config and run Pagination.setPageStyle(). Like 
+ * this:
+ * 
+ * Pagination.config.pageHeight = 11;
+ * Pagination.config.pageWidth = 8;
+ * Pagination.setPageStyle();
  * 
  */
  
@@ -172,6 +185,8 @@ Pagination.createRandomId = function(base) {
     return randomId;
 };
 
+Pagination.pageStyleSheet = document.createElement('style');
+
 Pagination.initiate = function () {
     // Initiate BookJS by importing user set config options and setting basic
     // CSS style.
@@ -179,6 +194,7 @@ Pagination.initiate = function () {
     this.userConfigImport();
     this.setStyle();
     this.setPageStyle();
+    document.head.insertBefore(Pagination.pageStyleSheet,document.head.firstChild);
 }
 
 Pagination.userConfigImport = function () {
@@ -227,8 +243,7 @@ Pagination.setPageStyle = function() {
     var contentsHeight = Pagination.config['pageHeight']
     - Pagination.config['contentsTopMargin']
     - Pagination.config['contentsBottomMargin'];
-    var stylesheet = document.createElement('style');
-    stylesheet.innerHTML = 
+    Pagination.pageStyleSheet.innerHTML = 
     ".page {height:" + Pagination.config['pageHeight'] + "in; width:" 
     + Pagination.config['pageWidth'] + "in; background-color: #fff;} "
     + "body {background-color: #efefef;} "
@@ -239,10 +254,11 @@ Pagination.setPageStyle = function() {
     + ".contentsContainer {height:"+contentsHeight+"in;"
     + "width:"+contentsWidth+"in;"
     + "bottom:"+Pagination.config['contentsBottomMargin']+"in;} "
-    + "img {max-height: "+(contentsHeight-.1)+"in; max-width: "+(contentsWidth-.1)+"in;} "
-    // max-height: page height - .1in
-    // max-width: page width - .1in
-    + ".pagenumber {bottom:"+Pagination.config['pagenumberBottomMargin']+"in;} "
+    // Images should at max size be slightly smaller than the contentsWidth.
+    + "img {max-height: "+(contentsHeight-.1)+"in;"
+    + " max-width: "+(contentsWidth-.1)+"in;} "
+    + ".pagenumber {"
+    + "bottom:"+Pagination.config['pagenumberBottomMargin']+"in;} "
     + ".header {top:"+Pagination.config['headerTopMargin']+"in;} "
     + "#toc-title:before {content:'Contents';} "
     + ".page:nth-child(odd) .contentsContainer, "
@@ -261,7 +277,6 @@ Pagination.setPageStyle = function() {
     + ".footnote > * > *::before, .footnote::before {position: relative; "
     + "top: -0.5em; font-size: 80%;} "
     + ".toc-entry .toc-pagenumber {float:right}";
-    document.head.insertBefore(stylesheet,document.head.firstChild);
 }
 
 
