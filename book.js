@@ -30,6 +30,8 @@
  * </script>
  * <script src="book.js" type="text/javascript"></script>
  *
+ * OPTIONS
+ * 
  * The following options are available to customize the pagination behavior. In
  * the descriptions below you can see the default values for these options. You
  * only need to specify the options if you want to deviate from the default 
@@ -79,9 +81,7 @@
  *
  * autoStart: true -- This controls whether pagination should be executed 
  * automatically upon page load. If it is set to false, pagination has to be
- * initiated manually by calling Pagination.applyBookLayout() or 
- * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
- * Check Pagination._cssRegionCheck() to see if CSS Regions are present.
+ * initiated manually. See below under "methods."
  * 
  * numberPages: true -- This controls whether page numbers should be used. If 
  * page numbers are not used, the table of contents is automatically left out.
@@ -116,11 +116,11 @@
  * pageWidth: 5.8 (inch) -- This controls the width of the page.
  * 
  * 
- * Methods
+ * METHODS
  * 
  * Changing the page style after initialization
  * 
- * At times the user might want to change th page design or page size after 
+ * At times the user might want to change the page design or page size after 
  * BookJS has started -- for example to look at the same text in different page
  * sizes. To do this, he has to change all the page style options which are now
  * located inside Pagination.config and run Pagination.setPageStyle(). Like 
@@ -129,6 +129,17 @@
  * Pagination.config.pageHeight = 11;
  * Pagination.config.pageWidth = 8;
  * Pagination.setPageStyle();
+ * 
+ * Initializing page flowing after loading
+ * 
+ * If one chooses not to flow the pages automatically upon page loading, it has
+ * to be initiated manually by calling Pagination.applyBookLayout() or 
+ * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
+ * 
+ * Check whether CSS regions are present.
+ * 
+ * Pagination._cssRegionCheck() will return true or false, depending on whether
+ * CSS Regions are present or not.
  * 
  */
  
