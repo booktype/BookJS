@@ -82,6 +82,9 @@
  * initiated manually by calling Pagination.applyBookLayout() or 
  * Pagination.applySimpleBookLayout() in case CSS Regions are not present. 
  * Check Pagination._cssRegionCheck() to see if CSS Regions are present.
+ * 
+ * numberPages: true -- This controls whether page numbers should be used. If 
+ * page numbers are not used, the table of contents is automatically left out.
  *
  * Page style setup
  * 
@@ -146,6 +149,7 @@ Pagination.config = {
     'pagesToAddIncrementRatio': 1.4,
     'frontmatterContents': '',
     'autoStart': true,
+    'numberPages': true,
     'outerMargin': .5,
     'innerMargin': .8,
     'contentsTopMargin': .8,
@@ -367,11 +371,13 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
 
         page.appendChild(header);
 
-        pagenumberfield = document.createElement('div');
-        pagenumberfield.classList.add('pagenumber');
-        pagenumberfield.classList.add(pageCounterClass);
+        if (Pagination.config.numberPages) {
+            pagenumberfield = document.createElement('div');
+            pagenumberfield.classList.add('pagenumber');
+            pagenumberfield.classList.add(pageCounterClass);
 
-        page.appendChild(pagenumberfield);
+            page.appendChild(pagenumberfield);
+        }
 
         // If flowName is given, create a page with content flow.
         if (flowName) {
@@ -408,7 +414,7 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
 };
 
 Pagination.events = {};
-// Pagination.events represents all the evenets created specifically by BookJs.
+// Pagination.events represents all the events created specifically by BookJS.
 
 Pagination.events.bodyLayoutUpdated = document.createEvent('Event');
 Pagination.events.bodyLayoutUpdated.initEvent(
@@ -465,15 +471,16 @@ Pagination.headersAndToc = function (bodyObjects) {
     // can influence the TOC (such as page creation or deletion).
     var currentChapterTitle = '';
     var currentSectionTitle = '';
+    
+    if (Pagination.config.numberPages) {
+        var tocDiv = document.createElement('div');
+        tocDiv.id = 'toc';
 
-    var tocDiv = document.createElement('div');
-    tocDiv.id = 'toc';
+        tocTitleH1 = document.createElement('h1');
+        tocTitleH1.id = 'toc-title';
 
-    tocTitleH1 = document.createElement('h1');
-    tocTitleH1.id = 'toc-title';
-
-    tocDiv.appendChild(tocTitleH1);
-
+        tocDiv.appendChild(tocTitleH1);
+    }
 
 
     for (var i = 0; i < bodyObjects.length; i++) {
@@ -495,7 +502,7 @@ Pagination.headersAndToc = function (bodyObjects) {
             sectionHeader.innerHTML = currentSectionTitle;
         }
 
-        if (bodyObjects[i].type) {
+        if (bodyObjects[i].type && Pagination.config.numberPages) {
 
             var tocItemDiv = document.createElement('div');
             tocItemDiv.classList.add('toc-entry');
@@ -621,7 +628,9 @@ Pagination.applyBookLayout = function () {
         contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
         fmObject.rawdiv.innerHTML = Pagination.config.frontmatterContents;
         var toc = Pagination.headersAndToc(bodyObjects);
-        fmObject.rawdiv.appendChild(toc);
+        if (Pagination.config.numberPages) {
+            fmObject.rawdiv.appendChild(toc);
+        }
         layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
         fmObject.initiate();
         var redoToc = function () {
@@ -723,7 +732,9 @@ Pagination.flowObject.prototype.initiate = function () {
     this.findAllFootnotes();
     this.layoutFootnotes();
     this.setupFootnoteReflow();
-    this.pageCounter.numberPages();
+    if (Pagination.config.numberPages) {
+        this.pageCounter.numberPages();
+    }
 }
 
 Pagination.flowObject.prototype.setStyle = function () {
@@ -761,7 +772,7 @@ Pagination.flowObject.prototype.findTitle = function () {
 
 Pagination.flowObject.prototype.findStartpageNumber = function () {
     // Find the first page number used in this flowObject.
-    if (this.rawdiv.innerText.length > 0) {
+    if (this.rawdiv.innerText.length > 0 && Pagination.config.numberPages) {
         var startpageNumberField = this.div.querySelector('.pagenumber');
         this.startpageNumber = startpageNumberField.innerText;
     }
@@ -928,7 +939,7 @@ Pagination.flowObject.prototype.checkAllFootnotePlacements = function () {
     for (var i = 0; i < this.footnotes.length; i++) {
         if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
             this.namedFlow.dispatchEvent(Pagination.events.footnotesNeedMove);
-        }
+       }
     }
 }
 
@@ -1199,7 +1210,9 @@ Pagination.flowObject.prototype.setupReflow = function () {
     var reFlow = function () {
         // The page layout has changed. Reflow by adding pages one by one.
         flowObject.addOrRemovePages(1);
-        flowObject.pageCounter.numberPages();
+        if (Pagination.config.numberPages) {
+            flowObject.pageCounter.numberPages();
+        }
     };
     this.namedFlow.addEventListener('pageLayoutUpdated', reFlow);
 
