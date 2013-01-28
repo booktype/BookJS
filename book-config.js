@@ -14,7 +14,7 @@ paginationConfig = {
 	+ '<h3>Book subtitle</h3><h5>'
 	+ 'ed. Editor 1, Editor II, Editor III</h5><div class="pagination-pagebreak">'
 	+ '</div><div id="copyrightpage">Copyright: You<br>License: CC</div>'
-	+ '<div class="pagebreak"></div>',
+	+ '<div class="pagination-pagebreak"></div>',
     'autoStart': true,
 }
 

@@ -1214,11 +1214,13 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
 
 Pagination.flowObject.prototype.makeEvenPages = function () {
     // If the number of pages is odd, add an empty page.
-    var emptyPage = this.div.querySelector('.page.empty');
+    var emptyPage = this.div.querySelector(
+        '.pagination-page.pagination-empty'
+    );
     if (emptyPage) {
         this.div.removeChild(emptyPage);
     }
-    var allPages = this.div.querySelectorAll('.page');
+    var allPages = this.div.querySelectorAll('.pagination-page');
     if (allPages.length % 2 == 1) {
         this.div.appendChild(
             Pagination.createPages(
