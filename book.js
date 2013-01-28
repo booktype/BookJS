@@ -135,8 +135,8 @@
  * located inside Pagination.config and run Pagination.setPageStyle(). Like 
  * this:
  * 
- * Pagination.config.pageHeight = 11;
- * Pagination.config.pageWidth = 8;
+ * Pagination.config['pageHeight'] = 11;
+ * Pagination.config['pageWidth'] = 8;
  * Pagination.setPageStyle();
  * 
  * Initializing page flowing after loading
@@ -250,10 +250,13 @@ Pagination.setStyle = function () {
      */
     + ".pagination-contents {height: 0px;} " 
     + ".pagination-contents-column {-webkit-flex: 1;} "
-    + "body {counter-reset: pagination-footnote pagination-footnote-reference;} "
-    + ".pagination-footnote::before {counter-increment: pagination-footnote-reference; "
+    + "body {"
+    + "counter-reset: pagination-footnote pagination-footnote-reference;} "
+    + ".pagination-footnote::before {"
+    + "counter-increment: pagination-footnote-reference; "
     + "content: counter(pagination-footnote-reference);} " 
-    + ".pagination-footnote > * > *:first-child::before {counter-increment: pagination-footnote; "
+    + ".pagination-footnote > * > *:first-child::before {"
+    + "counter-increment: pagination-footnote;"
     + "content: counter(pagination-footnote);} "
     + ".pagination-footnote > * > * {display: block;} "
     + ".pagination-page {page-break-after: always; position: relative;} "
@@ -271,7 +274,7 @@ Pagination.setPageStyle = function() {
     var contentsWidth = Pagination.config['pageWidth'] 
     - Pagination.config['innerMargin'] 
     - Pagination.config['outerMargin'];
-    var columnWidth = contentsWidth / Pagination.config.columns;
+    var columnWidth = contentsWidth / Pagination.config['columns'];
     var contentsHeight = Pagination.config['pageHeight']
     - Pagination.config['contentsTopMargin']
     - Pagination.config['contentsBottomMargin'];
@@ -415,7 +418,7 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
 
         page.appendChild(header);
 
-        if (Pagination.config.numberPages) {
+        if (Pagination.config['numberPages']) {
             pagenumberfield = document.createElement('div');
             pagenumberfield.classList.add('pagination-pagenumber');
             pagenumberfield.classList.add('pagination-' + pageCounterClass);
@@ -522,7 +525,7 @@ Pagination.headersAndToc = function (bodyObjects) {
     var currentChapterTitle = '';
     var currentSectionTitle = '';
     
-    if (Pagination.config.numberPages) {
+    if (Pagination.config['numberPages']) {
         var tocDiv = document.createElement('div');
         tocDiv.id = 'pagination-toc';
 
@@ -545,14 +548,18 @@ Pagination.headersAndToc = function (bodyObjects) {
         var pages = bodyObjects[i].div.childNodes;
 
         for (var j = 0; j < pages.length; j++) {
-            var chapterHeader = pages[j].querySelector('.pagination-header .pagination-chapter');
+            var chapterHeader = pages[j].querySelector(
+                '.pagination-header .pagination-chapter'
+            );
             chapterHeader.innerHTML = currentChapterTitle;
 
-            var sectionHeader = pages[j].querySelector('.pagination-header .pagination-section');
+            var sectionHeader = pages[j].querySelector(
+                '.pagination-header .pagination-section'
+            );
             sectionHeader.innerHTML = currentSectionTitle;
         }
 
-        if (bodyObjects[i].type && Pagination.config.numberPages) {
+        if (bodyObjects[i].type && Pagination.config['numberPages']) {
 
             var tocItemDiv = document.createElement('div');
             tocItemDiv.classList.add('pagination-toc-entry');
@@ -601,7 +608,7 @@ Pagination.createBodyObjects = function () {
         )
     );
 
-    var bodyContainer = eval(Pagination.config.flowElement);
+    var bodyContainer = eval(Pagination.config['flowElement']);
     var bodyContents = bodyContainer.childNodes;
 
 
@@ -610,7 +617,7 @@ Pagination.createBodyObjects = function () {
         if (bodyContents[0].nodeType == 1) {
             if (
                 bodyContents[0].webkitMatchesSelector(
-                    Pagination.config.chapterStartMarker
+                    Pagination.config['chapterStartMarker']
                 )
             ) {
                 bodyObjects.push(
@@ -623,7 +630,7 @@ Pagination.createBodyObjects = function () {
 
             } else if (
                 bodyContents[0].webkitMatchesSelector(
-                    Pagination.config.sectionStartMarker
+                    Pagination.config['sectionStartMarker']
                 )
             ) {
                 bodyObjects.push(
@@ -650,7 +657,7 @@ Pagination.applyBookLayoutNonDestructive = function () {
             'body',
             Pagination.pageCounters.arab
         )
-    if (eval(Pagination.config.flowElement) == document.body ) {
+    if (eval(Pagination.config['flowElement']) == document.body ) {
         /* We are reflowing the body itself, yet the layout will be added to 
          * the body. This will make the broser crash. So we need to move the 
          * original contents inside a Div of its own first.
@@ -661,10 +668,11 @@ Pagination.applyBookLayoutNonDestructive = function () {
         document.body.innerHTML = '';
         document.body.appendChild(contentsDiv);
         
-        Pagination.config.flowElement = "document.getElementById('pagination-contents')";
+        Pagination.config['flowElement'] = 
+            "document.getElementById('pagination-contents')";
     }
     
-    bodyObject.rawdiv = eval(Pagination.config.flowElement);
+    bodyObject.rawdiv = eval(Pagination.config['flowElement']);
     
     bodyObject.rawdiv.classList.add('pagination-body-contents');
     bodyObject.rawdiv.classList.add('pagination-contents-item');
@@ -708,7 +716,7 @@ Pagination.applyBookLayout = function () {
 
     Pagination.pageCounters.arab.numberPages();
 
-    if (Pagination.config.enableFrontmatter) {
+    if (Pagination.config['enableFrontmatter']) {
         //Create and flow frontmatter
         fmObject = new Pagination.flowObject(
             'frontmatter', 
@@ -717,9 +725,9 @@ Pagination.applyBookLayout = function () {
         );
         fmObject.columns = 1;
         contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
-        fmObject.rawdiv.innerHTML = Pagination.config.frontmatterContents;
+        fmObject.rawdiv.innerHTML = Pagination.config['frontmatterContents'];
         var toc = Pagination.headersAndToc(bodyObjects);
-        if (Pagination.config.numberPages) {
+        if (Pagination.config['numberPages']) {
             fmObject.rawdiv.appendChild(toc);
         }
         layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
@@ -739,7 +747,7 @@ Pagination.applyBookLayout = function () {
 Pagination.applySimpleBookLayout = function () {
     // Apply this alternative layout in case CSS Regions are not present 
     
-    if (eval(Pagination.config.flowElement) == document.body ) {
+    if (eval(Pagination.config['flowElement']) == document.body ) {
         /* We are reflowing the body itself, yet the layout will be added to 
          * the body. This will make the broser crash. So we need to move the 
          * original contents inside a Div of its own first.
@@ -750,11 +758,11 @@ Pagination.applySimpleBookLayout = function () {
         document.body.innerHTML = '';
         document.body.appendChild(contentsDiv);
         
-        Pagination.config.flowElement = 
+        Pagination.config['flowElement'] = 
             "document.getElementById('pagination-contents')";
     }
     
-    var simplePage = eval(Pagination.config.flowElement);
+    var simplePage = eval(Pagination.config['flowElement']);
     //var simplePage = document.createElement('div');
     simplePage.classList.add('pagination-page');
     simplePage.classList.add('pagination-simple');
@@ -785,7 +793,7 @@ Pagination.autoStartInitiator = function () {
     if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {
         Pagination.applySimpleBookLayout();
     } else if ((document.readyState == 'complete') && (cssRegionsPresent)) {
-        if (Pagination.config.divideContents) {
+        if (Pagination.config['divideContents']) {
             Pagination.applyBookLayout();
         } else {
             Pagination.applyBookLayoutNonDestructive();
@@ -810,9 +818,9 @@ Pagination.flowObject = function (name, pageCounter) {
     this.div = document.createElement('div');
     this.div.classList.add('pagination-' + name + '-layout');
 
-    this.bulkPagesToAdd = Pagination.config.bulkPagesToAdd;
+    this.bulkPagesToAdd = Pagination.config['bulkPagesToAdd'];
 
-    this.columns = Pagination.config.columns;
+    this.columns = Pagination.config['columns'];
 
     this.footnotes = [];
     
@@ -848,7 +856,7 @@ Pagination.flowObject.prototype.initiate = function () {
     this.findAllFootnotes();
     this.layoutFootnotes();
     this.setupFootnoteReflow();
-    if (Pagination.config.numberPages) {
+    if (Pagination.config['numberPages']) {
         this.pageCounter.numberPages();
     }
 }
@@ -861,7 +869,8 @@ Pagination.flowObject.prototype.setStyle = function () {
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = ".pagination-" + this.name + "-layout"
     + " .pagination-contents-column {-webkit-flow-from:" + this.name + ";}" 
-    + " .pagination-" + this.name + "-contents {-webkit-flow-into:" + this.name + ";}";
+    + " .pagination-" + this.name + "-contents "
+    + "{-webkit-flow-into:" + this.name + ";}";
     document.head.appendChild(stylesheet);
 }
 
@@ -876,12 +885,12 @@ Pagination.flowObject.prototype.findTitle = function () {
     var titleField;
     if (this.type == 'chapter') {
         titleField = this.rawdiv.querySelector(
-            Pagination.config.chapterTitleMarker
+            Pagination.config['chapterTitleMarker']
         );
         this.title = titleField.innerHTML;
     } else if (this.type == 'section') {
         titleField = this.rawdiv.querySelector(
-            Pagination.config.sectionTitleMarker
+            Pagination.config['sectionTitleMarker']
         );
         this.title = titleField.innerHTML;
     }
@@ -889,8 +898,9 @@ Pagination.flowObject.prototype.findTitle = function () {
 
 Pagination.flowObject.prototype.findStartpageNumber = function () {
     // Find the first page number used in this flowObject.
-    if (this.rawdiv.innerText.length > 0 && Pagination.config.numberPages) {
-        var startpageNumberField = this.div.querySelector('.pagination-pagenumber');
+    if (this.rawdiv.innerText.length > 0 && Pagination.config['numberPages']) {
+        var startpageNumberField = 
+            this.div.querySelector('.pagination-pagenumber');
         this.startpageNumber = startpageNumberField.innerText;
     }
 };
@@ -1238,7 +1248,7 @@ Pagination.flowObject.prototype.addPagesLoop = function (numberOfPages) {
             )
         );
         this.bulkPagesToAdd = Math.floor(
-            this.bulkPagesToAdd * Pagination.config.pagesToAddIncrementRatio
+            this.bulkPagesToAdd * Pagination.config['pagesToAddIncrementRatio']
         );
     } else {
         this.div.appendChild(
@@ -1285,7 +1295,7 @@ Pagination.flowObject.prototype.addOrRemovePages = function (pages) {
          * bodyLayoutUpdated event if this is not the frontmatter. 
          */
         this.redoPages = false;
-        if (Pagination.config.alwaysEven) {
+        if (Pagination.config['alwaysEven']) {
             this.makeEvenPages();
         }
         if (this.name != 'frontmatter') {
@@ -1350,7 +1360,7 @@ Pagination.flowObject.prototype.setupReflow = function () {
     var reFlow = function () {
         // The page layout has changed. Reflow by adding pages one by one.
         flowObject.addOrRemovePages(1);
-        if (Pagination.config.numberPages) {
+        if (Pagination.config['numberPages']) {
             flowObject.pageCounter.numberPages();
         }
     };
@@ -1362,7 +1372,7 @@ Pagination.flowObject.prototype.setupReflow = function () {
 
 Pagination.initiate();
 
-if (Pagination.config.autoStart === true) {
+if (Pagination.config['autoStart'] === true) {
     /* Hook Pagination.autoStartInitiator to document loading stage if
      * autoStart is set to true.
      */
