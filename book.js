@@ -276,13 +276,15 @@ Pagination.setPageStyle = function() {
     - Pagination.config['contentsTopMargin']
     - Pagination.config['contentsBottomMargin'];
     Pagination.pageStyleSheet.innerHTML = 
-    ".pagination-page {height:" + Pagination.config['pageHeight'] + "in; width:" 
-    + Pagination.config['pageWidth'] + "in; background-color: #fff;} "
+    ".pagination-page {height:" + Pagination.config['pageHeight'] 
+    + "in; width:" + Pagination.config['pageWidth'] + "in;"
+    + "background-color: #fff;} "
     + "body {background-color: #efefef;} "
     // A .page.simple is employed when CSS Regions are not accessible
     + ".pagination-simple {padding: 1in;} "
     // To give the appearance on the screen of pages, add a space of .2in
-    + "@media screen{.pagination-page {border:solid 1px #000; margin-bottom:.2in;}} "
+    + "@media screen{.pagination-page {border:solid 1px #000; "
+    + "margin-bottom:.2in;}} "
     + ".pagination-contents-container {height:"+contentsHeight+"in;"
     + "width:"+contentsWidth+"in;"
     + "bottom:"+Pagination.config['contentsBottomMargin']+"in;} "
@@ -294,20 +296,24 @@ Pagination.setPageStyle = function() {
     + ".pagination-header {top:"+Pagination.config['headerTopMargin']+"in;} "
     + "#pagination-toc-title:before {content:'Contents';} "
     + ".pagination-page:nth-child(odd) .pagination-contents-container, "
-    + ".pagination-page:nth-child(odd) .pagination-pagenumber,.pagination-page:nth-child(odd) .pagination-header {"
+    + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
+    + ".pagination-page:nth-child(odd) .pagination-header {"
     + "right:"+Pagination.config['outerMargin'] +"in;"
     + "left:"+Pagination.config['innerMargin'] +"in;} "
     + ".pagination-page:nth-child(even) .pagination-contents-container, "
-    + ".pagination-page:nth-child(even) .pagination-pagenumber,.pagination-page:nth-child(even) .pagination-header {"
+    + ".pagination-page:nth-child(even) .pagination-pagenumber,"
+    + ".pagination-page:nth-child(even) .pagination-header {"
     + "right:"+Pagination.config['innerMargin'] +"in;"
     + "left:"+Pagination.config['outerMargin'] +"in;} "
-    + ".pagination-page:nth-child(odd) .pagination-pagenumber,.pagination-page:nth-child(odd) .pagination-header {"
+    + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
+    + ".pagination-page:nth-child(odd) .pagination-header {"
     + "text-align:right;} "
-    + ".pagination-page:nth-child(even) .pagination-pagenumber,.pagination-page:nth-child(even) .pagination-header {"
+    + ".pagination-page:nth-child(even) .pagination-pagenumber,"
+    + ".pagination-page:nth-child(even) .pagination-header {"
     + "text-align:left;} "
     + ".pagination-footnote > * > * {font-size: 0.7em; margin:.25em;} "
-    + ".pagination-footnote > * > *::before, .pagination-footnote::before {position: relative; "
-    + "top: -0.5em; font-size: 80%;} "
+    + ".pagination-footnote > * > *::before, .pagination-footnote::before "
+    + "{position: relative; top: -0.5em; font-size: 80%;} "
     + ".pagination-toc-entry .pagination-toc-pagenumber {float:right}"
     /* This seems to be a bug in Webkit. But unless we set the width of the 
      * original element that is being flown, some elements extend beyond the
