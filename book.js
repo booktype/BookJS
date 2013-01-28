@@ -85,8 +85,17 @@
  * 
  * numberPages: true -- This controls whether page numbers should be used. If 
  * page numbers are not used, the table of contents is automatically left out.
+ * 
+ * divideContents: true -- This controls whether the contents are divdided up 
+ * according to sections and chapters before flowing. CSS Regions take a long
+ * time when more than 20-30 pages are involved, which is why it usually makes
+ * sense to divide the contents up. However, if the contents to be flown takes
+ * up less space than this, there is no need to do this division. The added 
+ * benefit of not doing it is that the original DOM of the part that contains 
+ * the conents will not be modified. Only the container element that holds the
+ * contents will be assigned another CSS class.
  *
- * Page style setup
+ * Page style options
  * 
  * These settings provide a way to do simple styling of the page. These 
  * settings are different from the baove ones in that they can be overriden 
@@ -161,6 +170,7 @@ Pagination.config = {
     'frontmatterContents': '',
     'autoStart': true,
     'numberPages': true,
+    'divideContents': true,
     'outerMargin': .5,
     'innerMargin': .8,
     'contentsTopMargin': .8,
@@ -232,27 +242,27 @@ Pagination.setStyle = function () {
      */
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = 
-    ".contentsContainer {display: -webkit-flex; " 
+    ".pagination-contents-container {display: -webkit-flex; " 
     + "-webkit-flex-direction: column; position: absolute;} "
-    + ".contents {display: -webkit-flex; -webkit-flex: 1;} "
+    + ".pagination-contents {display: -webkit-flex; -webkit-flex: 1;} "
     /* There seems to be a bug in the new flexbox model code which requires the
      * height to be set to an arbitrary value (which is ignored).
      */
-    + ".contents {height: 0px;} " 
-    + ".contents-column {-webkit-flex: 1;} "
-    + "body {counter-reset: footnote footnote-reference;} "
-    + ".footnote::before {counter-increment: footnote-reference; "
-    + "content: counter(footnote-reference);} " 
-    + ".footnote > * > *:first-child::before {counter-increment: footnote; "
-    + "content: counter(footnote);} "
-    + ".footnote > * > * {display: block;} "
-    + ".page {page-break-after: always; position: relative;} "
+    + ".pagination-contents {height: 0px;} " 
+    + ".pagination-contents-column {-webkit-flex: 1;} "
+    + "body {counter-reset: pagination-footnote pagination-footnote-reference;} "
+    + ".pagination-footnote::before {counter-increment: pagination-footnote-reference; "
+    + "content: counter(pagination-footnote-reference);} " 
+    + ".pagination-footnote > * > *:first-child::before {counter-increment: pagination-footnote; "
+    + "content: counter(pagination-footnote);} "
+    + ".pagination-footnote > * > * {display: block;} "
+    + ".pagination-page {page-break-after: always; position: relative;} "
     + "img {-webkit-region-break-before: always; "
     + "-webkit-region-break-after: always;} "
-    + ".pagenumber, .header {position: absolute;} "
-    + ".pagebreak {-webkit-region-break-after: always;} "
-    + ".page.simple {height: auto;} "
-    + ".page {margin-left:auto; margin-right:auto;} ";
+    + ".pagination-pagenumber, .pagination-header {position: absolute;} "
+    + ".pagination-pagebreak {-webkit-region-break-after: always;} "
+    + ".pagination-simple {height: auto;} "
+    + ".pagination-page {margin-left:auto; margin-right:auto;} ";
     document.head.appendChild(stylesheet);
 }
 
@@ -261,43 +271,50 @@ Pagination.setPageStyle = function() {
     var contentsWidth = Pagination.config['pageWidth'] 
     - Pagination.config['innerMargin'] 
     - Pagination.config['outerMargin'];
+    var columnWidth = contentsWidth / Pagination.config.columns;
     var contentsHeight = Pagination.config['pageHeight']
     - Pagination.config['contentsTopMargin']
     - Pagination.config['contentsBottomMargin'];
     Pagination.pageStyleSheet.innerHTML = 
-    ".page {height:" + Pagination.config['pageHeight'] + "in; width:" 
+    ".pagination-page {height:" + Pagination.config['pageHeight'] + "in; width:" 
     + Pagination.config['pageWidth'] + "in; background-color: #fff;} "
     + "body {background-color: #efefef;} "
     // A .page.simple is employed when CSS Regions are not accessible
-    + ".page.simple {padding: 1in;} "
+    + ".pagination-simple {padding: 1in;} "
     // To give the appearance on the screen of pages, add a space of .2in
-    + "@media screen{.page {border:solid 1px #000; margin-bottom:.2in;}} "
-    + ".contentsContainer {height:"+contentsHeight+"in;"
+    + "@media screen{.pagination-page {border:solid 1px #000; margin-bottom:.2in;}} "
+    + ".pagination-contents-container {height:"+contentsHeight+"in;"
     + "width:"+contentsWidth+"in;"
     + "bottom:"+Pagination.config['contentsBottomMargin']+"in;} "
     // Images should at max size be slightly smaller than the contentsWidth.
     + "img {max-height: "+(contentsHeight-.1)+"in;"
     + " max-width: "+(contentsWidth-.1)+"in;} "
-    + ".pagenumber {"
+    + ".pagination-pagenumber {"
     + "bottom:"+Pagination.config['pagenumberBottomMargin']+"in;} "
-    + ".header {top:"+Pagination.config['headerTopMargin']+"in;} "
-    + "#toc-title:before {content:'Contents';} "
-    + ".page:nth-child(odd) .contentsContainer, "
-    + ".page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header {"
+    + ".pagination-header {top:"+Pagination.config['headerTopMargin']+"in;} "
+    + "#pagination-toc-title:before {content:'Contents';} "
+    + ".pagination-page:nth-child(odd) .pagination-contents-container, "
+    + ".pagination-page:nth-child(odd) .pagination-pagenumber,.pagination-page:nth-child(odd) .pagination-header {"
     + "right:"+Pagination.config['outerMargin'] +"in;"
     + "left:"+Pagination.config['innerMargin'] +"in;} "
-    + ".page:nth-child(even) .contentsContainer, "
-    + ".page:nth-child(even) .pagenumber,.page:nth-child(even) .header {"
+    + ".pagination-page:nth-child(even) .pagination-contents-container, "
+    + ".pagination-page:nth-child(even) .pagination-pagenumber,.pagination-page:nth-child(even) .pagination-header {"
     + "right:"+Pagination.config['innerMargin'] +"in;"
     + "left:"+Pagination.config['outerMargin'] +"in;} "
-    + ".page:nth-child(odd) .pagenumber,.page:nth-child(odd) .header { "
+    + ".pagination-page:nth-child(odd) .pagination-pagenumber,.pagination-page:nth-child(odd) .pagination-header {"
     + "text-align:right;} "
-    + ".page:nth-child(even) .pagenumber,.page:nth-child(even) .header { "
+    + ".pagination-page:nth-child(even) .pagination-pagenumber,.pagination-page:nth-child(even) .pagination-header {"
     + "text-align:left;} "
-    + ".footnote > * > * {font-size: 0.7em; margin:.25em;} "
-    + ".footnote > * > *::before, .footnote::before {position: relative; "
+    + ".pagination-footnote > * > * {font-size: 0.7em; margin:.25em;} "
+    + ".pagination-footnote > * > *::before, .pagination-footnote::before {position: relative; "
     + "top: -0.5em; font-size: 80%;} "
-    + ".toc-entry .toc-pagenumber {float:right}";
+    + ".pagination-toc-entry .pagination-toc-pagenumber {float:right}"
+    /* This seems to be a bug in Webkit. But unless we set the width of the 
+     * original element that is being flown, some elements extend beyond the
+     * contentsContainer's width.
+     */  
+    + ".pagination-contents-item {width:"+columnWidth+"in;}"
+    + ".pagination-frontmatter-contents {width:"+contentsWidth+"in;}";
 }
 
 
@@ -346,7 +363,7 @@ Pagination.pageCounterCreator.prototype.numberPages = function () {
     this.needsUpdate = false;
 
     var pagenumbersToNumber = document.querySelectorAll(
-        '.page .pagenumber.' 
+        '.pagination-page .pagination-pagenumber.pagination-' 
         + this.cssClass
     );
     for (var i = 0; i < pagenumbersToNumber.length; i++) {
@@ -377,25 +394,25 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
     var tempRoot = document.createDocumentFragment();
     for (var i = 0; i < num; i++) {
         page = document.createElement('div');
-        page.classList.add('page');
+        page.classList.add('pagination-page');
 
         header = document.createElement('div');
-        header.classList.add('header');
+        header.classList.add('pagination-header');
 
         chapterheader = document.createElement('span');
-        chapterheader.classList.add('chapter');
+        chapterheader.classList.add('pagination-chapter');
         header.appendChild(chapterheader);
 
         sectionheader = document.createElement('span');
-        sectionheader.classList.add('section');
+        sectionheader.classList.add('pagination-section');
         header.appendChild(sectionheader);
 
         page.appendChild(header);
 
         if (Pagination.config.numberPages) {
             pagenumberfield = document.createElement('div');
-            pagenumberfield.classList.add('pagenumber');
-            pagenumberfield.classList.add(pageCounterClass);
+            pagenumberfield.classList.add('pagination-pagenumber');
+            pagenumberfield.classList.add('pagination-' + pageCounterClass);
 
             page.appendChild(pagenumberfield);
         }
@@ -403,22 +420,22 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
         // If flowName is given, create a page with content flow.
         if (flowName) {
             contentsContainer = document.createElement('div');
-            contentsContainer.classList.add('contentsContainer');
+            contentsContainer.classList.add('pagination-contents-container');
 
             topFloats = document.createElement('div');
-            topFloats.classList.add('topFloats');
+            topFloats.classList.add('pagination-top-floats');
 
             contents = document.createElement('div');
-            contents.classList.add('contents');
+            contents.classList.add('pagination-contents');
 
             for (var j = 0; j < columns; j++) {
                 column = document.createElement('div');
-                column.classList.add('contents-column');
+                column.classList.add('pagination-contents-column');
                 contents.appendChild(column);
             }
 
             footnotes = document.createElement('div');
-            footnotes.classList.add('footnotes');
+            footnotes.classList.add('pagination-footnotes');
 
             contentsContainer.appendChild(topFloats);
             contentsContainer.appendChild(contents);
@@ -426,7 +443,7 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
             page.appendChild(contentsContainer);
             // If no flowName is given, an empty page is created.
         } else {
-            page.classList.add('empty');
+            page.classList.add('pagination-empty');
         }
 
         tempRoot.appendChild(page);
@@ -501,10 +518,10 @@ Pagination.headersAndToc = function (bodyObjects) {
     
     if (Pagination.config.numberPages) {
         var tocDiv = document.createElement('div');
-        tocDiv.id = 'toc';
+        tocDiv.id = 'pagination-toc';
 
         tocTitleH1 = document.createElement('h1');
-        tocTitleH1.id = 'toc-title';
+        tocTitleH1.id = 'pagination-toc-title';
 
         tocDiv.appendChild(tocTitleH1);
     }
@@ -522,27 +539,27 @@ Pagination.headersAndToc = function (bodyObjects) {
         var pages = bodyObjects[i].div.childNodes;
 
         for (var j = 0; j < pages.length; j++) {
-            var chapterHeader = pages[j].querySelector('.header .chapter');
+            var chapterHeader = pages[j].querySelector('.pagination-header .pagination-chapter');
             chapterHeader.innerHTML = currentChapterTitle;
 
-            var sectionHeader = pages[j].querySelector('.header .section');
+            var sectionHeader = pages[j].querySelector('.pagination-header .pagination-section');
             sectionHeader.innerHTML = currentSectionTitle;
         }
 
         if (bodyObjects[i].type && Pagination.config.numberPages) {
 
             var tocItemDiv = document.createElement('div');
-            tocItemDiv.classList.add('toc-entry');
+            tocItemDiv.classList.add('pagination-toc-entry');
             tocItemDiv.classList.add(bodyObjects[i].type);
 
             var tocItemTextSpan = document.createElement('span');
-            tocItemTextSpan.classList.add('toc-text');
+            tocItemTextSpan.classList.add('pagination-toc-text');
 
             tocItemTextSpan.innerHTML = bodyObjects[i].title;
             tocItemDiv.appendChild(tocItemTextSpan);
 
             var tocItemPnSpan = document.createElement('span');
-            tocItemPnSpan.classList.add('toc-pagenumber');
+            tocItemPnSpan.classList.add('pagination-toc-pagenumber');
 
             if (typeof bodyObjects[i].startpageNumber !== 'undefined') {
                 var tocItemPnText = document.createTextNode(
@@ -623,7 +640,37 @@ Pagination.createBodyObjects = function () {
 Pagination.applyBookLayoutNonDestructive = function () {
     // Apply layout without changing the original DOM.
     
-    // NOT IMPLEMENTED
+    var bodyObject = new Pagination.flowObject(
+            'body',
+            Pagination.pageCounters.arab
+        )
+    if (eval(Pagination.config.flowElement) == document.body ) {
+        /* We are reflowing the body itself, yet the layout will be added to 
+         * the body. This will make the broser crash. So we need to move the 
+         * original contents inside a Div of its own first.
+         */
+        var contentsDiv = document.createElement('div');
+        contentsDiv.id = 'pagination-contents';
+        contentsDiv.innerHTML = document.body.innerHTML;
+        document.body.innerHTML = '';
+        document.body.appendChild(contentsDiv);
+        
+        Pagination.config.flowElement = "document.getElementById('pagination-contents')";
+    }
+    
+    bodyObject.rawdiv = eval(Pagination.config.flowElement);
+    
+    bodyObject.rawdiv.classList.add('pagination-body-contents');
+    bodyObject.rawdiv.classList.add('pagination-contents-item');
+    
+    // Create div for layout
+    var layoutDiv = document.createElement('div');
+    layoutDiv.id = 'pagination-layout';
+    layoutDiv.appendChild(bodyObject.div);
+    
+    document.body.appendChild(layoutDiv);    
+    
+    bodyObject.initiate();
     
 }
 
@@ -637,12 +684,12 @@ Pagination.applyBookLayout = function () {
 
     // Create div for layout
     var layoutDiv = document.createElement('div');
-    layoutDiv.id = 'layout';
+    layoutDiv.id = 'pagination-layout';
     document.body.appendChild(layoutDiv);
 
     // Create div for contents
     var contentsDiv = document.createElement('div');
-    contentsDiv.id = 'contents';
+    contentsDiv.id = 'pagination-contents';
     document.body.appendChild(contentsDiv);
 
     counter = 0;
@@ -685,14 +732,30 @@ Pagination.applyBookLayout = function () {
 
 Pagination.applySimpleBookLayout = function () {
     // Apply this alternative layout in case CSS Regions are not present 
-    bodyContainer = eval(Pagination.config.flowElement);
-    simplePage = document.createElement('div');
-    simplePage.classList.add('page');
-    simplePage.classList.add('simple');
-    simplePage.innerHTML = bodyContainer.innerHTML;
-    simplePage.id = bodyContainer.id;
-    bodyContainer.innerHTML = '';
-    document.body.appendChild(simplePage);
+    
+    if (eval(Pagination.config.flowElement) == document.body ) {
+        /* We are reflowing the body itself, yet the layout will be added to 
+         * the body. This will make the broser crash. So we need to move the 
+         * original contents inside a Div of its own first.
+         */
+        var contentsDiv = document.createElement('div');
+        contentsDiv.id = 'pagination-contents';
+        contentsDiv.innerHTML = document.body.innerHTML;
+        document.body.innerHTML = '';
+        document.body.appendChild(contentsDiv);
+        
+        Pagination.config.flowElement = 
+            "document.getElementById('pagination-contents')";
+    }
+    
+    var simplePage = eval(Pagination.config.flowElement);
+    //var simplePage = document.createElement('div');
+    simplePage.classList.add('pagination-page');
+    simplePage.classList.add('pagination-simple');
+    //simplePage.innerHTML = bodyContainer.innerHTML;
+    //simplePage.id = bodyContainer.id;
+    //bodyContainer.innerHTML = '';
+    //document.body.appendChild(simplePage);
 };
 
 Pagination._cssRegionsCheck = function () {
@@ -716,7 +779,11 @@ Pagination.autoStartInitiator = function () {
     if ((document.readyState == 'interactive') && (!(cssRegionsPresent))) {
         Pagination.applySimpleBookLayout();
     } else if ((document.readyState == 'complete') && (cssRegionsPresent)) {
-        Pagination.applyBookLayout();
+        if (Pagination.config.divideContents) {
+            Pagination.applyBookLayout();
+        } else {
+            Pagination.applyBookLayoutNonDestructive();
+        }
     }
 }
 
@@ -731,10 +798,11 @@ Pagination.flowObject = function (name, pageCounter) {
     this.pageCounter = pageCounter;
 
     this.rawdiv = document.createElement('div');
-    this.rawdiv.id = name + 'raw';
+    this.rawdiv.classList.add('pagination-' + name + '-contents');
+    this.rawdiv.classList.add('pagination-contents-item');
 
     this.div = document.createElement('div');
-    this.div.id = name;
+    this.div.classList.add('pagination-' + name + '-layout');
 
     this.bulkPagesToAdd = Pagination.config.bulkPagesToAdd;
 
@@ -785,16 +853,16 @@ Pagination.flowObject.prototype.setStyle = function () {
      * contents.
      */
     var stylesheet = document.createElement('style');
-    stylesheet.innerHTML = "#" + this.name 
-    + " .contents-column {-webkit-flow-from:" + this.name + ";}" 
-    + " #" + this.name + "raw {-webkit-flow-into:" + this.name + ";}";
+    stylesheet.innerHTML = ".pagination-" + this.name + "-layout"
+    + " .pagination-contents-column {-webkit-flow-from:" + this.name + ";}" 
+    + " .pagination-" + this.name + "-contents {-webkit-flow-into:" + this.name + ";}";
     document.head.appendChild(stylesheet);
 }
 
 Pagination.flowObject.prototype.setType = function (type) {
     // Set the type of this flowObject (chapter or section start).
     this.type = type;
-    this.div.classList.add(type);
+    this.div.classList.add('pagination-' + type);
 };
 
 Pagination.flowObject.prototype.findTitle = function () {
@@ -816,7 +884,7 @@ Pagination.flowObject.prototype.findTitle = function () {
 Pagination.flowObject.prototype.findStartpageNumber = function () {
     // Find the first page number used in this flowObject.
     if (this.rawdiv.innerText.length > 0 && Pagination.config.numberPages) {
-        var startpageNumberField = this.div.querySelector('.pagenumber');
+        var startpageNumberField = this.div.querySelector('.pagination-pagenumber');
         this.startpageNumber = startpageNumberField.innerText;
     }
 };
@@ -1006,7 +1074,7 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
     /* Look for all the items that have "footnote" in their class list. These
      * will be treated as footnote texts.
      */
-    var allFootnotes = this.rawdiv.getElementsByClassName('footnote'); 
+    var allFootnotes = this.rawdiv.getElementsByClassName('pagination-footnote'); 
 
     for (var i = 0; i < allFootnotes.length; i++) {
         
@@ -1014,7 +1082,7 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
             /* If footnote has no id, create one, so that we can target it
              * using CSS rules.
              */
-            allFootnotes[i].id = Pagination.createRandomId('footnote');
+            allFootnotes[i].id = Pagination.createRandomId('pagination-footnote-');
         }
         
         var footnoteId = allFootnotes[i].id;
@@ -1022,8 +1090,8 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         this.footnoteStylesheet.innerHTML += 
             '#' + footnoteId 
             + ' > * {-webkit-flow-into: ' + footnoteId + ';} '
-            + '#' + footnoteId 
-            + 'FlowTo {-webkit-flow-from: ' + footnoteId + ';} ';
+            + '#pagination-' + footnoteId 
+            + '-flow-to {-webkit-flow-from: ' + footnoteId + ';} ';
         
 
         var footnoteObject = {}; 
@@ -1035,9 +1103,9 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
 
         var footnoteFlowTo = document.createElement('div');
         
-        footnoteFlowTo.id = footnoteId + 'FlowTo';
+        footnoteFlowTo.id = 'pagination-' + footnoteId + '-flow-to';
 
-        footnoteFlowTo.classList.add('footnoteItem');
+        footnoteFlowTo.classList.add('pagination-footnote-item');
         
         footnoteObject['item'] = footnoteFlowTo;
 
@@ -1083,7 +1151,7 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
         ); 
         // We find the page where the footnote is referenced from.
         var firstFootnoteContainer = footnoteReferencePage.querySelector(
-            '.footnotes'
+            '.pagination-footnotes'
         );
         firstFootnoteContainer.appendChild(this.footnotes[i]['item']); 
         // We insert the footnote in the footnote container of that page.
@@ -1110,7 +1178,7 @@ Pagination.flowObject.prototype.layoutFootnotes = function () {
              * move the footnote there.
              */
             var newFootnoteContainer = newFootnoteReferencePage.querySelector(
-                '.footnotes'
+                '.pagination-footnotes'
             );
             
             /* We then insert the hidden element into the container where the
@@ -1228,7 +1296,7 @@ Pagination.flowObject.prototype.removeExcessPages = function (pages) {
      * how many pages are needed before we add them.
      */
 
-    var allPages = this.div.querySelectorAll('.page');
+    var allPages = this.div.querySelectorAll('.pagination-page');
 
     for (
         var i = (

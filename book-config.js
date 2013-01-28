@@ -3,7 +3,8 @@ paginationConfig = {
     'sectionTitleMarker': 'h1',
     'chapterStartMarker': 'h2',
     'chapterTitleMarker': 'h2',
-    'flowElement': "document.body",
+//    'flowElement': "document.getElementById('flowstuff')",
+    'flowElement': 'document.body',
     'alwaysEven': true,
     'columns': 2,
     'enableFrontmatter': true,
@@ -11,7 +12,7 @@ paginationConfig = {
     'pagesToAddIncrementRatio': 1.4, 
     'frontmatterContents': '<h1>Book title</h1>'
 	+ '<h3>Book subtitle</h3><h5>'
-	+ 'ed. Editor 1, Editor II, Editor III</h5><div class="pagebreak">'
+	+ 'ed. Editor 1, Editor II, Editor III</h5><div class="pagination-pagebreak">'
 	+ '</div><div id="copyrightpage">Copyright: You<br>License: CC</div>'
 	+ '<div class="pagebreak"></div>',
     'autoStart': true,
