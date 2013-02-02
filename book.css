@@ -4,6 +4,9 @@ body {
 background-color:#efefef; /* SET AUTOMATICALLY */
 }
 
+@page {
+size:5.8in 8.3in; /* Paper size for print */
+}
 
 /* size of pages: A5 */
 

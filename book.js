@@ -282,6 +282,8 @@ Pagination.setPageStyle = function() {
     ".pagination-page {height:" + Pagination.config['pageHeight'] 
     + "in; width:" + Pagination.config['pageWidth'] + "in;"
     + "background-color: #fff;} "
+    + "@page {size:" + Pagination.config['pageWidth'] + "in " 
+    + Pagination.config['pageHeight'] + "in;} "
     + "body {background-color: #efefef;} "
     // A .page.simple is employed when CSS Regions are not accessible
     + ".pagination-simple {padding: 1in;} "
