@@ -1,6 +1,7 @@
 0.25.1-dev
 ----
-
+option not to change original DOM
+style-element creation through JS options
 
 0.25.0
 ----
