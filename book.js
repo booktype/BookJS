@@ -605,7 +605,7 @@ Pagination.createBodyObjects = function () {
 
     bodyObjects.push(
         new Pagination.flowObject(
-            'bodypre',
+            'pagination-body-pre',
             Pagination.pageCounters.arab
         )
     );
@@ -624,7 +624,7 @@ Pagination.createBodyObjects = function () {
             ) {
                 bodyObjects.push(
                     new Pagination.flowObject(
-                        'body' + chapterCounter++, 
+                        'pagination-body-' + chapterCounter++, 
                         Pagination.pageCounters.arab
                     )
                 );
@@ -637,7 +637,7 @@ Pagination.createBodyObjects = function () {
             ) {
                 bodyObjects.push(
                     new Pagination.flowObject(
-                        'body' + chapterCounter++, 
+                        'pagination-body-' + chapterCounter++, 
                         Pagination.pageCounters.arab
                     )
                 );
@@ -721,7 +721,7 @@ Pagination.applyBookLayout = function () {
     if (Pagination.config['enableFrontmatter']) {
         //Create and flow frontmatter
         fmObject = new Pagination.flowObject(
-            'frontmatter', 
+            'pagination-frontmatter', 
             Pagination.pageCounters.roman, 
             1
         );
@@ -814,11 +814,11 @@ Pagination.flowObject = function (name, pageCounter) {
     this.pageCounter = pageCounter;
 
     this.rawdiv = document.createElement('div');
-    this.rawdiv.classList.add('pagination-' + name + '-contents');
+    this.rawdiv.classList.add(name + '-contents');
     this.rawdiv.classList.add('pagination-contents-item');
 
     this.div = document.createElement('div');
-    this.div.classList.add('pagination-' + name + '-layout');
+    this.div.classList.add(name + '-layout');
 
     this.bulkPagesToAdd = Pagination.config['bulkPagesToAdd'];
 
@@ -868,10 +868,10 @@ Pagination.flowObject.prototype.setStyle = function () {
      * contents.
      */
     var stylesheet = document.createElement('style');
-    stylesheet.innerHTML = ".pagination-" + this.name + "-layout"
-    + " .pagination-contents-column {-webkit-flow-from:" + this.name + ";}" 
-    + "\n.pagination-" + this.name + "-contents "
-    + "{-webkit-flow-into:" + this.name + ";}";
+    stylesheet.innerHTML = "." + this.name + "-layout"
+    + " .pagination-contents-column {-webkit-flow-from: " + this.name + ";}" 
+    + "\n." + this.name + "-contents "
+    + "{-webkit-flow-into: " + this.name + ";}";
     document.head.appendChild(stylesheet);
 }
 
@@ -1110,8 +1110,8 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         this.footnoteStylesheet.innerHTML += 
             '\n#' + footnoteId 
             + ' > * {-webkit-flow-into: ' + footnoteId + ';}'
-            + '\n#pagination-' + footnoteId 
-            + '-flow-to {-webkit-flow-from: ' + footnoteId + ';}';
+            + '\n#' + footnoteId 
+            + '-flow-into {-webkit-flow-from: ' + footnoteId + ';}';
         
 
         var footnoteObject = {}; 
@@ -1123,7 +1123,7 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
 
         var footnoteFlowTo = document.createElement('div');
         
-        footnoteFlowTo.id = 'pagination-' + footnoteId + '-flow-to';
+        footnoteFlowTo.id = footnoteId + '-flow-into';
 
         footnoteFlowTo.classList.add('pagination-footnote-item');
         
@@ -1306,7 +1306,7 @@ Pagination.flowObject.prototype.addOrRemovePages = function (pages) {
         if (Pagination.config['alwaysEven']) {
             this.makeEvenPages();
         }
-        if (this.name != 'frontmatter') {
+        if (this.name != 'pagination-frontmatter') {
             document.body.dispatchEvent(Pagination.events.bodyLayoutUpdated);
         }
     }
