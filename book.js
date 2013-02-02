@@ -243,29 +243,29 @@ Pagination.setStyle = function () {
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = 
     ".pagination-contents-container {display: -webkit-flex; " 
-    + "-webkit-flex-direction: column; position: absolute;} "
-    + ".pagination-contents {display: -webkit-flex; -webkit-flex: 1;} "
+    + "-webkit-flex-direction: column; position: absolute;}"
+    + "\n.pagination-contents {display: -webkit-flex; -webkit-flex: 1;}"
     /* There seems to be a bug in the new flexbox model code which requires the
      * height to be set to an arbitrary value (which is ignored).
      */
-    + ".pagination-contents {height: 0px;} " 
-    + ".pagination-contents-column {-webkit-flex: 1;} "
-    + "body {"
-    + "counter-reset: pagination-footnote pagination-footnote-reference;} "
-    + ".pagination-footnote::before {"
+    + "\n.pagination-contents {height: 0px;}" 
+    + "\n.pagination-contents-column {-webkit-flex: 1;}"
+    + "\nbody {"
+    + "counter-reset: pagination-footnote pagination-footnote-reference;}"
+    + "\n.pagination-footnote::before {"
     + "counter-increment: pagination-footnote-reference; "
-    + "content: counter(pagination-footnote-reference);} " 
-    + ".pagination-footnote > * > *:first-child::before {"
+    + "content: counter(pagination-footnote-reference);}" 
+    + "\n.pagination-footnote > * > *:first-child::before {"
     + "counter-increment: pagination-footnote;"
-    + "content: counter(pagination-footnote);} "
-    + ".pagination-footnote > * > * {display: block;} "
-    + ".pagination-page {page-break-after: always; position: relative;} "
-    + "img {-webkit-region-break-before: always; "
-    + "-webkit-region-break-after: always;} "
-    + ".pagination-pagenumber, .pagination-header {position: absolute;} "
-    + ".pagination-pagebreak {-webkit-region-break-after: always;} "
-    + ".pagination-simple {height: auto;} "
-    + ".pagination-page {margin-left:auto; margin-right:auto;} ";
+    + "content: counter(pagination-footnote);}"
+    + "\n.pagination-footnote > * > * {display: block;}"
+    + "\n.pagination-page {page-break-after: always; position: relative;}"
+    + "\nimg {-webkit-region-break-before: always; "
+    + "-webkit-region-break-after: always;}"
+    + "\n.pagination-pagenumber, .pagination-header {position: absolute;}"
+    + "\n.pagination-pagebreak {-webkit-region-break-after: always;}"
+    + "\n.pagination-simple {height: auto;}"
+    + "\n.pagination-page {margin-left:auto; margin-right:auto;}";
     document.head.appendChild(stylesheet);
 }
 
@@ -281,51 +281,51 @@ Pagination.setPageStyle = function() {
     Pagination.pageStyleSheet.innerHTML = 
     ".pagination-page {height:" + Pagination.config['pageHeight'] 
     + "in; width:" + Pagination.config['pageWidth'] + "in;"
-    + "background-color: #fff;} "
-    + "@page {size:" + Pagination.config['pageWidth'] + "in " 
-    + Pagination.config['pageHeight'] + "in;} "
-    + "body {background-color: #efefef;} "
+    + "background-color: #fff;}"
+    + "\n@page {size:" + Pagination.config['pageWidth'] + "in " 
+    + Pagination.config['pageHeight'] + "in;}"
+    + "\nbody {background-color: #efefef;}"
     // A .page.simple is employed when CSS Regions are not accessible
-    + ".pagination-simple {padding: 1in;} "
+    + "\n.pagination-simple {padding: 1in;}"
     // To give the appearance on the screen of pages, add a space of .2in
-    + "@media screen{.pagination-page {border:solid 1px #000; "
-    + "margin-bottom:.2in;}} "
-    + ".pagination-contents-container {height:"+contentsHeight+"in;"
+    + "\n@media screen{.pagination-page {border:solid 1px #000; "
+    + "margin-bottom:.2in;}}"
+    + "\n.pagination-contents-container {height:"+contentsHeight+"in;"
     + "width:"+contentsWidth+"in;"
-    + "bottom:"+Pagination.config['contentsBottomMargin']+"in;} "
+    + "bottom:"+Pagination.config['contentsBottomMargin']+"in;}"
     // Images should at max size be slightly smaller than the contentsWidth.
-    + "img {max-height: "+(contentsHeight-.1)+"in;"
-    + " max-width: "+(contentsWidth-.1)+"in;} "
-    + ".pagination-pagenumber {"
-    + "bottom:"+Pagination.config['pagenumberBottomMargin']+"in;} "
-    + ".pagination-header {top:"+Pagination.config['headerTopMargin']+"in;} "
-    + "#pagination-toc-title:before {content:'Contents';} "
-    + ".pagination-page:nth-child(odd) .pagination-contents-container, "
+    + "\nimg {max-height: "+(contentsHeight-.1)+"in;"
+    + " max-width: "+(contentsWidth-.1)+"in;}"
+    + "\n.pagination-pagenumber {"
+    + "bottom:"+Pagination.config['pagenumberBottomMargin']+"in;}"
+    + "\n.pagination-header {top:"+Pagination.config['headerTopMargin']+"in;}"
+    + "\n#pagination-toc-title:before {content:'Contents';}"
+    + "\n.pagination-page:nth-child(odd) .pagination-contents-container, "
     + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
     + ".pagination-page:nth-child(odd) .pagination-header {"
     + "right:"+Pagination.config['outerMargin'] +"in;"
-    + "left:"+Pagination.config['innerMargin'] +"in;} "
-    + ".pagination-page:nth-child(even) .pagination-contents-container, "
+    + "left:"+Pagination.config['innerMargin'] +"in;}"
+    + "\n.pagination-page:nth-child(even) .pagination-contents-container, "
     + ".pagination-page:nth-child(even) .pagination-pagenumber,"
     + ".pagination-page:nth-child(even) .pagination-header {"
     + "right:"+Pagination.config['innerMargin'] +"in;"
-    + "left:"+Pagination.config['outerMargin'] +"in;} "
-    + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
+    + "left:"+Pagination.config['outerMargin'] +"in;}"
+    + "\n.pagination-page:nth-child(odd) .pagination-pagenumber,"
     + ".pagination-page:nth-child(odd) .pagination-header {"
-    + "text-align:right;} "
-    + ".pagination-page:nth-child(even) .pagination-pagenumber,"
+    + "text-align:right;}"
+    + "\n.pagination-page:nth-child(even) .pagination-pagenumber,"
     + ".pagination-page:nth-child(even) .pagination-header {"
-    + "text-align:left;} "
-    + ".pagination-footnote > * > * {font-size: 0.7em; margin:.25em;} "
-    + ".pagination-footnote > * > *::before, .pagination-footnote::before "
-    + "{position: relative; top: -0.5em; font-size: 80%;} "
-    + ".pagination-toc-entry .pagination-toc-pagenumber {float:right}"
+    + "text-align:left;}"
+    + "\n.pagination-footnote > * > * {font-size: 0.7em; margin:.25em;}"
+    + "\n.pagination-footnote > * > *::before, .pagination-footnote::before "
+    + "{position: relative; top: -0.5em; font-size: 80%;}"
+    + "\n.pagination-toc-entry .pagination-toc-pagenumber {float:right}"
     /* This seems to be a bug in Webkit. But unless we set the width of the 
      * original element that is being flown, some elements extend beyond the
      * contentsContainer's width.
      */  
-    + ".pagination-contents-item {width:"+columnWidth+"in;}"
-    + ".pagination-frontmatter-contents {width:"+contentsWidth+"in;}";
+    + "\n.pagination-contents-item {width:"+columnWidth+"in;}"
+    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+"in;}";
 }
 
 
@@ -827,7 +827,6 @@ Pagination.flowObject = function (name, pageCounter) {
     this.footnotes = [];
     
     this.footnoteStylesheet = document.createElement('style');
-    document.head.appendChild(this.footnoteStylesheet);
     
 };
 
@@ -871,7 +870,7 @@ Pagination.flowObject.prototype.setStyle = function () {
     var stylesheet = document.createElement('style');
     stylesheet.innerHTML = ".pagination-" + this.name + "-layout"
     + " .pagination-contents-column {-webkit-flow-from:" + this.name + ";}" 
-    + " .pagination-" + this.name + "-contents "
+    + "\n.pagination-" + this.name + "-contents "
     + "{-webkit-flow-into:" + this.name + ";}";
     document.head.appendChild(stylesheet);
 }
@@ -1086,8 +1085,11 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
     
     // Find all the footnotes in the text and prepare them for flow.
 
-    // Remove all previous footnote stylesheet rules.
-    this.footnoteStylesheet.innerHTML='';
+    if (this.footnoteStylesheet.parentNode === document.head) {
+         // Remove all previous footnote stylesheet rules.
+        document.head.removeChild(this.footnoteStylesheet);
+        this.footnoteStylesheet.innerHTML='';
+    }
 
     /* Look for all the items that have "footnote" in their class list. These
      * will be treated as footnote texts.
@@ -1106,10 +1108,10 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         var footnoteId = allFootnotes[i].id;
         
         this.footnoteStylesheet.innerHTML += 
-            '#' + footnoteId 
-            + ' > * {-webkit-flow-into: ' + footnoteId + ';} '
-            + '#pagination-' + footnoteId 
-            + '-flow-to {-webkit-flow-from: ' + footnoteId + ';} ';
+            '\n#' + footnoteId 
+            + ' > * {-webkit-flow-into: ' + footnoteId + ';}'
+            + '\n#pagination-' + footnoteId 
+            + '-flow-to {-webkit-flow-from: ' + footnoteId + ';}';
         
 
         var footnoteObject = {}; 
@@ -1130,9 +1132,11 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         footnoteObject['id'] = footnoteId;
 
         this.footnotes.push(footnoteObject);
-        var flowObject = this;
         
         
+    }
+    if (this.footnoteStylesheet.innerHTML!=='') {
+        document.head.appendChild(this.footnoteStylesheet);
     }
 
 }
