@@ -1,5 +1,6 @@
 0.25.1-dev
 ----
+prefix flownames and content elements
 option not to change original DOM
 style-element creation through JS options
 

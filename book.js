@@ -124,6 +124,8 @@
  * 
  * pageWidth: 5.8 (inch) -- This controls the width of the page.
  * 
+ * lengthUnit: in (inch) -- Use this to specify the unit used in all the page 
+ * style options. It can be any unit supported by CSS.
  * 
  * METHODS
  * 
@@ -179,6 +181,7 @@ Pagination.config = {
     'pagenumberBottomMargin': .3,
     'pageHeight': 8.3,
     'pageWidth': 5.8,
+    'lengthUnit': 'in',
 };
 
 // help functions
@@ -273,43 +276,57 @@ Pagination.setPageStyle = function() {
     // Set style for a particular page size.
     var contentsWidth = Pagination.config['pageWidth'] 
     - Pagination.config['innerMargin'] 
-    - Pagination.config['outerMargin'];
-    var columnWidth = contentsWidth / Pagination.config['columns'];
+    - Pagination.config['outerMargin'] + Pagination.config['lengthUnit'];
+    var columnWidth = contentsWidth / Pagination.config['columns'] + Pagination.config['lengthUnit'];
     var contentsHeight = Pagination.config['pageHeight']
     - Pagination.config['contentsTopMargin']
-    - Pagination.config['contentsBottomMargin'];
+    - Pagination.config['contentsBottomMargin'] + Pagination.config['lengthUnit'];
+    var pageWidth = Pagination.config['pageWidth'] + Pagination.config['lengthUnit'];
+    var pageHeight = Pagination.config['pageHeight'] + Pagination.config['lengthUnit'];
+    var contentsBottomMargin = Pagination.config['contentsBottomMargin'] + Pagination.config['lengthUnit'];
+    var innerMargin = Pagination.config['innerMargin'] + Pagination.config['lengthUnit'];
+    var outerMargin = Pagination.config['outerMargin'] + Pagination.config['lengthUnit'];
+    var pagenumberBottomMargin = Pagination.config['pagenumberBottomMargin'] + Pagination.config['lengthUnit'];
+    var headerTopMargin = Pagination.config['headerTopMargin'] + Pagination.config['lengthUnit'];
+    var imageMaxHeight = Pagination.config['pageHeight'] 
+    - Pagination.config['contentsTopMargin'] 
+    - Pagination.config['contentsBottomMargin']-.1 + Pagination.config['lengthUnit'];
+    var imageMaxWidth = Pagination.config['pageWidth'] 
+    - Pagination.config['innerMargin'] 
+    - Pagination.config['outerMargin']-.1 + Pagination.config['lengthUnit'];
+    
     Pagination.pageStyleSheet.innerHTML = 
-    ".pagination-page {height:" + Pagination.config['pageHeight'] 
-    + "in; width:" + Pagination.config['pageWidth'] + "in;"
+    ".pagination-page {height:" + pageHeight 
+    + "; width:" + pageWidth + ";"
     + "background-color: #fff;}"
-    + "\n@page {size:" + Pagination.config['pageWidth'] + "in " 
-    + Pagination.config['pageHeight'] + "in;}"
+    + "\n@page {size:" + pageWidth + " " 
+    + pageHeight + ";}"
     + "\nbody {background-color: #efefef;}"
     // A .page.simple is employed when CSS Regions are not accessible
     + "\n.pagination-simple {padding: 1in;}"
     // To give the appearance on the screen of pages, add a space of .2in
     + "\n@media screen{.pagination-page {border:solid 1px #000; "
     + "margin-bottom:.2in;}}"
-    + "\n.pagination-contents-container {height:"+contentsHeight+"in;"
-    + "width:"+contentsWidth+"in;"
-    + "bottom:"+Pagination.config['contentsBottomMargin']+"in;}"
+    + "\n.pagination-contents-container {height:"+contentsHeight+";"
+    + "width:"+contentsWidth+";"
+    + "bottom:"+contentsBottomMargin+";}"
     // Images should at max size be slightly smaller than the contentsWidth.
-    + "\nimg {max-height: "+(contentsHeight-.1)+"in;"
-    + " max-width: "+(contentsWidth-.1)+"in;}"
+    + "\nimg {max-height: "+imageMaxHeight+";"
+    + " max-width: "+imageMaxWidth+";}"
     + "\n.pagination-pagenumber {"
-    + "bottom:"+Pagination.config['pagenumberBottomMargin']+"in;}"
-    + "\n.pagination-header {top:"+Pagination.config['headerTopMargin']+"in;}"
+    + "bottom:"+pagenumberBottomMargin+";}"
+    + "\n.pagination-header {top:"+headerTopMargin+";}"
     + "\n#pagination-toc-title:before {content:'Contents';}"
     + "\n.pagination-page:nth-child(odd) .pagination-contents-container, "
     + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
     + ".pagination-page:nth-child(odd) .pagination-header {"
-    + "right:"+Pagination.config['outerMargin'] +"in;"
-    + "left:"+Pagination.config['innerMargin'] +"in;}"
+    + "right:"+outerMargin+";"
+    + "left:"+innerMargin+";}"
     + "\n.pagination-page:nth-child(even) .pagination-contents-container, "
     + ".pagination-page:nth-child(even) .pagination-pagenumber,"
     + ".pagination-page:nth-child(even) .pagination-header {"
-    + "right:"+Pagination.config['innerMargin'] +"in;"
-    + "left:"+Pagination.config['outerMargin'] +"in;}"
+    + "right:"+innerMargin+";"
+    + "left:"+outerMargin+";}"
     + "\n.pagination-page:nth-child(odd) .pagination-pagenumber,"
     + ".pagination-page:nth-child(odd) .pagination-header {"
     + "text-align:right;}"
@@ -324,8 +341,8 @@ Pagination.setPageStyle = function() {
      * original element that is being flown, some elements extend beyond the
      * contentsContainer's width.
      */  
-    + "\n.pagination-contents-item {width:"+columnWidth+"in;}"
-    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+"in;}";
+    + "\n.pagination-contents-item {width:"+columnWidth+";}"
+    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}";
 }
 
 
