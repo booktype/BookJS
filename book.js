@@ -274,33 +274,33 @@ Pagination.setStyle = function () {
 
 Pagination.setPageStyle = function() {
     // Set style for a particular page size.
-    var contentsWidth = Pagination.config['pageWidth'] 
-    - Pagination.config['innerMargin'] 
-    - Pagination.config['outerMargin'] + Pagination.config['lengthUnit'];
-    var columnWidth = contentsWidth / Pagination.config['columns'] + Pagination.config['lengthUnit'];
-    var contentsHeight = Pagination.config['pageHeight']
-    - Pagination.config['contentsTopMargin']
-    - Pagination.config['contentsBottomMargin'] + Pagination.config['lengthUnit'];
-    var pageWidth = Pagination.config['pageWidth'] + Pagination.config['lengthUnit'];
-    var pageHeight = Pagination.config['pageHeight'] + Pagination.config['lengthUnit'];
-    var contentsBottomMargin = Pagination.config['contentsBottomMargin'] + Pagination.config['lengthUnit'];
-    var innerMargin = Pagination.config['innerMargin'] + Pagination.config['lengthUnit'];
-    var outerMargin = Pagination.config['outerMargin'] + Pagination.config['lengthUnit'];
-    var pagenumberBottomMargin = Pagination.config['pagenumberBottomMargin'] + Pagination.config['lengthUnit'];
-    var headerTopMargin = Pagination.config['headerTopMargin'] + Pagination.config['lengthUnit'];
-    var imageMaxHeight = Pagination.config['pageHeight'] 
-    - Pagination.config['contentsTopMargin'] 
-    - Pagination.config['contentsBottomMargin']-.1 + Pagination.config['lengthUnit'];
-    var imageMaxWidth = Pagination.config['pageWidth'] 
-    - Pagination.config['innerMargin'] 
-    - Pagination.config['outerMargin']-.1 + Pagination.config['lengthUnit'];
+    var unit = Pagination.config['lengthUnit'],
+        contentsWidthNumber = Pagination.config['pageWidth'] 
+            - Pagination.config['innerMargin'] 
+            - Pagination.config['outerMargin'],
+        contentsWidth = contentsWidthNumber + unit,
+        columnWidth = contentsWidthNumber / Pagination.config['columns'] 
+            + unit,
+        contentsHeightNumber = Pagination.config['pageHeight']
+            - Pagination.config['contentsTopMargin']
+            - Pagination.config['contentsBottomMargin'],
+        contentsHeight = contentsHeightNumber + unit,
+        pageWidth = Pagination.config['pageWidth'] + unit,
+        pageHeight = Pagination.config['pageHeight'] + unit,
+        contentsBottomMargin = Pagination.config['contentsBottomMargin'] 
+            + unit,
+        innerMargin = Pagination.config['innerMargin'] + unit,
+        outerMargin = Pagination.config['outerMargin'] + unit,
+        pagenumberBottomMargin = Pagination.config['pagenumberBottomMargin'] 
+            + unit,
+        headerTopMargin = Pagination.config['headerTopMargin'] + unit,
+        imageMaxHeight = contentsHeightNumber-.1 + unit,
+        imageMaxWidth = contentsWidthNumber-.1 + unit;
     
     Pagination.pageStyleSheet.innerHTML = 
-    ".pagination-page {height:" + pageHeight 
-    + "; width:" + pageWidth + ";"
+    ".pagination-page {height:" + pageHeight + "; width:" + pageWidth + ";"
     + "background-color: #fff;}"
-    + "\n@page {size:" + pageWidth + " " 
-    + pageHeight + ";}"
+    + "\n@page {size:" + pageWidth + " " + pageHeight + ";}"
     + "\nbody {background-color: #efefef;}"
     // A .page.simple is employed when CSS Regions are not accessible
     + "\n.pagination-simple {padding: 1in;}"
@@ -308,25 +308,20 @@ Pagination.setPageStyle = function() {
     + "\n@media screen{.pagination-page {border:solid 1px #000; "
     + "margin-bottom:.2in;}}"
     + "\n.pagination-contents-container {height:"+contentsHeight+";"
-    + "width:"+contentsWidth+";"
-    + "bottom:"+contentsBottomMargin+";}"
+    + "width:"+contentsWidth+";" + "bottom:"+contentsBottomMargin+";}"
     // Images should at max size be slightly smaller than the contentsWidth.
-    + "\nimg {max-height: "+imageMaxHeight+";"
-    + " max-width: "+imageMaxWidth+";}"
-    + "\n.pagination-pagenumber {"
-    + "bottom:"+pagenumberBottomMargin+";}"
+    + "\nimg {max-height: "+imageMaxHeight+";max-width: "+imageMaxWidth+";}"
+    + "\n.pagination-pagenumber {bottom:"+pagenumberBottomMargin+";}"
     + "\n.pagination-header {top:"+headerTopMargin+";}"
     + "\n#pagination-toc-title:before {content:'Contents';}"
     + "\n.pagination-page:nth-child(odd) .pagination-contents-container, "
     + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
     + ".pagination-page:nth-child(odd) .pagination-header {"
-    + "right:"+outerMargin+";"
-    + "left:"+innerMargin+";}"
+    + "right:"+outerMargin+";left:"+innerMargin+";}"
     + "\n.pagination-page:nth-child(even) .pagination-contents-container, "
     + ".pagination-page:nth-child(even) .pagination-pagenumber,"
     + ".pagination-page:nth-child(even) .pagination-header {"
-    + "right:"+innerMargin+";"
-    + "left:"+outerMargin+";}"
+    + "right:"+innerMargin+";left:"+outerMargin+";}"
     + "\n.pagination-page:nth-child(odd) .pagination-pagenumber,"
     + ".pagination-page:nth-child(odd) .pagination-header {"
     + "text-align:right;}"
@@ -672,29 +667,29 @@ Pagination.createBodyObjects = function () {
 Pagination.applyBookLayoutNonDestructive = function () {
     // Apply layout without changing the original DOM.
     
-    var bodyObject = new Pagination.flowObject(
-            'body',
-            Pagination.pageCounters.arab
-        )
+
     if (eval(Pagination.config['flowElement']) == document.body ) {
         /* We are reflowing the body itself, yet the layout will be added to 
          * the body. This will make the broser crash. So we need to move the 
          * original contents inside a Div of its own first.
          */
-        var contentsDiv = document.createElement('div');
-        contentsDiv.id = 'pagination-contents';
-        contentsDiv.innerHTML = document.body.innerHTML;
+        var rawdiv = document.createElement('div');
+        rawdiv.id = 'pagination-contents';
+        rawdiv.innerHTML = document.body.innerHTML;
         document.body.innerHTML = '';
-        document.body.appendChild(contentsDiv);
+        document.body.appendChild(rawdiv);
         
-        Pagination.config['flowElement'] = 
-            "document.getElementById('pagination-contents')";
+      //  Pagination.config['flowElement'] = 
+      //      "document.getElementById('pagination-contents')";
+    } else {
+        var rawdiv = eval(Pagination.config['flowElement']);
     }
     
-    bodyObject.rawdiv = eval(Pagination.config['flowElement']);
-    
-    bodyObject.rawdiv.classList.add('pagination-body-contents');
-    bodyObject.rawdiv.classList.add('pagination-contents-item');
+    var bodyObject = new Pagination.flowObject(
+        'body',
+        Pagination.pageCounters.arab,
+        rawdiv
+    )
     
     // Create div for layout
     var layoutDiv = document.createElement('div');
@@ -822,7 +817,7 @@ Pagination.autoStartInitiator = function () {
 
 
 
-Pagination.flowObject = function (name, pageCounter) {
+Pagination.flowObject = function (name, pageCounter, rawdiv) {
     /* A flowObject is either a chapter, a section start, the frontmatter or
      * the contents of the body of the text that come before the first
      * chapter/section title.
@@ -830,7 +825,11 @@ Pagination.flowObject = function (name, pageCounter) {
     this.name = name;
     this.pageCounter = pageCounter;
 
-    this.rawdiv = document.createElement('div');
+    if (rawdiv) {
+        this.rawdiv = rawdiv;
+    } else {
+        this.rawdiv = document.createElement('div');
+    }
     this.rawdiv.classList.add(name + '-contents');
     this.rawdiv.classList.add('pagination-contents-item');
 
