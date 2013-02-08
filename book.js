@@ -24,7 +24,7 @@
  * <script type="text/javascript">
  *     paginationConfig = {
  *         'sectionStartMarker': 'h3',
- *	   'columns': 3,
+ *         'columns': 3,
  *         'autoStart': false,
  *     }
  * </script>
@@ -934,12 +934,21 @@ Pagination.flowObject.prototype.findFootnoteReferencePage =
     )[0];
     if (footnoteReferenceNode) {
         return footnoteReferenceNode.parentNode.parentNode.parentNode;
+    } else {
+        /* A bug in Webkit means that we don't find the footnote at times. In these
+        * situations we will look for the parent element instead.
+        */
+        return this.findFootnoteReferencePage(footnoteReference.parentNode);
     }
 }
 
 Pagination.flowObject.prototype.findFootnotePage = function (footnote) {
-    // Find the page where the footnote itself is currently placed.
-    return footnote.parentNode.parentNode.parentNode;
+     if (footnote.parentNode) {
+        // Find the page where the footnote itself is currently placed.
+        return footnote.parentNode.parentNode.parentNode;
+     } else {
+         return false;
+     }
 }
 
 Pagination.flowObject.prototype.compareReferenceAndFootnotePage = 
