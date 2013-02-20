@@ -5,7 +5,7 @@ paginationConfig = {
     'chapterTitleMarker': 'h2',
     'flowElement': 'document.body',
     'alwaysEven': true,
-    'divideContents': false,
+    'divideContents': true,
     'columns': 2,
     'enableFrontmatter': true,
     'bulkPagesToAdd': 50, 

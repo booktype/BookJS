@@ -60,7 +60,8 @@
  * body text. 
  * 
  * enableFrontmatter: true -- This resolves whether a table of contents, page\
- * headers and other frontmatter contents should be added upon page creation.
+ * headers and other frontmatter contents should be added upon page creation. 
+ * Note: divideContents has to be true if one wants the frontmatter to render.
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
@@ -77,7 +78,7 @@
  *
  * frontmatterContents: none -- These are the HTML contents that are added to
  * the frontmatter before the table of contents. This would usually be a title 
- * page and a copyright page, including page breaks.
+ * page and a copyright page, including page breaks. 
  *
  * autoStart: true -- This controls whether pagination should be executed 
  * automatically upon page load. If it is set to false, pagination has to be
@@ -93,7 +94,8 @@
  * up less space than this, there is no need to do this division. The added 
  * benefit of not doing it is that the original DOM of the part that contains 
  * the conents will not be modified. Only the container element that holds the
- * contents will be assigned another CSS class.
+ * contents will be assigned another CSS class. Note: divideContents has to be
+ * true if one wants the frontmatter to render.
  *
  * Page style options
  * 
@@ -735,7 +737,7 @@ Pagination.applyBookLayout = function () {
         fmObject = new Pagination.flowObject(
             'pagination-frontmatter', 
             Pagination.pageCounters.roman, 
-            1
+            false
         );
         fmObject.columns = 1;
         contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
@@ -830,6 +832,8 @@ Pagination.flowObject = function (name, pageCounter, rawdiv) {
     } else {
         this.rawdiv = document.createElement('div');
     }
+console.log(rawdiv);
+console.log(this.rawdiv);
     this.rawdiv.classList.add(name + '-contents');
     this.rawdiv.classList.add('pagination-contents-item');
 
