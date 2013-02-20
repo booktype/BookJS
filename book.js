@@ -269,7 +269,7 @@ Pagination.setStyle = function () {
     + "-webkit-region-break-after: always;}"
     + "\n.pagination-pagenumber, .pagination-header {position: absolute;}"
     + "\n.pagination-pagebreak {-webkit-region-break-after: always;}"
-    + "\n.pagination-simple {height: auto;}"
+    + "\n.pagination-simple {height: auto; position-relative;}"
     + "\n.pagination-page {margin-left:auto; margin-right:auto;}";
     document.head.appendChild(stylesheet);
 }
@@ -339,7 +339,8 @@ Pagination.setPageStyle = function() {
      * contentsContainer's width.
      */  
     + "\n.pagination-contents-item {width:"+columnWidth+";}"
-    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}";
+    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}"//XX
+    + "\n.pagination-simple .pagination-footnote > span {position: absolute; right: 0in; width: 1in;";
 }
 
 
