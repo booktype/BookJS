@@ -339,8 +339,10 @@ Pagination.setPageStyle = function() {
      * contentsContainer's width.
      */  
     + "\n.pagination-contents-item {width:"+columnWidth+";}"
-    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}"//XX
-    + "\n.pagination-simple .pagination-footnote > span {position: absolute; right: 0in; width: 1in;";
+    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}"
+    // Footnotes in non-CSS Regions browsers will render as right margin notes.
+    + "\n.pagination-simple .pagination-footnote > span {"
+    + "position: absolute; right: 0in; width: 1in;}";
 }
 
 
