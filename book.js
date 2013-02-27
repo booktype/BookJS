@@ -842,8 +842,6 @@ Pagination.flowObject = function (name, pageCounter, rawdiv) {
     } else {
         this.rawdiv = document.createElement('div');
     }
-console.log(rawdiv);
-console.log(this.rawdiv);
     this.rawdiv.classList.add(name + '-contents');
     this.rawdiv.classList.add('pagination-contents-item');
 
