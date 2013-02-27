@@ -60,8 +60,7 @@
  * body text. 
  * 
  * enableFrontmatter: true -- This resolves whether a table of contents, page\
- * headers and other frontmatter contents should be added upon page creation. 
- * Note: divideContents has to be true if one wants the frontmatter to render.
+ * headers and other frontmatter contents should be added upon page creation.
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
@@ -78,7 +77,7 @@
  *
  * frontmatterContents: none -- These are the HTML contents that are added to
  * the frontmatter before the table of contents. This would usually be a title 
- * page and a copyright page, including page breaks. 
+ * page and a copyright page, including page breaks.
  *
  * autoStart: true -- This controls whether pagination should be executed 
  * automatically upon page load. If it is set to false, pagination has to be
@@ -94,8 +93,7 @@
  * up less space than this, there is no need to do this division. The added 
  * benefit of not doing it is that the original DOM of the part that contains 
  * the conents will not be modified. Only the container element that holds the
- * contents will be assigned another CSS class. Note: divideContents has to be
- * true if one wants the frontmatter to render.
+ * contents will be assigned another CSS class.
  *
  * Page style options
  * 
@@ -269,7 +267,7 @@ Pagination.setStyle = function () {
     + "-webkit-region-break-after: always;}"
     + "\n.pagination-pagenumber, .pagination-header {position: absolute;}"
     + "\n.pagination-pagebreak {-webkit-region-break-after: always;}"
-    + "\n.pagination-simple {height: auto; position-relative;}"
+    + "\n.pagination-simple {height: auto;}"
     + "\n.pagination-page {margin-left:auto; margin-right:auto;}";
     document.head.appendChild(stylesheet);
 }
@@ -339,10 +337,7 @@ Pagination.setPageStyle = function() {
      * contentsContainer's width.
      */  
     + "\n.pagination-contents-item {width:"+columnWidth+";}"
-    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}"
-    // Footnotes in non-CSS Regions browsers will render as right margin notes.
-    + "\n.pagination-simple .pagination-footnote > span {"
-    + "position: absolute; right: 0in; width: 1in;}";
+    + "\n.pagination-frontmatter-contents {width:"+contentsWidth+";}";
 }
 
 
@@ -740,7 +735,7 @@ Pagination.applyBookLayout = function () {
         fmObject = new Pagination.flowObject(
             'pagination-frontmatter', 
             Pagination.pageCounters.roman, 
-            false
+            1
         );
         fmObject.columns = 1;
         contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
@@ -835,8 +830,6 @@ Pagination.flowObject = function (name, pageCounter, rawdiv) {
     } else {
         this.rawdiv = document.createElement('div');
     }
-console.log(rawdiv);
-console.log(this.rawdiv);
     this.rawdiv.classList.add(name + '-contents');
     this.rawdiv.classList.add('pagination-contents-item');
 
@@ -995,22 +988,40 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
 
         flowObject.checkAllFootnotePlacements();
     }
-
+    // Chrome 25 and higher
     this.namedFlow.addEventListener(
         'webkitregionlayoutupdate', 
         checkAllFootnotePlacements
     );
+    // Chrome 24 and lower
+    this.namedFlow.addEventListener(
+        'webkitRegionLayoutUpdate', 
+        checkAllFootnotePlacements
+    );
+    
     
     
     var reFlow = function () {
+        // Webkit 24 and lower
+        flowObject.namedFlow.removeEventListener(
+            'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );        
+        // Webkit 25 and higher
         flowObject.namedFlow.removeEventListener(
             'webkitregionlayoutupdate', 
             checkAllFootnotePlacements
         );
         flowObject.layoutFootnotes();
-
+        
+        // Chrome 25 and higher
         flowObject.namedFlow.addEventListener(
             'webkitregionlayoutupdate', 
+            checkAllFootnotePlacements
+        );
+        // Chrome 24 and lower
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate', 
             checkAllFootnotePlacements
         );
     }
@@ -1018,14 +1029,29 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
     this.namedFlow.addEventListener('footnotesNeedMove', reFlow);
     
     var redoFootnotes = function() {
+        
+        // Webkit 25 and higher
         flowObject.namedFlow.removeEventListener(
             'webkitregionlayoutupdate', 
             checkAllFootnotePlacements
         );
+        
+        // Webkti 24 and lower
+        flowObject.namedFlow.removeEventListener(
+            'webkitRegionLayoutUpdate', 
+            checkAllFootnotePlacements
+        );
         flowObject.redoFootnotes();
 
+        // Webkit 25 and higher
         flowObject.namedFlow.addEventListener(
             'webkitregionlayoutupdate', 
+            checkAllFootnotePlacements
+        );
+        
+        //Webkit 24 and lower
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate', 
             checkAllFootnotePlacements
         );
     }
@@ -1038,6 +1064,12 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
          * put in their place. If not, the spacer most likely has to be
          * replaced by the footnote in its original location.
          */      
+        // Webkit 24 and lower
+        flowObject.namedFlow.removeEventListener(
+            'webkitRegionLayoutUpdate',
+            checkSpacerSize);  
+        
+        // Webkit 25 and higher
         flowObject.namedFlow.removeEventListener(
             'webkitregionlayoutupdate',
             checkSpacerSize);        
@@ -1057,17 +1089,26 @@ Pagination.flowObject.prototype.setupFootnoteReflow = function () {
             }
         }
 
+        // Chrome 25 and higher
         flowObject.namedFlow.addEventListener(
             'webkitregionlayoutupdate',
-            checkSpacerSize);    
+            checkSpacerSize); 
+        
+        // Chrome 24 and lower
+        flowObject.namedFlow.addEventListener(
+            'webkitregionlayoutupdate',
+            checkSpacerSize);         
         };
         
 
-        
+        // Chrome 25 and higher
         flowObject.namedFlow.addEventListener(
             'webkitregionlayoutupdate',
             checkSpacerSize);    
-        
+        // Chrome 24 and lower
+        flowObject.namedFlow.addEventListener(
+            'webkitRegionLayoutUpdate',
+            checkSpacerSize); 
 
 }
 
@@ -1153,13 +1194,24 @@ Pagination.flowObject.prototype.findAllFootnotes = function () {
         
         footnoteObject['reference'] = allFootnotes[i];
 
+        var footnoteFlowToContainer = document.createElement('div');
+        
+        footnoteFlowToContainer.id = footnoteId + '-flow-into-container';
+        
+        footnoteFlowToContainer.setAttribute('data-footnote-id', footnoteId);
+        
+        
+        footnoteFlowToContainer.classList.add('pagination-footnote-item-container');        
+        
         var footnoteFlowTo = document.createElement('div');
         
         footnoteFlowTo.id = footnoteId + '-flow-into';
 
         footnoteFlowTo.classList.add('pagination-footnote-item');
         
-        footnoteObject['item'] = footnoteFlowTo;
+        footnoteFlowToContainer.appendChild(footnoteFlowTo);
+        
+        footnoteObject['item'] = footnoteFlowToContainer;
 
         footnoteObject['id'] = footnoteId;
 
@@ -1395,6 +1447,9 @@ Pagination.flowObject.prototype.setupReflow = function () {
             );
         }
     }
+    // Webkit 24 and lower
+    this.namedFlow.addEventListener('webkitRegionLayoutUpdate', checkOverset);
+    // Webkit 25 and higher
     this.namedFlow.addEventListener('webkitregionlayoutupdate', checkOverset);    
 
     var reFlow = function () {
