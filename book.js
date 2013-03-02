@@ -711,7 +711,7 @@ Pagination.applyBookLayoutNonDestructive = function () {
     document.body.appendChild(layoutDiv);    
     
     bodyObject.initiate();
-    
+    document.dispatchEvent(Pagination.events.layoutFlowFinished);
 }
 
 Pagination.applyBookLayout = function () {
@@ -796,6 +796,7 @@ Pagination.applySimpleBookLayout = function () {
     //simplePage.id = bodyContainer.id;
     //bodyContainer.innerHTML = '';
     //document.body.appendChild(simplePage);
+    document.dispatchEvent(Pagination.events.layoutFlowFinished);
 };
 
 Pagination._cssRegionsCheck = function () {
