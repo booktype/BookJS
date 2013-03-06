@@ -103,6 +103,12 @@
  * to set this to 'webkitRegionLayoutUpdate'. A bug in early development 
  * versions of Chrome 25 did that the event anme was 'regionlayoutupdate'.
  *
+ * maxPageNumber: 10000 -- This controls the maximum amount of pages. If more 
+ * pages than this are added, BookJS will die. Notice that pages are added 
+ * incrementally, so you won't be able to control the exact number of pages. 
+ * You should always set this to something much larger than what you will ever
+ * expect that you book will need.
+ * 
  * Page style options
  * 
  * These settings provide a way to do simple styling of the page. These 
@@ -181,6 +187,7 @@ Pagination.config = {
     'autoStart': true,
     'numberPages': true,
     'divideContents': true,
+    'maxPageNumber': 10000,
     'outerMargin': .5,
     'innerMargin': .8,
     'contentsTopMargin': .8,
@@ -435,11 +442,11 @@ Pagination.createPages = function (num, flowName, pageCounterClass, columns) {
         header.classList.add('pagination-header');
 
         chapterheader = document.createElement('span');
-        chapterheader.classList.add('pagination-chapter');
+        chapterheader.classList.add('pagination-header-chapter');
         header.appendChild(chapterheader);
 
         sectionheader = document.createElement('span');
-        sectionheader.classList.add('pagination-section');
+        sectionheader.classList.add('pagination-header-section');
         header.appendChild(sectionheader);
 
         page.appendChild(header);
@@ -575,12 +582,12 @@ Pagination.headersAndToc = function (bodyObjects) {
 
         for (var j = 0; j < pages.length; j++) {
             var chapterHeader = pages[j].querySelector(
-                '.pagination-header .pagination-chapter'
+                '.pagination-header .pagination-header-chapter'
             );
             chapterHeader.innerHTML = currentChapterTitle;
 
             var sectionHeader = pages[j].querySelector(
-                '.pagination-header .pagination-section'
+                '.pagination-header .pagination-header-section'
             );
             sectionHeader.innerHTML = currentSectionTitle;
         }
@@ -1284,6 +1291,7 @@ Pagination.flowObject.prototype.addPagesLoop = function (numberOfPages) {
      * It is a point to overshoot the target, as it is more costly to add than
      * to remove pages. 
      */
+    if (this.bulkPagesToAdd > Pagination.config['maxPageNumber']) return;
     if ('undefined' === typeof (numberOfPages)) {
         this.div.appendChild(
             Pagination.createPages(

@@ -70,12 +70,12 @@ font-size:13px;
 }
 
 /* Don't display section titles in the header on odd pages */
-.pagination-page:nth-child(odd) .pagination-header .pagination-section {
+.pagination-page:nth-child(odd) .pagination-header .pagination-header-section {
 display:none;
 }
 
 /* Don't display chapter titles in the header on even pages */
-.pagination-page:nth-child(even) .pagination-header .pagination-chapter {
+.pagination-page:nth-child(even) .pagination-header .pagination-header-chapter {
 display:none;
 }
 
