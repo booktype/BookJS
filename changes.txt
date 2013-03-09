@@ -1,5 +1,6 @@
-0.26.0-dev
+0.60-dev
 ----
+changed version scheme
 prefix flownames and content elements
 option not to change original DOM
 style-element creation through JS options
