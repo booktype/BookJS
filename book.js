@@ -924,12 +924,20 @@ Pagination.flowObject.prototype.findTitle = function () {
         titleField = this.rawdiv.querySelector(
             Pagination.config['chapterTitleMarker']
         );
-        this.title = titleField.innerHTML;
+	if (titleField) {
+        	this.title = titleField.innerHTML;
+	} else {
+		this.title = '';
+	}
     } else if (this.type == 'section') {
         titleField = this.rawdiv.querySelector(
             Pagination.config['sectionTitleMarker']
         );
-        this.title = titleField.innerHTML;
+	if (titleField) {
+        	this.title = titleField.innerHTML;
+	} else {
+		this.title = '';
+	}
     }
 };
 
