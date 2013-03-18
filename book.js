@@ -37,19 +37,19 @@
  * only need to specify the options if you want to deviate from the default 
  * value.
  *
- * sectionStartMarker: h1 -- This is the HTML element we look for to find where
+ * sectionStartMarker: 'h1' -- This is the HTML element we look for to find where
  * a new section starts.
  *
- * sectionTitleMarker: h1 -- Within the newly found section, we look for the
+ * sectionTitleMarker: 'h1' -- Within the newly found section, we look for the
  * first instance of this element to determine the title of the section.
  *
- * chapterStartMarker: h2 -- This is the HTML element we look for to find where
+ * chapterStartMarker: 'h2' -- This is the HTML element we look for to find where
  * a new chapter starts.
  *
- * chapterTitleMarker: h2 -- Within the newly found chapter, we look for the
+ * chapterTitleMarker: 'h2' -- Within the newly found chapter, we look for the
  * first instance of this element to determine the title of the chapter.
  *
- * flowElement: document.body -- This specifies element the container element
+ * flowElement: 'document.body' -- This specifies element the container element
  * of the content we will flow into pages. You can use any javascript selector
  * here, such as "document.getElementById('contents')" .
  * 
@@ -138,7 +138,7 @@
  * 
  * pageWidth: 5.8 (inch) -- This controls the width of the page.
  * 
- * lengthUnit: in (inch) -- Use this to specify the unit used in all the page 
+ * lengthUnit: 'in' (inch) -- Use this to specify the unit used in all the page 
  * style options. It can be any unit supported by CSS.
  * 
  * METHODS
