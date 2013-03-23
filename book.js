@@ -96,12 +96,6 @@
  * the conents will not be modified. Only the container element that holds the
  * contents will be assigned another CSS class. Note: divideContents has to be
  * true if one wants the frontmatter to render.
- * 
- * regionLayoutUpdateEventName: 'webkitregionlayoutupdate' -- This controls 
- * which event is listened to for in case the browser detects layout change. 
- * The default option corresponds to Chrome 25+. Chrome versions below 25 need
- * to set this to 'webkitRegionLayoutUpdate'. A bug in early development 
- * versions of Chrome 25 did that the event anme was 'regionlayoutupdate'.
  *
  * maxPageNumber: 10000 -- This controls the maximum amount of pages. If more 
  * pages than this are added, BookJS will die. Notice that pages are added 
@@ -200,7 +194,6 @@
         'pageHeight': 8.3,
         'pageWidth': 5.8,
         'lengthUnit': 'in',
-        'regionLayoutUpdateEventName': 'webkitregionlayoutupdate',
     };
     
     // help functions
@@ -1003,38 +996,15 @@
         // Connect footnote reflow events with triggers.
         var flowObject = this;
 
-        var checkAllFootnotePlacements = function () {
-
-            flowObject.checkAllFootnotePlacements();
-        }
-
-        this.namedFlow.addEventListener(
-        pagination.config('regionLayoutUpdateEventName'),
-        checkAllFootnotePlacements);
-
 
         var reFlow = function () {
-            flowObject.namedFlow.removeEventListener(
-            pagination.config('regionLayoutUpdateEventName'),
-            checkAllFootnotePlacements);
             flowObject.layoutFootnotes();
-
-            flowObject.namedFlow.addEventListener(
-            pagination.config('regionLayoutUpdateEventName'),
-            checkAllFootnotePlacements);
         }
 
         this.namedFlow.addEventListener('footnotesNeedMove', reFlow);
 
         var redoFootnotes = function () {
-            flowObject.namedFlow.removeEventListener(
-            pagination.config('regionLayoutUpdateEventName'),
-            checkAllFootnotePlacements);
             flowObject.redoFootnotes();
-
-            flowObject.namedFlow.addEventListener(
-            pagination.config('regionLayoutUpdateEventName'),
-            checkAllFootnotePlacements);
         }
 
         this.rawdiv.addEventListener('redoFootnotes', redoFootnotes);
@@ -1045,9 +1015,6 @@
              * put in their place. If not, the spacer most likely has to be
              * replaced by the footnote in its original location.
              */
-            flowObject.namedFlow.removeEventListener(
-            pagination.config('regionLayoutUpdateEventName'),
-            checkSpacerSize);
 
             for (var i = 0; i < flowObject.footnotes.length; i++) {
                 if ('hidden' in flowObject.footnotes[i]) {
@@ -1063,16 +1030,7 @@
                 }
             }
 
-            flowObject.namedFlow.addEventListener(
-            pagination.config('regionLayoutUpdateEventName'),
-            checkSpacerSize);
         };
-
-
-
-        flowObject.namedFlow.addEventListener(
-        pagination.config('regionLayoutUpdateEventName'),
-        checkSpacerSize);
 
 
     }
@@ -1242,6 +1200,34 @@
                 this.footnotes[i]['item']);
                 newFootnoteContainer.appendChild(this.footnotes[i]['item']);
 
+                var checkSpacerSize = function () {
+                     console.log('check spacer size');
+                    if (this.footnotes[i]['item'].clientHeight <
+                        this.footnotes[i]['hidden'].clientHeight) {
+                        /* The footnote is smaller than its space holder on another
+                         * page. It means the footnote has been shortened and we
+                         * need to reflow footnotes!
+                         */
+                        this.namedFlow.dispatchEvent(
+                        pagination.events.footnotesNeedMove);                        
+                    }
+                };
+                
+
+
+            var observer = new MutationObserver(function(mutations) {
+                checkSpacerSize();  
+            });
+ 
+            observer.observe(this.footnotes[i]['item'], { 
+                attributes: true, 
+                subtree: true, 
+                characterData: true 
+                
+            });
+                            
+                
+                
 
             }
         }
@@ -1374,9 +1360,33 @@
                 pagination.events.pageLayoutUpdate);
             }
         }
-        this.namedFlow.addEventListener(pagination.config('regionLayoutUpdateEventName'),
-            checkOverset);
 
+        var checkAllFootnotePlacements = function() {
+            flowObject.checkAllFootnotePlacements();
+        }
+
+        if (this.rawdiv) {
+        /* Create an observer instance to watch if anything is being changed in
+         * the contents of the original text.
+         * We do this instead of listening to the webkitregionlayoutupdate 
+         * event of the flow, because it is ridden with bugs and fires too often.
+         * This could be changed once 
+         * https://bugs.webkit.org/show_bug.cgi?id=105366 has been resolved.
+         */
+            var observer = new MutationObserver(function(mutations) {
+                checkOverset();
+                console.log('check footnote placement');
+                checkAllFootnotePlacements();
+            });
+ 
+            observer.observe(this.rawdiv, { 
+                attributes: true, 
+                subtree: true, 
+                characterData: true 
+                
+            });
+        }
+        
         var reFlow = function () {
             // The page layout has changed. Reflow by adding pages one by one.
             flowObject.addOrRemovePages(1);
