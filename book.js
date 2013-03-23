@@ -814,7 +814,26 @@
 
 
 
-    pagination.flowObject = function (name, pageCounter, rawdiv) {
+    if (pagination.config('autoStart') === true) {
+        /* Hook pagination.autoStartInitiator to document loading stage if
+         * autoStart is set to true.
+         */
+        document.addEventListener(
+            "readystatechange",
+        pagination.autoStartInitiator);
+    }
+
+    exports.pagination = pagination;
+
+}).call(this);
+
+
+(function () {
+
+    var exports = this,
+        flowObject;
+
+    flowObject = function (name, pageCounter, rawdiv) {
         /* A flowObject is either a chapter, a section start, the frontmatter or
          * the contents of the body of the text that come before the first
          * chapter/section title.
@@ -843,23 +862,23 @@
 
     };
 
-    pagination.flowObject.prototype.redoPages = false;
+    flowObject.prototype.redoPages = false;
     // redoPages is set if page numbering needs to be updated.
 
-    pagination.flowObject.prototype.overset = false;
+    flowObject.prototype.overset = false;
     /* We record the current state of the overset of the region flow so that we
      * only have to find out if pages need to be added or removed when it
      * changes, rather than every time the contents of the region flow changes.
      */
 
-    pagination.flowObject.prototype.firstEmptyRegionIndex = -1;
+    flowObject.prototype.firstEmptyRegionIndex = -1;
     /* In addition to overset, we also need to monitor changes to the
      * firstEmptyRegionIndex property of the flow, because in the case of multi
      * column pages, there may be empty regions (unfilled columns) that we do not
      * want to remove.
      */
 
-    pagination.flowObject.prototype.initiate = function () {
+    flowObject.prototype.initiate = function () {
         /* To be run upon the initiation of any flowObject after rawdiv and div
          * have been set and rawdiv has been filled with initial contents.
          */
@@ -875,7 +894,7 @@
         }
     }
 
-    pagination.flowObject.prototype.setStyle = function () {
+    flowObject.prototype.setStyle = function () {
         /* Create a style element for this flowObject and add it to the header in
          * the DOM. That way it will not be mixing with the DOM of the
          * contents.
@@ -888,13 +907,13 @@
         document.head.appendChild(stylesheet);
     }
 
-    pagination.flowObject.prototype.setType = function (type) {
+    flowObject.prototype.setType = function (type) {
         // Set the type of this flowObject (chapter or section start).
         this.type = type;
         this.div.classList.add('pagination-' + type);
     };
 
-    pagination.flowObject.prototype.findTitle = function () {
+    flowObject.prototype.findTitle = function () {
         // Find the title of section or chapter that this flowObject is covering.
         var titleField;
         if (this.type == 'chapter') {
@@ -916,7 +935,7 @@
         }
     };
 
-    pagination.flowObject.prototype.findStartpageNumber = function () {
+    flowObject.prototype.findStartpageNumber = function () {
         // Find the first page number used in this flowObject.
         if (this.rawdiv.innerText.length > 0 && pagination.config('numberPages')) {
             var startpageNumberField =
@@ -927,7 +946,7 @@
 
     // Footnote handling
 
-    pagination.flowObject.prototype.findFootnoteReferencePage = function (
+    flowObject.prototype.findFootnoteReferencePage = function (
         footnoteReference) {
         /* Find the page where the reference to the footnote in the text is
          * placed.
@@ -944,7 +963,7 @@
         }
     }
 
-    pagination.flowObject.prototype.findFootnotePage = function (footnote) {
+    flowObject.prototype.findFootnotePage = function (footnote) {
         if (footnote.parentNode) {
             // Find the page where the footnote itself is currently placed.
             return footnote.parentNode.parentNode.parentNode;
@@ -953,7 +972,7 @@
         }
     }
 
-    pagination.flowObject.prototype.compareReferenceAndFootnotePage = function (
+    flowObject.prototype.compareReferenceAndFootnotePage = function (
         footnoteObject) {
         /* Check whether a footnote and it's corresponding reference in the text
          * are on the same page.
@@ -980,7 +999,7 @@
     }
 
 
-    pagination.flowObject.prototype.setupFootnoteReflow = function () {
+    flowObject.prototype.setupFootnoteReflow = function () {
         // Connect footnote reflow events with triggers.
         var flowObject = this;
 
@@ -1058,7 +1077,7 @@
 
     }
 
-    pagination.flowObject.prototype.redoFootnotes = function () {
+    flowObject.prototype.redoFootnotes = function () {
         /* Go through all footnotes and check whether they are still where the
          * reference to them is placed.
          */
@@ -1085,7 +1104,7 @@
     }
 
 
-    pagination.flowObject.prototype.checkAllFootnotePlacements = function () {
+    flowObject.prototype.checkAllFootnotePlacements = function () {
         /* Go through all footnotes and check whether they are still where the
          * reference to them is placed.
          */
@@ -1098,7 +1117,7 @@
 
 
 
-    pagination.flowObject.prototype.findAllFootnotes = function () {
+    flowObject.prototype.findAllFootnotes = function () {
 
         // Find all the footnotes in the text and prepare them for flow.
 
@@ -1159,7 +1178,7 @@
 
     }
 
-    pagination.flowObject.prototype.layoutFootnotes = function () {
+    flowObject.prototype.layoutFootnotes = function () {
         // Layout all footnotes
 
         for (var i = 0; i < this.footnotes.length; i++) {
@@ -1229,7 +1248,7 @@
     };
 
 
-    pagination.flowObject.prototype.makeEvenPages = function () {
+    flowObject.prototype.makeEvenPages = function () {
         // If the number of pages is odd, add an empty page.
         var emptyPage = this.div.querySelector(
             '.pagination-page.pagination-empty');
@@ -1247,7 +1266,7 @@
         }
     };
 
-    pagination.flowObject.prototype.addPagesLoop = function (numberOfPages) {
+    flowObject.prototype.addPagesLoop = function (numberOfPages) {
         /* Add pages. If the variable numberOfPages is defined, add this amount of
          * pages. Else use the config option bulkPagesToAdd times
          * pagesToAddIncrementRatio to determine how many pages should be added.
@@ -1276,7 +1295,7 @@
     };
 
 
-    pagination.flowObject.prototype.addOrRemovePages = function (pages) {
+    flowObject.prototype.addOrRemovePages = function (pages) {
         // This loop is called when we believe pages have to added or removed. 
 
         if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
@@ -1313,7 +1332,7 @@
     };
 
 
-    pagination.flowObject.prototype.removeExcessPages = function (pages) {
+    flowObject.prototype.removeExcessPages = function (pages) {
         /* Remove pages that are in excess. As it takes much less time to remove
          * excess pages than to add new ones, it is preferable to add too many
          * pages initially and then remove them givent hat we do not know exactly
@@ -1333,7 +1352,7 @@
     };
 
 
-    pagination.flowObject.prototype.setupReflow = function () {
+    flowObject.prototype.setupReflow = function () {
         /* Setup automatic addition and removing of pages when content is added or
          * removed.
          */
@@ -1368,19 +1387,10 @@
         this.namedFlow.addEventListener('pageLayoutUpdated', reFlow);
 
     };
+    
+    exports.flowObject = flowObject;
 
-    if (pagination.config('autoStart') === true) {
-        /* Hook pagination.autoStartInitiator to document loading stage if
-         * autoStart is set to true.
-         */
-        document.addEventListener(
-            "readystatechange",
-        pagination.autoStartInitiator);
-    }
-
-    exports.pagination = pagination;
-
-}).call(this);
+}).call(this.pagination);    
 
 
 pagination.initiate();
