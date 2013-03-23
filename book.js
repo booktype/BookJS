@@ -195,7 +195,7 @@
         'pageWidth': 5.8,
         'lengthUnit': 'in',
     };
-    
+
     // help functions
 
     pagination.romanize = function () {
@@ -238,15 +238,15 @@
         this.setStyle();
         this.setPageStyle();
         document.head.insertBefore(
-        pagination.pageStyleSheet,
-        document.head.firstChild);
+            pagination.pageStyleSheet,
+            document.head.firstChild);
     }
 
     pagination.config = function (configKey) {
         /* Return configuration variables either from paginationConfig if present,
          * or using default values.
          */
-        
+
         if (paginationConfig && configKey in paginationConfig) {
             return paginationConfig[configKey];
         } else if (configKey in defaults) {
@@ -267,8 +267,7 @@
             "\n.pagination-contents {display: -webkit-flex; -webkit-flex: 1;}"
         /* There seems to be a bug in the new flexbox model code which requires the
          * height to be set to an arbitrary value (which is ignored).
-         */
-        + "\n.pagination-contents {height: 0px;}" +
+         */ + "\n.pagination-contents {height: 0px;}" +
             "\n.pagination-contents-column {-webkit-flex: 1;}" + "\nbody {" +
             "counter-reset: pagination-footnote pagination-footnote-reference;}" +
             "\n.pagination-footnote::before {" +
@@ -351,8 +350,7 @@
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
          * contentsContainer's width.
-         */
-        + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
+         */ + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
             "\n.pagination-frontmatter-contents {width:" + contentsWidth + ";}"
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         + "\n.pagination-simple .pagination-footnote > span {" +
@@ -423,7 +421,7 @@
 
     pagination.pageCounters.roman = new pagination.pageCounterCreator(
         'roman',
-    pagination.romanize);
+        pagination.romanize);
     // roman is the page counter used by the frontmatter.
 
     pagination.createPages = function (num, flowName, pageCounterClass, columns) {
@@ -495,8 +493,8 @@
     pagination.events.bodyLayoutUpdated = document.createEvent('Event');
     pagination.events.bodyLayoutUpdated.initEvent(
         'bodyLayoutUpdated',
-    true,
-    true);
+        true,
+        true);
     /* bodyLayoutUpdated is emitted when pages have been added or removed from any
      * body flowObject.
      */
@@ -504,8 +502,8 @@
     pagination.events.layoutFlowFinished = document.createEvent('Event');
     pagination.events.layoutFlowFinished.initEvent(
         'layoutFlowFinished',
-    true,
-    true);
+        true,
+        true);
     /* layoutFlowFinished is emitted the first time the flow of the entire book has
      * been created.
      */
@@ -513,8 +511,8 @@
     pagination.events.pageLayoutUpdate = document.createEvent('Event');
     pagination.events.pageLayoutUpdate.initEvent(
         'pageLayoutUpdated',
-    true,
-    true);
+        true,
+        true);
     /* pageLayoutUpdated is emitted when new pages have to added or excess pages be
      * removed.
      */
@@ -522,8 +520,8 @@
     pagination.events.footnotesNeedMove = document.createEvent('Event');
     pagination.events.footnotesNeedMove.initEvent(
         'footnotesNeedMove',
-    true,
-    true);
+        true,
+        true);
     /* footnotesNeedMove is emitted when at least one footnote no longer is on the
      * page of the reference page it corresponds to.
      */
@@ -531,8 +529,8 @@
     pagination.events.redoFootnotes = document.createEvent('Event');
     pagination.events.redoFootnotes.initEvent(
         'redoFootnotes',
-    true,
-    true);
+        true,
+        true);
     /* redoFootnotes is being listened to by BookJS to see when footnotes need to
      * be refound and redrawn. This can be used by editors who need to add new 
      * footnotes. 
@@ -598,7 +596,7 @@
 
                 if (typeof bodyObjects[i].startpageNumber !== 'undefined') {
                     var tocItemPnText = document.createTextNode(
-                    bodyObjects[i].startpageNumber);
+                        bodyObjects[i].startpageNumber);
                     tocItemPnSpan.appendChild(tocItemPnText);
                 }
 
@@ -623,9 +621,9 @@
         var chapterCounter = 0;
 
         bodyObjects.push(
-        new pagination.flowObject(
+            new pagination.flowObject(
             'pagination-body-pre',
-        pagination.pageCounters.arab));
+            pagination.pageCounters.arab));
 
         var bodyContainer = eval(pagination.config('flowElement'));
         var bodyContents = bodyContainer.childNodes;
@@ -635,21 +633,21 @@
 
             if (bodyContents[0].nodeType == 1) {
                 if (
-                bodyContents[0].webkitMatchesSelector(
-                pagination.config('chapterStartMarker'))) {
+                    bodyContents[0].webkitMatchesSelector(
+                    pagination.config('chapterStartMarker'))) {
                     bodyObjects.push(
-                    new pagination.flowObject(
+                        new pagination.flowObject(
                         'pagination-body-' + chapterCounter++,
-                    pagination.pageCounters.arab));
+                        pagination.pageCounters.arab));
                     bodyObjects[chapterCounter].setType('chapter');
 
                 } else if (
-                bodyContents[0].webkitMatchesSelector(
-                pagination.config('sectionStartMarker'))) {
+                    bodyContents[0].webkitMatchesSelector(
+                    pagination.config('sectionStartMarker'))) {
                     bodyObjects.push(
-                    new pagination.flowObject(
+                        new pagination.flowObject(
                         'pagination-body-' + chapterCounter++,
-                    pagination.pageCounters.arab));
+                        pagination.pageCounters.arab));
                     bodyObjects[chapterCounter].setType('section');
                 }
             }
@@ -682,8 +680,8 @@
 
         var bodyObject = new pagination.flowObject(
             'body',
-        pagination.pageCounters.arab,
-        rawdiv)
+            pagination.pageCounters.arab,
+            rawdiv)
 
         // Create div for layout
         var layoutDiv = document.createElement('div');
@@ -728,8 +726,8 @@
             //Create and flow frontmatter
             fmObject = new pagination.flowObject(
                 'pagination-frontmatter',
-            pagination.pageCounters.roman,
-            false);
+                pagination.pageCounters.roman,
+                false);
             fmObject.columns = 1;
             contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
             fmObject.rawdiv.innerHTML = pagination.config('frontmatterContents');
@@ -784,8 +782,8 @@
         // Check whether CSS Regions are present in Chrome 23+ version
         if (
         (
-        document.webkitGetNamedFlows) && (
-        document.webkitGetNamedFlows() !== null)) {
+            document.webkitGetNamedFlows) && (
+            document.webkitGetNamedFlows() !== null)) {
             return true;
         }
         return false;
@@ -813,7 +811,7 @@
          */
         document.addEventListener(
             "readystatechange",
-        pagination.autoStartInitiator);
+            pagination.autoStartInitiator);
     }
 
     exports.pagination = pagination;
@@ -911,7 +909,7 @@
         var titleField;
         if (this.type == 'chapter') {
             titleField = this.rawdiv.querySelector(
-            pagination.config('chapterTitleMarker'));
+                pagination.config('chapterTitleMarker'));
             if (titleField) {
                 this.title = titleField.innerHTML;
             } else {
@@ -919,7 +917,7 @@
             }
         } else if (this.type == 'section') {
             titleField = this.rawdiv.querySelector(
-            pagination.config('sectionTitleMarker'));
+                pagination.config('sectionTitleMarker'));
             if (titleField) {
                 this.title = titleField.innerHTML;
             } else {
@@ -945,7 +943,7 @@
          * placed.
          */
         var footnoteReferenceNode = this.namedFlow.getRegionsByContent(
-        footnoteReference)[0];
+            footnoteReference)[0];
         if (footnoteReferenceNode) {
             return footnoteReferenceNode.parentNode.parentNode.parentNode;
         } else {
@@ -980,9 +978,9 @@
         }
 
         var referencePage = this.findFootnoteReferencePage(
-        footnoteReference);
+            footnoteReference);
         var footnotePage = this.findFootnotePage(
-        footnoteObject['item']);
+            footnoteObject['item']);
 
         if (footnotePage === referencePage) {
             return true;
@@ -1025,7 +1023,7 @@
                          * need to reflow footnotes!
                          */
                         flowObject.namedFlow.dispatchEvent(
-                        pagination.events.footnotesNeedMove);
+                            pagination.events.footnotesNeedMove);
                     }
                 }
             }
@@ -1046,12 +1044,12 @@
 
             if ('hidden' in this.footnotes[i]) {
                 this.footnotes[i]['hidden'].parentNode.removeChild(
-                this.footnotes[i]['hidden']);
+                    this.footnotes[i]['hidden']);
             }
 
             if (this.footnotes[i]['item'].parentNode !== null) {
                 this.footnotes[i]['item'].parentNode.removeChild(
-                this.footnotes[i]['item']);
+                    this.footnotes[i]['item']);
             }
         }
         // Start out with no footnotes.
@@ -1146,13 +1144,13 @@
 
             if ('hidden' in this.footnotes[i]) {
                 this.footnotes[i]['hidden'].parentNode.removeChild(
-                this.footnotes[i]['hidden']);
+                    this.footnotes[i]['hidden']);
                 delete this.footnotes[i]['hidden'];
             }
 
             if (this.footnotes[i]['item'].parentNode !== null) {
                 this.footnotes[i]['item'].parentNode.removeChild(
-                this.footnotes[i]['item']);
+                    this.footnotes[i]['item']);
             }
         }
 
@@ -1162,7 +1160,7 @@
              */
 
             var footnoteReferencePage = this.findFootnoteReferencePage(
-            document.getElementById(this.footnotes[i]['id']));
+                document.getElementById(this.footnotes[i]['id']));
             // We find the page where the footnote is referenced from.
             var firstFootnoteContainer = footnoteReferencePage.querySelector(
                 '.pagination-footnotes');
@@ -1179,13 +1177,13 @@
                 this.footnotes[i]['hidden'] = document.createElement('div');
 
                 this.footnotes[i]['hidden'].style.height = (
-                this.footnotes[i]['item'].clientHeight) + 'px';
+                    this.footnotes[i]['item'].clientHeight) + 'px';
 
                 this.footnotes[i]['hidden'].id = this.footnotes[i]['id'] +
                     'hidden';
 
                 var newFootnoteReferencePage = this.findFootnoteReferencePage(
-                this.footnotes[i]['reference']);
+                    this.footnotes[i]['reference']);
                 /* We find the page where the footnote is referenced from now and
                  * move the footnote there.
                  */
@@ -1196,12 +1194,12 @@
                  * footnote was previously so that the body text doesn't flow back.
                  */
                 firstFootnoteContainer.replaceChild(
-                this.footnotes[i]['hidden'],
-                this.footnotes[i]['item']);
+                    this.footnotes[i]['hidden'],
+                    this.footnotes[i]['item']);
                 newFootnoteContainer.appendChild(this.footnotes[i]['item']);
 
                 var checkSpacerSize = function () {
-                     console.log('check spacer size');
+                    console.log('check spacer size');
                     if (this.footnotes[i]['item'].clientHeight <
                         this.footnotes[i]['hidden'].clientHeight) {
                         /* The footnote is smaller than its space holder on another
@@ -1209,25 +1207,25 @@
                          * need to reflow footnotes!
                          */
                         this.namedFlow.dispatchEvent(
-                        pagination.events.footnotesNeedMove);                        
+                            pagination.events.footnotesNeedMove);
                     }
                 };
-                
 
 
-            var observer = new MutationObserver(function(mutations) {
-                checkSpacerSize();  
-            });
- 
-            observer.observe(this.footnotes[i]['item'], { 
-                attributes: true, 
-                subtree: true, 
-                characterData: true 
-                
-            });
-                            
-                
-                
+
+                var observer = new MutationObserver(function (mutations) {
+                    checkSpacerSize();
+                });
+
+                observer.observe(this.footnotes[i]['item'], {
+                    attributes: true,
+                    subtree: true,
+                    characterData: true
+
+                });
+
+
+
 
             }
         }
@@ -1244,11 +1242,11 @@
         var allPages = this.div.querySelectorAll('.pagination-page');
         if (allPages.length % 2 == 1) {
             this.div.appendChild(
-            pagination.createPages(
-            1,
-            false,
-            this.pageCounter.cssClass,
-            this.columns));
+                pagination.createPages(
+                1,
+                false,
+                this.pageCounter.cssClass,
+                this.columns));
         }
     };
 
@@ -1262,20 +1260,21 @@
         if (this.bulkPagesToAdd > pagination.config('maxPageNumber')) return;
         if ('undefined' === typeof (numberOfPages)) {
             this.div.appendChild(
-            pagination.createPages(
-            this.bulkPagesToAdd,
-            this.name,
-            this.pageCounter.cssClass,
-            this.columns));
+                pagination.createPages(
+                this.bulkPagesToAdd,
+                this.name,
+                this.pageCounter.cssClass,
+                this.columns));
             this.bulkPagesToAdd = Math.floor(
-            this.bulkPagesToAdd * pagination.config('pagesToAddIncrementRatio'));
+                this.bulkPagesToAdd * pagination.config(
+                'pagesToAddIncrementRatio'));
         } else {
             this.div.appendChild(
-            pagination.createPages(
-            numberOfPages,
-            this.name,
-            this.pageCounter.cssClass,
-            this.columns));
+                pagination.createPages(
+                numberOfPages,
+                this.name,
+                this.pageCounter.cssClass,
+                this.columns));
         }
         this.addOrRemovePages(numberOfPages);
     };
@@ -1294,7 +1293,7 @@
         } else if (
         (this.namedFlow.firstEmptyRegionIndex != -1) && (
         (
-        this.namedFlow.getRegions().length - this.namedFlow.firstEmptyRegionIndex) >
+            this.namedFlow.getRegions().length - this.namedFlow.firstEmptyRegionIndex) >
             this.columns)) {
             /* If there are excess regions, and the number of empty regions is
              * equal to or higher than the number of columns, we need to remove
@@ -1328,10 +1327,9 @@
         var allPages = this.div.querySelectorAll('.pagination-page');
 
         for (
-        var i = (
-        Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns));
-        i < allPages.length;
-        i++) {
+            var i = (
+            Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns)); i <
+            allPages.length; i++) {
             this.div.removeChild(allPages[i]);
         }
         this.addOrRemovePages(pages);
@@ -1351,42 +1349,42 @@
              */
             if (
             (
-            flowObject.namedFlow.overset !== flowObject.overset) || (
-            flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)) {
+                flowObject.namedFlow.overset !== flowObject.overset) || (
+                flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)) {
                 flowObject.overset = flowObject.namedFlow.overset;
                 flowObject.firstEmptyRegionIndex =
                     flowObject.namedFlow.firstEmptyRegionIndex;
                 flowObject.namedFlow.dispatchEvent(
-                pagination.events.pageLayoutUpdate);
+                    pagination.events.pageLayoutUpdate);
             }
         }
 
-        var checkAllFootnotePlacements = function() {
+        var checkAllFootnotePlacements = function () {
             flowObject.checkAllFootnotePlacements();
         }
 
         if (this.rawdiv) {
-        /* Create an observer instance to watch if anything is being changed in
-         * the contents of the original text.
-         * We do this instead of listening to the webkitregionlayoutupdate 
-         * event of the flow, because it is ridden with bugs and fires too often.
-         * This could be changed once 
-         * https://bugs.webkit.org/show_bug.cgi?id=105366 has been resolved.
-         */
-            var observer = new MutationObserver(function(mutations) {
+            /* Create an observer instance to watch if anything is being changed in
+             * the contents of the original text.
+             * We do this instead of listening to the webkitregionlayoutupdate 
+             * event of the flow, because it is ridden with bugs and fires too often.
+             * This could be changed once 
+             * https://bugs.webkit.org/show_bug.cgi?id=105366 has been resolved.
+             */
+            var observer = new MutationObserver(function (mutations) {
                 checkOverset();
                 console.log('check footnote placement');
                 checkAllFootnotePlacements();
             });
- 
-            observer.observe(this.rawdiv, { 
-                attributes: true, 
-                subtree: true, 
-                characterData: true 
-                
+
+            observer.observe(this.rawdiv, {
+                attributes: true,
+                subtree: true,
+                characterData: true
+
             });
         }
-        
+
         var reFlow = function () {
             // The page layout has changed. Reflow by adding pages one by one.
             flowObject.addOrRemovePages(1);
@@ -1397,10 +1395,10 @@
         this.namedFlow.addEventListener('pageLayoutUpdated', reFlow);
 
     };
-    
+
     exports.flowObject = flowObject;
 
-}).call(this.pagination);    
+}).call(this.pagination);
 
 
 pagination.initiate();
