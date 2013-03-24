@@ -1287,8 +1287,8 @@
             observer.observe(this.escapes.footnote[i]['item'], {
                 attributes: true,
                 subtree: true,
-                characterData: true
-
+                characterData: true,
+                childList: true
             });
 
         }
@@ -1439,14 +1439,15 @@ flowObject.prototype.setupReflow = function () {
          */
         var observer = new MutationObserver(function (mutations) {
             checkOverset();
+            console.log('checkfootnote');
             checkAllFootnotePlacements();
         });
 
         observer.observe(this.rawdiv, {
             attributes: true,
             subtree: true,
-            characterData: true
-
+            characterData: true,
+            childList: true
         });
     }
 
