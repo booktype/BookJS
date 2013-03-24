@@ -240,7 +240,7 @@
         document.head.insertBefore(
             pagination.pageStyleSheet,
             document.head.firstChild);
-    }
+    };
 
     pagination.config = function (configKey) {
         /* Return configuration variables either from paginationConfig if present,
@@ -254,7 +254,7 @@
         } else {
             return false;
         }
-    }
+    };
 
     pagination.setStyle = function () {
         /* Set style for the regions and pages used by BookJS and add it to the
@@ -285,7 +285,7 @@
             "\n.pagination-simple {height: auto; position-relative;}" +
             "\n.pagination-page {margin-left:auto; margin-right:auto;}";
         document.head.appendChild(stylesheet);
-    }
+    };
 
     pagination.setPageStyle = function () {
         // Set style for a particular page size.
@@ -355,7 +355,7 @@
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         + "\n.pagination-simple .pagination-footnote > span {" +
             "position: absolute; right: 0in; width: 1in;}";
-    }
+    };
 
 
 
@@ -692,7 +692,7 @@
 
         bodyObject.initiate();
         document.dispatchEvent(pagination.events.layoutFlowFinished);
-    }
+    };
 
     pagination.applyBookLayout = function () {
         /* Apply this layout if CSS Regions are present.
@@ -801,7 +801,7 @@
                 pagination.applyBookLayoutNonDestructive();
             }
         }
-    }
+    };
 
 
 
@@ -847,10 +847,12 @@
 
         this.columns = pagination.config('columns');
 
-        this.footnotes = [];
+        this.escapes = {}
+        this.escapes.footnote = [];
 
-        this.footnoteStylesheet = document.createElement('style');
-
+        this.escapeStylesheets = {}
+        this.escapeStylesheets.footnote = document.createElement('style');
+        
     };
 
     flowObject.prototype.redoPages = false;
@@ -883,7 +885,7 @@
         if (pagination.config('numberPages')) {
             this.pageCounter.numberPages();
         }
-    }
+    };
 
     flowObject.prototype.setStyle = function () {
         /* Create a style element for this flowObject and add it to the header in
@@ -896,7 +898,7 @@
             ";}" + "\n." + this.name + "-contents " + "{-webkit-flow-into: " +
             this.name + ";}";
         document.head.appendChild(stylesheet);
-    }
+    };
 
     flowObject.prototype.setType = function (type) {
         // Set the type of this flowObject (chapter or section start).
@@ -952,7 +954,7 @@
              */
             return this.findFootnoteReferencePage(footnoteReference.parentNode);
         }
-    }
+    };
 
     flowObject.prototype.findFootnotePage = function (footnote) {
         if (footnote.parentNode) {
@@ -961,7 +963,7 @@
         } else {
             return false;
         }
-    }
+    };
 
     flowObject.prototype.compareReferenceAndFootnotePage = function (
         footnoteObject) {
@@ -987,7 +989,7 @@
         } else {
             return false;
         }
-    }
+    };
 
 
     flowObject.prototype.setupFootnoteReflow = function () {
@@ -1014,10 +1016,10 @@
              * replaced by the footnote in its original location.
              */
 
-            for (var i = 0; i < flowObject.footnotes.length; i++) {
-                if ('hidden' in flowObject.footnotes[i]) {
-                    if (flowObject.footnotes[i]['item'].clientHeight <
-                        flowObject.footnotes[i]['hidden'].clientHeight) {
+            for (var i = 0; i < flowObject.escapes.footnote.length; i++) {
+                if ('hidden' in flowObject.escapes.footnote[i]) {
+                    if (flowObject.escapes.footnote[i]['item'].clientHeight <
+                        flowObject.escapes.footnote[i]['hidden'].clientHeight) {
                         /* The footnote is smaller than its space holder on another
                          * page. It means the footnote has been shortened and we
                          * need to reflow footnotes!
@@ -1031,159 +1033,163 @@
         };
 
 
-    }
+    };
 
     flowObject.prototype.redoFootnotes = function () {
         /* Go through all footnotes and check whether they are still where the
          * reference to them is placed.
          */
-        for (var i = 0; i < this.footnotes.length; i++) {
+        for (var i = 0; i < this.escapes.footnote.length; i++) {
             /* Go through all footnotes, removing all spacer blocks and footnote
              * references from the DOM.
              */
 
-            if ('hidden' in this.footnotes[i]) {
-                this.footnotes[i]['hidden'].parentNode.removeChild(
-                    this.footnotes[i]['hidden']);
+            if ('hidden' in this.escapes.footnote[i]) {
+                this.escapes.footnote[i]['hidden'].parentNode.removeChild(
+                    this.escapes.footnote[i]['hidden']);
             }
 
-            if (this.footnotes[i]['item'].parentNode !== null) {
-                this.footnotes[i]['item'].parentNode.removeChild(
-                    this.footnotes[i]['item']);
+            if (this.escapes.footnote[i]['item'].parentNode !== null) {
+                this.escapes.footnote[i]['item'].parentNode.removeChild(
+                    this.escapes.footnote[i]['item']);
             }
         }
         // Start out with no footnotes.
-        this.footnotes = [];
+        this.escapes.footnote = [];
 
         // Find footnotes from scratch.
         this.findAllFootnotes();
-    }
+    };
 
 
     flowObject.prototype.checkAllFootnotePlacements = function () {
         /* Go through all footnotes and check whether they are still where the
          * reference to them is placed.
          */
-        for (var i = 0; i < this.footnotes.length; i++) {
-            if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
+        for (var i = 0; i < this.escapes.footnote.length; i++) {
+            if (!(this.compareReferenceAndFootnotePage(this.escapes.footnote[i]))) {
                 this.namedFlow.dispatchEvent(pagination.events.footnotesNeedMove);
             }
         }
+    };
+
+    
+    flowObject.prototype.findAllFootnotes = function() {
+        // Find all the footnotes in the text and prepare them for flow.
+        this.findAllEscapes('footnote');
     }
 
+    flowObject.prototype.findAllEscapes = function (escapeType) {
 
+        // Find all the escapes (footnotes, topfloats) in the text and prepare them for flow.
 
-    flowObject.prototype.findAllFootnotes = function () {
-
-        // Find all the footnotes in the text and prepare them for flow.
-
-        if (this.footnoteStylesheet.parentNode === document.head) {
+        if (this.escapeStylesheets[escapeType].parentNode === document.head) {
             // Remove all previous footnote stylesheet rules.
-            document.head.removeChild(this.footnoteStylesheet);
-            this.footnoteStylesheet.innerHTML = '';
+            document.head.removeChild(this.escapeStylesheets[escapeType]);
+            this.escapeStylesheets[escapeType].innerHTML = '';
         }
 
-        /* Look for all the items that have "pagination-footnote" in their class list. These
-         * will be treated as footnote texts.
+        /* Look for all the items that have "pagination-"+escapeType in their class list. These
+         * will be treated as escapes from the normal text flow.
          */
-        var allFootnotes = this.rawdiv.getElementsByClassName(
-            'pagination-footnote');
+        var allEscapes = this.rawdiv.getElementsByClassName(
+            'pagination-' + escapeType);
 
-        for (var i = 0; i < allFootnotes.length; i++) {
+        for (var i = 0; i < allEscapes.length; i++) {
 
-            if (allFootnotes[i].id === '') {
-                /* If footnote has no id, create one, so that we can target it
+            if (allEscapes[i].id === '') {
+                /* If the escape has no id, create one, so that we can target it
                  * using CSS rules.
                  */
-                allFootnotes[i].id = pagination.createRandomId(
-                    'pagination-footnote-');
+                allEscapes[i].id = pagination.createRandomId(
+                    'pagination-'+escapeType+'-');
             }
 
-            var footnoteId = allFootnotes[i].id;
+            var escapeId = allEscapes[i].id;
 
-            this.footnoteStylesheet.innerHTML +=
-                '\n#' + footnoteId + ' > * {-webkit-flow-into: ' + footnoteId +
-                ';}' + '\n#' + footnoteId + '-flow-into {-webkit-flow-from: ' +
-                footnoteId + ';}';
+            this.escapeStylesheets.footnote.innerHTML +=
+                '\n#' + escapeId + ' > * {-webkit-flow-into: ' + escapeId +
+                ';}' + '\n#' + escapeId + '-flow-into {-webkit-flow-from: ' +
+                escapeId + ';}';
 
 
-            var footnoteObject = {};
-            /* We create this object so that we can find the footnote item and
+            var escapeObject = {};
+            /* We create this object so that we can find the escape item and
              * reference again later on.
              */
 
-            footnoteObject['reference'] = allFootnotes[i];
+            escapeObject['reference'] = allEscapes[i];
 
-            var footnoteFlowTo = document.createElement('div');
+            var escapeFlowTo = document.createElement('div');
 
-            footnoteFlowTo.id = footnoteId + '-flow-into';
+            escapeFlowTo.id = escapeId + '-flow-into';
 
-            footnoteFlowTo.classList.add('pagination-footnote-item');
+            escapeFlowTo.classList.add('pagination-'+escapeType+'-item');
 
-            footnoteObject['item'] = footnoteFlowTo;
+            escapeObject['item'] = escapeFlowTo;
 
-            footnoteObject['id'] = footnoteId;
+            escapeObject['id'] = escapeId;
 
-            this.footnotes.push(footnoteObject);
+            this.escapes[escapeType].push(escapeObject);
 
 
         }
-        if (this.footnoteStylesheet.innerHTML !== '') {
-            document.head.appendChild(this.footnoteStylesheet);
+        if (this.escapeStylesheets.footnote.innerHTML !== '') {
+            document.head.appendChild(this.escapeStylesheets.footnote);
         }
 
-    }
+    };
 
     flowObject.prototype.layoutFootnotes = function () {
         // Layout all footnotes
 
-        for (var i = 0; i < this.footnotes.length; i++) {
+        for (var i = 0; i < this.escapes.footnote.length; i++) {
             /* Go through all footnotes, delete the spacer blocks if they have any
              * and remove the footnote itself from the DOM.
              */
 
-            if ('hidden' in this.footnotes[i]) {
-                this.footnotes[i]['hidden'].parentNode.removeChild(
-                    this.footnotes[i]['hidden']);
-                delete this.footnotes[i]['hidden'];
+            if ('hidden' in this.escapes.footnote[i]) {
+                this.escapes.footnote[i]['hidden'].parentNode.removeChild(
+                    this.escapes.footnote[i]['hidden']);
+                delete this.escapes.footnote[i]['hidden'];
             }
 
-            if (this.footnotes[i]['item'].parentNode !== null) {
-                this.footnotes[i]['item'].parentNode.removeChild(
-                    this.footnotes[i]['item']);
+            if (this.escapes.footnote[i]['item'].parentNode !== null) {
+                this.escapes.footnote[i]['item'].parentNode.removeChild(
+                    this.escapes.footnote[i]['item']);
             }
         }
 
-        for (var i = 0; i < this.footnotes.length; i++) {
+        for (var i = 0; i < this.escapes.footnote.length; i++) {
             /* Go through the footnotes again, this time with the purpose of
              * placing them correctly.
              */
 
             var footnoteReferencePage = this.findFootnoteReferencePage(
-                document.getElementById(this.footnotes[i]['id']));
+                document.getElementById(this.escapes.footnote[i]['id']));
             // We find the page where the footnote is referenced from.
             var firstFootnoteContainer = footnoteReferencePage.querySelector(
                 '.pagination-footnotes');
-            firstFootnoteContainer.appendChild(this.footnotes[i]['item']);
+            firstFootnoteContainer.appendChild(this.escapes.footnote[i]['item']);
             // We insert the footnote in the footnote container of that page.
 
-            if (!(this.compareReferenceAndFootnotePage(this.footnotes[i]))) {
+            if (!(this.compareReferenceAndFootnotePage(this.escapes.footnote[i]))) {
                 /* If the footnote reference has been moved from one page to
                  * another through the insertion procedure, we move the footnote to
                  * where it is referenced from now and create an empty div 
                  * ('hidden') and set it in it's place.
                  */
 
-                this.footnotes[i]['hidden'] = document.createElement('div');
+                this.escapes.footnote[i]['hidden'] = document.createElement('div');
 
-                this.footnotes[i]['hidden'].style.height = (
-                    this.footnotes[i]['item'].clientHeight) + 'px';
+                this.escapes.footnote[i]['hidden'].style.height = (
+                    this.escapes.footnote[i]['item'].clientHeight) + 'px';
 
-                this.footnotes[i]['hidden'].id = this.footnotes[i]['id'] +
+                this.escapes.footnote[i]['hidden'].id = this.escapes.footnote[i]['id'] +
                     'hidden';
 
                 var newFootnoteReferencePage = this.findFootnoteReferencePage(
-                    this.footnotes[i]['reference']);
+                    this.escapes.footnote[i]['reference']);
                 /* We find the page where the footnote is referenced from now and
                  * move the footnote there.
                  */
@@ -1194,13 +1200,13 @@
                  * footnote was previously so that the body text doesn't flow back.
                  */
                 firstFootnoteContainer.replaceChild(
-                    this.footnotes[i]['hidden'],
-                    this.footnotes[i]['item']);
-                newFootnoteContainer.appendChild(this.footnotes[i]['item']);
+                    this.escapes.footnote[i]['hidden'],
+                    this.escapes.footnote[i]['item']);
+                newFootnoteContainer.appendChild(this.escapes.footnote[i]['item']);
 
                 var checkSpacerSize = function () {
-                    if (this.footnotes[i]['item'].clientHeight <
-                        this.footnotes[i]['hidden'].clientHeight) {
+                    if (this.escapes.footnote[i]['item'].clientHeight <
+                        this.escapes.footnote[i]['hidden'].clientHeight) {
                         /* The footnote is smaller than its space holder on another
                          * page. It means the footnote has been shortened and we
                          * need to reflow footnotes!
@@ -1216,7 +1222,7 @@
                     checkSpacerSize();
                 });
 
-                observer.observe(this.footnotes[i]['item'], {
+                observer.observe(this.escapes.footnote[i]['item'], {
                     attributes: true,
                     subtree: true,
                     characterData: true
@@ -1356,11 +1362,11 @@
                 flowObject.namedFlow.dispatchEvent(
                     pagination.events.pageLayoutUpdate);
             }
-        }
+        };
 
         var checkAllFootnotePlacements = function () {
             flowObject.checkAllFootnotePlacements();
-        }
+        };
 
         if (this.rawdiv) {
             /* Create an observer instance to watch if anything is being changed in
