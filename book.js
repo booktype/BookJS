@@ -447,12 +447,13 @@
 
     pagination.createPages = function (num, flowName, pageCounterClass, columns) {
         // Create the DOM structure of num number of pages.
-        var page, contents, footnotes, contentsContainer, column, topFloats;
+        var page, contents, footnotes, contentsContainer, column, topfloats;
         var tempRoot = document.createDocumentFragment();
         for (var i = 0; i < num; i++) {
             page = document.createElement('div');
             page.classList.add('pagination-page');
-
+            page.id = pagination.createRandomId('pagination-page-');
+            
             header = document.createElement('div');
             header.classList.add('pagination-header');
 
@@ -479,8 +480,8 @@
                 contentsContainer = document.createElement('div');
                 contentsContainer.classList.add('pagination-contents-container');
 
-                topFloats = document.createElement('div');
-                topFloats.classList.add('pagination-topfloats');
+                topfloats = document.createElement('div');
+                topfloats.classList.add('pagination-topfloats');
 
                 contents = document.createElement('div');
                 contents.classList.add('pagination-contents');
@@ -494,7 +495,7 @@
                 footnotes = document.createElement('div');
                 footnotes.classList.add('pagination-footnotes');
 
-                contentsContainer.appendChild(topFloats);
+                contentsContainer.appendChild(topfloats);
                 contentsContainer.appendChild(contents);
                 contentsContainer.appendChild(footnotes);
                 page.appendChild(contentsContainer);
@@ -538,23 +539,23 @@
      * removed.
      */
 
-    pagination.events.footnotesNeedMove = document.createEvent('Event');
-    pagination.events.footnotesNeedMove.initEvent(
-        'footnotesNeedMove',
+    pagination.events.escapesNeedMove = document.createEvent('Event');
+    pagination.events.escapesNeedMove.initEvent(
+        'escapesNeedMove',
         true,
         true);
-    /* footnotesNeedMove is emitted when at least one footnote no longer is on the
-     * page of the reference page it corresponds to.
+    /* escapesNeedMove is emitted when at least one reference to a an escape 
+     * node (footnote, top float) no longer is on the page where it used to be.
      */
 
-    pagination.events.redoFootnotes = document.createEvent('Event');
-    pagination.events.redoFootnotes.initEvent(
-        'redoFootnotes',
+    pagination.events.redoEscapes = document.createEvent('Event');
+    pagination.events.redoEscapes.initEvent(
+        'redoEscapes',
         true,
         true);
-    /* redoFootnotes is being listened to by BookJS to see when footnotes need to
-     * be refound and redrawn. This can be used by editors who need to add new 
-     * footnotes. 
+    /* redoEscapes is being listened to by BookJS to see when escape nodes 
+     * (footnotes, top floats) need to be refound and redrawn. This can be used
+     * by editors that need to add new footnotes or top floats. 
      */
 
 
@@ -903,9 +904,8 @@
         this.setupReflow();
         this.findAllTopfloats();
         this.findAllFootnotes();
-        this.layoutTopfloats();
-        this.layoutFootnotes();
-        this.setupFootnoteReflow();
+        this.placeAllEscapes();
+        this.setupEscapeReflow();
         if (pagination.config('numberPages')) {
             this.pageCounter.numberPages();
         }
@@ -973,7 +973,7 @@
             return escapeReferenceNode.parentNode.parentNode.parentNode;
         } else {
             /* A bug in Webkit means that we don't find the footnote at times. In these
-             * situations we will look for the parent element instead.
+             * situations we look for the parent element instead.
              */
             return this.findEscapeReferencePage(escapeReference.parentNode);
         }
@@ -987,6 +987,65 @@
             return false;
         }
     };
+    
+    flowObject.prototype.placeAllEscapes = function () {
+        /* Find and place all escapes. Then freeze the pages of the references 
+         * to these.
+         */
+        this.layoutTopfloats();
+        this.layoutFootnotes();
+        this.freezeEscapeReferencePages();
+    };
+    
+    flowObject.prototype.freezeEscapeReferencePages = function () {
+        /* For all the references of top/bottom escapes (topfloats, footnotes),
+         * note the page they are on. This way we can compare to this
+         * list when changes have been made and determine whether footnotes need to be reflown.
+         */
+        var escapeTypes = ['footnote', 'topfloat'];
+        
+        for (var j = 0; j < escapeTypes.length; j++) {
+            for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
+                this.escapes[escapeTypes[j]][i]['referencePage'] = this.findEscapeReferencePage(
+                this.escapes[escapeTypes[j]][i]['reference']);
+            }
+        }
+    };
+    
+    flowObject.prototype.checkAllEscapeReferencePagesPlacements = function () {
+        /* For all the references of top/bottom escapes (topfloats, footnotes),
+         * check if they are still on the same page they were on when we froze 
+         * them. If one has changed, dispatch a redoEscapes event.
+         */
+        var escapeTypes = ['footnote', 'topfloat'];
+        
+        for (var j = 0; j < escapeTypes.length; j++) {
+            for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
+                
+                if (document.getElementById(this.escapes[escapeTypes[j]][i]['id']) === null) {
+                    /* It seems this escape reference had been deleted, so we will dispatch an 
+                    * event that will redo all escapes.
+                    */
+                    this.rawdiv.dispatchEvent(pagination.events.redoEscapes);
+                    this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
+                    console.log('something has changed');
+                    return;
+                }                
+                
+                if (this.escapes[escapeTypes[j]][i]['referencePage'] !== this.findEscapeReferencePage(
+                this.escapes[escapeTypes[j]][i]['reference'])) {
+                    this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
+                    console.log('something has changed');
+                    return;
+                }
+                
+            }
+        }
+        
+        return;
+    };    
+    
+    
 
     flowObject.prototype.compareReferenceAndFootnotePage = function (
         footnoteObject) {
@@ -994,13 +1053,6 @@
          * are on the same page.
          */
         var footnoteReference = document.getElementById(footnoteObject['id']);
-        if (footnoteReference === null) {
-            /* It seems this footnote had been deleted, so we will dispatch an 
-             * event that will redo all footnotes.
-             */
-            this.rawdiv.dispatchEvent(pagination.events.redoFootnotes);
-            return false;
-        }
 
         var referencePage = this.findEscapeReferencePage(
             footnoteReference);
@@ -1015,89 +1067,56 @@
     };
 
 
-    flowObject.prototype.setupFootnoteReflow = function () {
+    flowObject.prototype.setupEscapeReflow = function () {
         // Connect footnote reflow events with triggers.
         var flowObject = this;
 
 
         var reFlow = function () {
-            flowObject.layoutFootnotes();
+            console.log('reflowing everything');
+            flowObject.placeAllEscapes();
         }
 
-        this.namedFlow.addEventListener('footnotesNeedMove', reFlow);
+        this.namedFlow.addEventListener('escapesNeedMove', reFlow);
 
-        var redoFootnotes = function () {
-            flowObject.redoFootnotes();
+        var redoEscapes = function () {
+            flowObject.redoEscapes();
         }
 
-        this.rawdiv.addEventListener('redoFootnotes', redoFootnotes);
+        this.rawdiv.addEventListener('redoEscapes', redoEscapes);
+    };
 
+    flowObject.prototype.redoEscapes = function () {
+        /* Reset all top floats and footnotes.
+         */
+        var escapeTypes = ['footnote', 'topfloat'];
+        
+        for (var j = 0; j < escapeTypes.length; j++) {
+            for (var i = 0; i < this.escapes[j].length; i++) {
+                /* Go through all footnotes, removing all spacer blocks and footnote
+                * references from the DOM.
+                */
 
-        var checkSpacerSize = function () {
-            /* Check whether footnotes are still as large as the spacer that was
-             * put in their place. If not, the spacer most likely has to be
-             * replaced by the footnote in its original location.
-             */
+                if (j==='footnote' && 'hidden' in this.escapes[j][i]) {
+                    this.escapes[j][i]['hidden'].parentNode.removeChild(
+                        this.escapes[j][i]['hidden']);
+                }
 
-            for (var i = 0; i < flowObject.escapes.footnote.length; i++) {
-                if ('hidden' in flowObject.escapes.footnote[i]) {
-                    if (flowObject.escapes.footnote[i]['item'].clientHeight <
-                        flowObject.escapes.footnote[i]['hidden'].clientHeight) {
-                        /* The footnote is smaller than its space holder on another
-                         * page. It means the footnote has been shortened and we
-                         * need to reflow footnotes!
-                         */
-                        flowObject.namedFlow.dispatchEvent(
-                            pagination.events.footnotesNeedMove);
-                    }
+                if (this.escapes[j][i]['item'].parentNode !== null) {
+                    this.escapes[j][i]['item'].parentNode.removeChild(
+                        this.escapes[j][i]['item']);
                 }
             }
-
-        };
-
-
-    };
-
-    flowObject.prototype.redoFootnotes = function () {
-        /* Go through all footnotes and check whether they are still where the
-         * reference to them is placed.
-         */
-        for (var i = 0; i < this.escapes.footnote.length; i++) {
-            /* Go through all footnotes, removing all spacer blocks and footnote
-             * references from the DOM.
-             */
-
-            if ('hidden' in this.escapes.footnote[i]) {
-                this.escapes.footnote[i]['hidden'].parentNode.removeChild(
-                    this.escapes.footnote[i]['hidden']);
-            }
-
-            if (this.escapes.footnote[i]['item'].parentNode !== null) {
-                this.escapes.footnote[i]['item'].parentNode.removeChild(
-                    this.escapes.footnote[i]['item']);
-            }
+                    
+            // Start out with no footnotes or top floats.
+            this.escapes[j] = [];
         }
-        // Start out with no footnotes.
-        this.escapes.footnote = [];
-
+        
         // Find footnotes from scratch.
+        this.findAllTopfloats();
         this.findAllFootnotes();
     };
-
-
-    flowObject.prototype.checkAllFootnotePlacements = function () {
-        /* Go through all footnotes and check whether they are still where the
-         * reference to them is placed.
-         */
-        for (var i = 0; i < this.escapes.footnote.length; i++) {
-            if (!(this.compareReferenceAndFootnotePage(
-                this.escapes.footnote[i]))) {
-                this.namedFlow.dispatchEvent(
-                    pagination.events.footnotesNeedMove);
-            }
-        }
-    };
-
+    
     flowObject.prototype.findAllTopfloats = function () {
         // Find all the topfloats in the text and prepare them for flow.
         this.findAllEscapes('topfloat');
@@ -1120,6 +1139,7 @@
             document.head.removeChild(this.escapeStylesheets[escapeType]);
             this.escapeStylesheets[escapeType].innerHTML = '';
         }
+        
 
         /* Look for all the items that have "pagination-"+escapeType in their 
          * class list. These will be treated as escapes from the normal text 
@@ -1185,7 +1205,7 @@
 
     flowObject.prototype.layoutTopBottomEscapes = function (escapeType) {
         // Layout all footnotes and top floats
-
+        console.log('layout: '+escapeType);
         for (var i = 0; i < this.escapes[escapeType].length; i++) {
             /* Go through all escapes, and remove the escape node itself from the DOM.
              * footnotes: delete the spacer blocks if they have any
@@ -1206,6 +1226,7 @@
             if (escapeType === 'topfloat') {
                 this.escapes[escapeType][i]['item'].parentNode.parentNode.parentNode
                     .classList.remove('pagination-page-topfloat');
+                    console.log('remove top float class');
             }
 
             this.escapes[escapeType][i]['item'].parentNode.removeChild(
@@ -1213,6 +1234,8 @@
         }
     }
 
+    console.log(this.escapes);
+    
     for (var i = 0; i < this.escapes[escapeType].length; i++) {
         /* Go through the escapes again, this time with the purpose of
          * placing them correctly.
@@ -1220,6 +1243,10 @@
 
         var escapeReferencePage = this.findEscapeReferencePage(
             document.getElementById(this.escapes[escapeType][i]['id']));
+        
+        if (escapeType==='topfloat') {
+            console.log(escapeReferencePage);
+        }
         // We find the page where the escape is referenced from.
         var firstEscapeContainer = escapeReferencePage.querySelector(
             '.pagination-' + escapeType + 's');
@@ -1273,10 +1300,10 @@
                     this.escapes.footnote[i]['hidden'].clientHeight) {
                     /* The footnote is smaller than its space holder on another
                      * page. It means the footnote has been shortened and we
-                     * need to reflow footnotes!
+                     * need to reflow escapes!
                      */
                     this.namedFlow.dispatchEvent(
-                        pagination.events.footnotesNeedMove);
+                        pagination.events.escapesNeedMove);
                 }
             };
 
@@ -1423,9 +1450,10 @@ flowObject.prototype.setupReflow = function () {
         }
     };
 
-    var checkAllFootnotePlacements = function () {
-        flowObject.checkAllFootnotePlacements();
-    };
+    
+    var checkAllEscapeReferencePagesPlacements = function () {
+        flowObject.checkAllEscapeReferencePagesPlacements();
+    }
 
     if (this.rawdiv) {
         /* Create an observer instance to watch if anything is being changed in
@@ -1439,8 +1467,8 @@ flowObject.prototype.setupReflow = function () {
          */
         var observer = new MutationObserver(function (mutations) {
             checkOverset();
-            console.log('checkfootnote');
-            checkAllFootnotePlacements();
+            console.log('check float references');
+            checkAllEscapeReferencePagesPlacements();
         });
 
         observer.observe(this.rawdiv, {
