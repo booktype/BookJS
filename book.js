@@ -1083,7 +1083,7 @@
             this.footnoteStylesheet.innerHTML = '';
         }
 
-        /* Look for all the items that have "footnote" in their class list. These
+        /* Look for all the items that have "pagination-footnote" in their class list. These
          * will be treated as footnote texts.
          */
         var allFootnotes = this.rawdiv.getElementsByClassName(
@@ -1199,7 +1199,6 @@
                 newFootnoteContainer.appendChild(this.footnotes[i]['item']);
 
                 var checkSpacerSize = function () {
-                    console.log('check spacer size');
                     if (this.footnotes[i]['item'].clientHeight <
                         this.footnotes[i]['hidden'].clientHeight) {
                         /* The footnote is smaller than its space holder on another
@@ -1370,10 +1369,11 @@
              * event of the flow, because it is ridden with bugs and fires too often.
              * This could be changed once 
              * https://bugs.webkit.org/show_bug.cgi?id=105366 has been resolved.
+             * 
+             * TODO: Check whether throttling this event makes sense.
              */
             var observer = new MutationObserver(function (mutations) {
                 checkOverset();
-                console.log('check footnote placement');
                 checkAllFootnotePlacements();
             });
 
