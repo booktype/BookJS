@@ -1,5 +1,9 @@
 0.70-dev
 ----
+pages with top floats have extra CSS class: pagination-page-topfloat
+use mutation observers instead of flow events
+support for top floats
+changed default options reading. Changing page size on the fly now has to happen by changing page sized in paginationConfig rather than Pagionation.config
 
 0.60-dev
 ----
