@@ -103,6 +103,23 @@
  * You should always set this to something much larger than what you will ever
  * expect that you book will need.
  * 
+ * topfloatSelector: '.pagination-topfloat' -- This is the CSS selector used 
+ * for finding top floats within the HTML code. Top floats are placed on the 
+ * page were they were in the text at the time of document loading, and they 
+ * are not moved later on.In editing environments, the top float should be 
+ * inserted into to additional elements, like this:
+ * 
+ * <span class='pagination-topfloat'><span><span>This is the top float contents
+ * </span></span></span>
+ * 
+ * footnoteSelector: '.pagination-footnote' -- This is the CSS selector used 
+ * for finding footnotes within the HTML code. Footnotes are automatically 
+ * moved if the page of their reference changes. In editing environments, the
+ * footnote should be inserted into to additional elements, like this:
+ * 
+ * <span class='pagination-footnote'><span><span>This is a footnote</span>
+ * </span></span>. 
+ * 
  * Page style options
  * 
  * These settings provide a way to do simple styling of the page. These 
@@ -184,6 +201,8 @@
         'autoStart': true,
         'numberPages': true,
         'divideContents': true,
+        'footnoteSelector': '.pagination-footnote',
+        'topfloatSelector': '.pagination-topfloat',
         'maxPageNumber': 10000,
         'outerMargin': .5,
         'innerMargin': .8,
@@ -267,7 +286,8 @@
             "\n.pagination-contents {display: -webkit-flex; -webkit-flex: 1;}"
         /* There seems to be a bug in the new flexbox model code which requires the
          * height to be set to an arbitrary value (which is ignored).
-         */ + "\n.pagination-contents {height: 0px;}" +
+         */
+        + "\n.pagination-contents {height: 0px;}" +
             "\n.pagination-contents-column {-webkit-flex: 1;}" + "\nbody {" +
             "counter-reset: pagination-footnote pagination-footnote-reference;}" +
             "\n.pagination-footnote::before {" +
@@ -350,7 +370,8 @@
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
          * contentsContainer's width.
-         */ + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
+         */
+        + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
             "\n.pagination-frontmatter-contents {width:" + contentsWidth + ";}"
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         + "\n.pagination-simple .pagination-footnote > span {" +
@@ -459,7 +480,7 @@
                 contentsContainer.classList.add('pagination-contents-container');
 
                 topFloats = document.createElement('div');
-                topFloats.classList.add('pagination-top-floats');
+                topFloats.classList.add('pagination-topfloats');
 
                 contents = document.createElement('div');
                 contents.classList.add('pagination-contents');
@@ -849,10 +870,11 @@
 
         this.escapes = {}
         this.escapes.footnote = [];
+        this.escapes.topfloat = [];
 
         this.escapeStylesheets = {}
         this.escapeStylesheets.footnote = document.createElement('style');
-        
+        this.escapeStylesheets.topfloat = document.createElement('style');
     };
 
     flowObject.prototype.redoPages = false;
@@ -879,7 +901,9 @@
         this.namedFlow = document.webkitGetNamedFlows()[this.name];
         this.addOrRemovePages();
         this.setupReflow();
+        this.findAllTopfloats();
         this.findAllFootnotes();
+        this.layoutTopfloats();
         this.layoutFootnotes();
         this.setupFootnoteReflow();
         if (pagination.config('numberPages')) {
@@ -937,7 +961,7 @@
         }
     };
 
-    // Footnote handling
+    // Footnote and top float handling
 
     flowObject.prototype.findFootnoteReferencePage = function (
         footnoteReference) {
@@ -1073,8 +1097,13 @@
         }
     };
 
-    
-    flowObject.prototype.findAllFootnotes = function() {
+    flowObject.prototype.findAllTopfloats = function () {
+        // Find all the topfloats in the text and prepare them for flow.
+        this.findAllEscapes('topfloat');
+    }
+
+
+    flowObject.prototype.findAllFootnotes = function () {
         // Find all the footnotes in the text and prepare them for flow.
         this.findAllEscapes('footnote');
     }
@@ -1084,7 +1113,7 @@
         // Find all the escapes (footnotes, topfloats) in the text and prepare them for flow.
 
         if (this.escapeStylesheets[escapeType].parentNode === document.head) {
-            // Remove all previous footnote stylesheet rules.
+            // Remove all previous stylesheet rules of the same escape type.
             document.head.removeChild(this.escapeStylesheets[escapeType]);
             this.escapeStylesheets[escapeType].innerHTML = '';
         }
@@ -1092,8 +1121,8 @@
         /* Look for all the items that have "pagination-"+escapeType in their class list. These
          * will be treated as escapes from the normal text flow.
          */
-        var allEscapes = this.rawdiv.getElementsByClassName(
-            'pagination-' + escapeType);
+        var allEscapes = this.rawdiv.querySelectorAll(
+            pagination.config(escapeType + 'Selector'));
 
         for (var i = 0; i < allEscapes.length; i++) {
 
@@ -1102,12 +1131,12 @@
                  * using CSS rules.
                  */
                 allEscapes[i].id = pagination.createRandomId(
-                    'pagination-'+escapeType+'-');
+                    'pagination-' + escapeType + '-');
             }
 
             var escapeId = allEscapes[i].id;
 
-            this.escapeStylesheets.footnote.innerHTML +=
+            this.escapeStylesheets[escapeType].innerHTML +=
                 '\n#' + escapeId + ' > * {-webkit-flow-into: ' + escapeId +
                 ';}' + '\n#' + escapeId + '-flow-into {-webkit-flow-from: ' +
                 escapeId + ';}';
@@ -1124,7 +1153,7 @@
 
             escapeFlowTo.id = escapeId + '-flow-into';
 
-            escapeFlowTo.classList.add('pagination-'+escapeType+'-item');
+            escapeFlowTo.classList.add('pagination-' + escapeType + '-item');
 
             escapeObject['item'] = escapeFlowTo;
 
@@ -1134,58 +1163,73 @@
 
 
         }
-        if (this.escapeStylesheets.footnote.innerHTML !== '') {
-            document.head.appendChild(this.escapeStylesheets.footnote);
+        if (this.escapeStylesheets[escapeType].innerHTML !== '') {
+            document.head.appendChild(this.escapeStylesheets[escapeType]);
         }
 
     };
 
+    flowObject.prototype.layoutTopfloats = function () {
+        // Layout all top floats
+        this.layoutTopBottomEscapes('topfloat');
+    };
+
     flowObject.prototype.layoutFootnotes = function () {
         // Layout all footnotes
+        this.layoutTopBottomEscapes('footnote');
+    }
 
-        for (var i = 0; i < this.escapes.footnote.length; i++) {
-            /* Go through all footnotes, delete the spacer blocks if they have any
-             * and remove the footnote itself from the DOM.
+    flowObject.prototype.layoutTopBottomEscapes = function (escapeType) {
+        // Layout all footnotes and top floats
+
+        for (var i = 0; i < this.escapes[escapeType].length; i++) {
+            /* Go through all escapes, delete the spacer blocks if they have any
+             * in the case of footnotes and remove the escape node itself from the DOM.
              */
 
-            if ('hidden' in this.escapes.footnote[i]) {
-                this.escapes.footnote[i]['hidden'].parentNode.removeChild(
-                    this.escapes.footnote[i]['hidden']);
-                delete this.escapes.footnote[i]['hidden'];
+            if (escapeType === 'footnote' && 'hidden' in this.escapes[
+                escapeType][i]) {
+                this.escapes[escapeType][i]['hidden'].parentNode.removeChild(
+                    this.escapes[escapeType][i]['hidden']);
+                delete this.escapes[escapeType][i]['hidden'];
             }
 
-            if (this.escapes.footnote[i]['item'].parentNode !== null) {
-                this.escapes.footnote[i]['item'].parentNode.removeChild(
-                    this.escapes.footnote[i]['item']);
+            if (this.escapes[escapeType][i]['item'].parentNode !== null) {
+                this.escapes[escapeType][i]['item'].parentNode.removeChild(
+                    this.escapes[escapeType][i]['item']);
             }
         }
 
-        for (var i = 0; i < this.escapes.footnote.length; i++) {
-            /* Go through the footnotes again, this time with the purpose of
+        for (var i = 0; i < this.escapes[escapeType].length; i++) {
+            /* Go through the escapes again, this time with the purpose of
              * placing them correctly.
              */
 
-            var footnoteReferencePage = this.findFootnoteReferencePage(
-                document.getElementById(this.escapes.footnote[i]['id']));
-            // We find the page where the footnote is referenced from.
-            var firstFootnoteContainer = footnoteReferencePage.querySelector(
-                '.pagination-footnotes');
-            firstFootnoteContainer.appendChild(this.escapes.footnote[i]['item']);
-            // We insert the footnote in the footnote container of that page.
+            var escapeReferencePage = this.findFootnoteReferencePage(
+                document.getElementById(this.escapes[escapeType][i]['id']));
+            // We find the page where the escape is referenced from.
+            var firstEscapeContainer = escapeReferencePage.querySelector(
+                '.pagination-' + escapeType + 's');
+            firstEscapeContainer.appendChild(this.escapes[escapeType][i]['item']);
+            // We insert the escape in the footnote or topfloat container of that page.
 
-            if (!(this.compareReferenceAndFootnotePage(this.escapes.footnote[i]))) {
+            if (escapeType === 'footnote' && !(this.compareReferenceAndFootnotePage(
+                this.escapes.footnote[i]))) {
                 /* If the footnote reference has been moved from one page to
                  * another through the insertion procedure, we move the footnote to
                  * where it is referenced from now and create an empty div 
                  * ('hidden') and set it in it's place.
                  */
 
-                this.escapes.footnote[i]['hidden'] = document.createElement('div');
+                this.escapes.footnote[i]['hidden'] = document.createElement(
+                    'div');
 
                 this.escapes.footnote[i]['hidden'].style.height = (
                     this.escapes.footnote[i]['item'].clientHeight) + 'px';
 
-                this.escapes.footnote[i]['hidden'].id = this.escapes.footnote[i]['id'] +
+                this.escapes.footnote[i]['hidden'].id = this.escapes.footnote[i][
+                        'id'
+                ] +
                     'hidden';
 
                 var newFootnoteReferencePage = this.findFootnoteReferencePage(
@@ -1199,10 +1243,12 @@
                 /* We then insert the hidden element into the container where the
                  * footnote was previously so that the body text doesn't flow back.
                  */
-                firstFootnoteContainer.replaceChild(
+                firstEscapeContainer.replaceChild(
                     this.escapes.footnote[i]['hidden'],
                     this.escapes.footnote[i]['item']);
-                newFootnoteContainer.appendChild(this.escapes.footnote[i]['item']);
+                newFootnoteContainer.appendChild(this.escapes.footnote[i][
+                        'item'
+                ]);
 
                 var checkSpacerSize = function () {
                     if (this.escapes.footnote[i]['item'].clientHeight <
@@ -1216,8 +1262,6 @@
                     }
                 };
 
-
-
                 var observer = new MutationObserver(function (mutations) {
                     checkSpacerSize();
                 });
@@ -1228,9 +1272,6 @@
                     characterData: true
 
                 });
-
-
-
 
             }
         }
