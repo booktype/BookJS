@@ -105,9 +105,9 @@
  * 
  * topfloatSelector: '.pagination-topfloat' -- This is the CSS selector used 
  * for finding top floats within the HTML code. Top floats are placed on the 
- * page were they were in the text at the time of document loading, and they 
- * are not moved later on.In editing environments, the top float should be 
- * inserted into to additional elements, like this:
+ * page either of the reference or the one following it. In editing 
+ * environments, the top float should be inserted inside two additional 
+ * elements, like this:
  * 
  * <span class='pagination-topfloat'><span><span>This is the top float contents
  * </span></span></span>
@@ -115,7 +115,7 @@
  * footnoteSelector: '.pagination-footnote' -- This is the CSS selector used 
  * for finding footnotes within the HTML code. Footnotes are automatically 
  * moved if the page of their reference changes. In editing environments, the
- * footnote should be inserted into to additional elements, like this:
+ * footnote should be inserted inside two additional elements, like this:
  * 
  * <span class='pagination-footnote'><span><span>This is a footnote</span>
  * </span></span>. 
@@ -1004,7 +1004,8 @@
 
         for (var j = 0; j < escapeTypes.length; j++) {
             for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
-                this.escapes[escapeTypes[j]][i]['referencePage'] = this.findEscapeReferencePage(
+                this.escapes[escapeTypes[j]][i]['referencePage'] = 
+                  this.findEscapeReferencePage(
                     this.escapes[escapeTypes[j]][i]['reference']);
             }
         }
@@ -1023,19 +1024,17 @@
                 if (document.getElementById(this.escapes[escapeTypes[j]][i][
                         'id'
                 ]) === null) {
-                    /* It seems this escape reference had been deleted, so we will dispatch an 
+                    /* It seems this escape reference had been deleted, so we dispatch an 
                      * event that will redo all escapes.
                      */
                     this.rawdiv.dispatchEvent(pagination.events.redoEscapes);
                     this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
-                    console.log('something big has changed');
                     return;
                 }
 
                 if (this.escapes[escapeTypes[j]][i]['referencePage'] !== this.findEscapeReferencePage(
                     this.escapes[escapeTypes[j]][i]['reference'])) {
                     this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
-                    console.log('something small has changed');
                     return;
                 }
 
@@ -1073,7 +1072,6 @@
 
 
         var reFlow = function () {
-            console.log('reflowing everything');
             flowObject.placeAllEscapes();
         }
 
@@ -1205,7 +1203,6 @@
 
     flowObject.prototype.layoutTopBottomEscapes = function (escapeType) {
         // Layout all footnotes and top floats
-        //    console.log('layout: '+escapeType);
 
         if (escapeType === 'footnote') {
 
@@ -1538,7 +1535,6 @@
              */
             var observer = new MutationObserver(function (mutations) {
                 checkOverset();
-                // console.log('check float references');
                 checkAllEscapeReferencePagesPlacements();
             });
 
