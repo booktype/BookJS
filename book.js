@@ -149,7 +149,7 @@
  * 
  * pageWidth: 5.8 (inch) -- This controls the width of the page.
  *
- * columnSeparatorWidth: .3 (inch) -- This is the space between columns.
+ * columnSeparatorWidth: .09 (inch) -- This is the space between columns.
  * 
  * lengthUnit: 'in' (inch) -- Use this to specify the unit used in all the page 
  * style options. It can be any unit supported by CSS.
