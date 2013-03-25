@@ -148,6 +148,8 @@
  * pageHeight: 8.3 (inch) -- This controls the height of the page.
  * 
  * pageWidth: 5.8 (inch) -- This controls the width of the page.
+ *
+ * columnSeparatorWidth: .3 (inch) -- This is the space between columns.
  * 
  * lengthUnit: 'in' (inch) -- Use this to specify the unit used in all the page 
  * style options. It can be any unit supported by CSS.
@@ -204,6 +206,7 @@
         'footnoteSelector': '.pagination-footnote',
         'topfloatSelector': '.pagination-topfloat',
         'maxPageNumber': 10000,
+        'columnSeparatorWidth': .09,
         'outerMargin': .5,
         'innerMargin': .8,
         'contentsTopMargin': .8,
@@ -312,8 +315,11 @@
             contentsWidthNumber = pagination.config('pageWidth') - pagination.config(
                 'innerMargin') - pagination.config('outerMargin'),
             contentsWidth = contentsWidthNumber + unit,
-            columnWidth = contentsWidthNumber / pagination.config('columns') +
-                unit,
+            contentsColumnSeparatorWidthNumber = pagination.config('columnSeparatorWidth'),
+            contentsColumnSeparatorWidth = contentsColumnSeparatorWidthNumber + unit,
+            columnWidth = contentsWidthNumber / pagination.config('columns') -
+                (contentsColumnSeparatorWidthNumber * (pagination.config('columns') - 1))
+                + unit,
             contentsHeightNumber = pagination.config('pageHeight') - pagination
                 .config('contentsTopMargin') - pagination.config(
                 'contentsBottomMargin'),
@@ -369,8 +375,11 @@
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
          * contentsContainer's width.
-         */ + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
+         */ 
+        
+        + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
             "\n.pagination-frontmatter-contents {width:" + contentsWidth + ";}"
+        + "\n.pagination-contents-column-separator {width:" + contentsColumnSeparatorWidth + ";}" +
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         + "\n.pagination-simple .pagination-footnote > span {" +
             "position: absolute; right: 0in; width: 1in;}";
@@ -445,7 +454,7 @@
 
     pagination.createPages = function (num, flowName, pageCounterClass, columns) {
         // Create the DOM structure of num number of pages.
-        var page, contents, footnotes, contentsContainer, column, topfloats;
+        var page, contents, footnotes, contentsContainer, column, columnSeparator, topfloats;
         var tempRoot = document.createDocumentFragment();
         for (var i = 0; i < num; i++) {
             page = document.createElement('div');
@@ -488,6 +497,12 @@
                     column = document.createElement('div');
                     column.classList.add('pagination-contents-column');
                     contents.appendChild(column);
+                    
+                    if ((columns - j) > 1) {
+                        columnSeparator = document.createElement('div');
+                        columnSeparator.classList.add('pagination-contents-column-separator');
+                        contents.appendChild(columnSeparator);
+                    }
                 }
 
                 footnotes = document.createElement('div');

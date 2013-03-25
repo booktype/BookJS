@@ -1,5 +1,6 @@
 0.70-dev
 ----
+column separators
 pages with top floats have extra CSS class: pagination-page-topfloat
 use mutation observers instead of flow events
 support for top floats
