@@ -979,10 +979,10 @@
         }
     };
 
-    flowObject.prototype.findFootnotePage = function (footnote) {
-        if (footnote.parentNode) {
-            // Find the page where the footnote itself is currently placed.
-            return footnote.parentNode.parentNode.parentNode;
+    flowObject.prototype.findEscapePage = function (escapeNode) {
+        if (escapeNode.parentNode) {
+            // Find the page where the escape itself is currently placed.
+            return escapeNode.parentNode.parentNode.parentNode;
         } else {
             return false;
         }
@@ -1028,14 +1028,14 @@
                     */
                     this.rawdiv.dispatchEvent(pagination.events.redoEscapes);
                     this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
-                    console.log('something has changed');
+                    console.log('something big has changed');
                     return;
                 }                
                 
                 if (this.escapes[escapeTypes[j]][i]['referencePage'] !== this.findEscapeReferencePage(
                 this.escapes[escapeTypes[j]][i]['reference'])) {
                     this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
-                    console.log('something has changed');
+                    console.log('something small has changed');
                     return;
                 }
                 
@@ -1047,19 +1047,19 @@
     
     
 
-    flowObject.prototype.compareReferenceAndFootnotePage = function (
-        footnoteObject) {
-        /* Check whether a footnote and it's corresponding reference in the text
+    flowObject.prototype.compareReferenceAndEscapePage = function (
+        escapeObject) {
+        /* Check whether a footnote/top float and it's corresponding reference in the text
          * are on the same page.
          */
-        var footnoteReference = document.getElementById(footnoteObject['id']);
+        var escapeReference = document.getElementById(escapeObject['id']);
 
         var referencePage = this.findEscapeReferencePage(
-            footnoteReference);
-        var footnotePage = this.findFootnotePage(
-            footnoteObject['item']);
+            escapeReference);
+        var escapePage = this.findEscapePage(
+            escapeObject['item']);
 
-        if (footnotePage === referencePage) {
+        if (escapePage === referencePage) {
             return true;
         } else {
             return false;
@@ -1205,7 +1205,7 @@
 
     flowObject.prototype.layoutTopBottomEscapes = function (escapeType) {
         // Layout all footnotes and top floats
-        console.log('layout: '+escapeType);
+    //    console.log('layout: '+escapeType);
         for (var i = 0; i < this.escapes[escapeType].length; i++) {
             /* Go through all escapes, and remove the escape node itself from the DOM.
              * footnotes: delete the spacer blocks if they have any
@@ -1223,18 +1223,22 @@
         
 
         if (this.escapes[escapeType][i]['item'].parentNode !== null) {
+            // If the escape node has a parentNode, it means it has been placed previously.
+            
+            
             if (escapeType === 'topfloat') {
+                
                 this.escapes[escapeType][i]['item'].parentNode.parentNode.parentNode
                     .classList.remove('pagination-page-topfloat');
-                    console.log('remove top float class');
+  //                  console.log('remove top float class');
             }
 
-            this.escapes[escapeType][i]['item'].parentNode.removeChild(
-                this.escapes[escapeType][i]['item']);
+           // this.escapes[escapeType][i]['item'].parentNode.removeChild(
+           //     this.escapes[escapeType][i]['item']);
         }
     }
 
-    console.log(this.escapes);
+//    console.log(this.escapes);
     
     for (var i = 0; i < this.escapes[escapeType].length; i++) {
         /* Go through the escapes again, this time with the purpose of
@@ -1244,60 +1248,55 @@
         var escapeReferencePage = this.findEscapeReferencePage(
             document.getElementById(this.escapes[escapeType][i]['id']));
         
-        if (escapeType==='topfloat') {
-            console.log(escapeReferencePage);
-        }
+      //  if (escapeType==='topfloat') {
+      //      console.log(escapeReferencePage);
+      //  }
         // We find the page where the escape is referenced from.
         var firstEscapeContainer = escapeReferencePage.querySelector(
             '.pagination-' + escapeType + 's');
-        firstEscapeContainer.appendChild(this.escapes[escapeType][i]['item']);
-        // We insert the escape in the footnote or topfloat container of that page.
-
+        if (this.escapes[escapeType][i]['item'].parentNode !== firstEscapeContainer) {
+            firstEscapeContainer.appendChild(this.escapes[escapeType][i]['item']);
+            // We insert the escape in the footnote or topfloat container of that page 
+            // if it is not there already.
+        }
+        
         if (escapeType === 'topfloat') {
             // We add the class 'pagination-page-topfloat' to the page where the top float was inserted.
             firstEscapeContainer.parentNode.parentNode.classList.add(
                 'pagination-page-topfloat');
 
-        } else if (escapeType === 'footnote' && !(this.compareReferenceAndFootnotePage(
-            this.escapes.footnote[i]))) {
+        } 
+        if (!(this.compareReferenceAndEscapePage(
+            this.escapes[escapeType][i]))) {
             /* If the footnote reference has been moved from one page to
              * another through the insertion procedure, we move the footnote to
              * where it is referenced from now and create an empty div 
              * ('hidden') and set it in it's place.
              */
 
-            this.escapes.footnote[i]['hidden'] = document.createElement(
-                'div');
+            if (escapeType === 'footnote') {
+                /* We insert a hidden element into the container where the
+                * footnote was previously so that the body text doesn't flow back.
+                */
+                this.escapes[escapeType][i]['hidden'] = document.createElement(
+                    'div');
 
-            this.escapes.footnote[i]['hidden'].style.height = (
-                this.escapes.footnote[i]['item'].clientHeight) + 'px';
+                this.escapes[escapeType][i]['hidden'].style.height = (
+                    this.escapes[escapeType][i]['item'].clientHeight) + 'px';
 
-            this.escapes.footnote[i]['hidden'].id = this.escapes.footnote[i][
+                this.escapes[escapeType][i]['hidden'].id = this.escapes[escapeType][i][
                     'id'
-            ] +
-                'hidden';
+                ] +
+                    'hidden';
 
-            var newFootnoteReferencePage = this.findEscapeReferencePage(
-                this.escapes.footnote[i]['reference']);
-            /* We find the page where the footnote is referenced from now and
-             * move the footnote there.
-             */
-            var newFootnoteContainer = newFootnoteReferencePage.querySelector(
-                '.pagination-footnotes');
-
-            /* We then insert the hidden element into the container where the
-             * footnote was previously so that the body text doesn't flow back.
-             */
-            firstEscapeContainer.replaceChild(
-                this.escapes.footnote[i]['hidden'],
-                this.escapes.footnote[i]['item']);
-            newFootnoteContainer.appendChild(this.escapes.footnote[i][
-                    'item'
-            ]);
-
-            var checkSpacerSize = function () {
-                if (this.escapes.footnote[i]['item'].clientHeight <
-                    this.escapes.footnote[i]['hidden'].clientHeight) {
+                    
+                firstEscapeContainer.replaceChild(
+                    this.escapes[escapeType][i]['hidden'],
+                    this.escapes[escapeType][i]['item']); 
+                
+                var checkSpacerSize = function () {
+                if (this.escapes[escapeType][i]['item'].clientHeight <
+                    this.escapes[escapeType][i]['hidden'].clientHeight) {
                     /* The footnote is smaller than its space holder on another
                      * page. It means the footnote has been shortened and we
                      * need to reflow escapes!
@@ -1311,12 +1310,28 @@
                 checkSpacerSize();
             });
 
-            observer.observe(this.escapes.footnote[i]['item'], {
+            observer.observe(this.escapes[escapeType][i]['item'], {
                 attributes: true,
                 subtree: true,
                 characterData: true,
                 childList: true
             });
+            
+            }
+            
+            var newEscapeReferencePage = this.findEscapeReferencePage(
+                this.escapes[escapeType][i]['reference']);
+                /* We find the page where the escape node is referenced from now and
+                * move it there.
+                */
+            var newEscapeContainer = newEscapeReferencePage.querySelector(
+                '.pagination-'+escapeType+'s');
+
+            
+
+            newEscapeContainer.appendChild(this.escapes[escapeType][i][
+                    'item'
+            ]);
 
         }
     }
@@ -1467,7 +1482,7 @@ flowObject.prototype.setupReflow = function () {
          */
         var observer = new MutationObserver(function (mutations) {
             checkOverset();
-            console.log('check float references');
+           // console.log('check float references');
             checkAllEscapeReferencePagesPlacements();
         });
 
