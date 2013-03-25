@@ -286,8 +286,7 @@
             "\n.pagination-contents {display: -webkit-flex; -webkit-flex: 1;}"
         /* There seems to be a bug in the new flexbox model code which requires the
          * height to be set to an arbitrary value (which is ignored).
-         */
-        + "\n.pagination-contents {height: 0px;}" +
+         */ + "\n.pagination-contents {height: 0px;}" +
             "\n.pagination-contents-column {-webkit-flex: 1;}" + "\nbody {" +
             "counter-reset: pagination-footnote pagination-footnote-reference;}" +
             "\n.pagination-footnote::before {" +
@@ -370,8 +369,7 @@
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
          * contentsContainer's width.
-         */
-        + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
+         */ + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
             "\n.pagination-frontmatter-contents {width:" + contentsWidth + ";}"
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         + "\n.pagination-simple .pagination-footnote > span {" +
@@ -453,7 +451,7 @@
             page = document.createElement('div');
             page.classList.add('pagination-page');
             page.id = pagination.createRandomId('pagination-page-');
-            
+
             header = document.createElement('div');
             header.classList.add('pagination-header');
 
@@ -987,7 +985,7 @@
             return false;
         }
     };
-    
+
     flowObject.prototype.placeAllEscapes = function () {
         /* Find and place all escapes. Then freeze the pages of the references 
          * to these.
@@ -996,56 +994,58 @@
         this.layoutFootnotes();
         this.freezeEscapeReferencePages();
     };
-    
+
     flowObject.prototype.freezeEscapeReferencePages = function () {
         /* For all the references of top/bottom escapes (topfloats, footnotes),
          * note the page they are on. This way we can compare to this
          * list when changes have been made and determine whether footnotes need to be reflown.
          */
         var escapeTypes = ['footnote', 'topfloat'];
-        
+
         for (var j = 0; j < escapeTypes.length; j++) {
             for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
                 this.escapes[escapeTypes[j]][i]['referencePage'] = this.findEscapeReferencePage(
-                this.escapes[escapeTypes[j]][i]['reference']);
+                    this.escapes[escapeTypes[j]][i]['reference']);
             }
         }
     };
-    
+
     flowObject.prototype.checkAllEscapeReferencePagesPlacements = function () {
         /* For all the references of top/bottom escapes (topfloats, footnotes),
          * check if they are still on the same page they were on when we froze 
          * them. If one has changed, dispatch a redoEscapes event.
          */
         var escapeTypes = ['footnote', 'topfloat'];
-        
+
         for (var j = 0; j < escapeTypes.length; j++) {
             for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
-                
-                if (document.getElementById(this.escapes[escapeTypes[j]][i]['id']) === null) {
+
+                if (document.getElementById(this.escapes[escapeTypes[j]][i][
+                        'id'
+                ]) === null) {
                     /* It seems this escape reference had been deleted, so we will dispatch an 
-                    * event that will redo all escapes.
-                    */
+                     * event that will redo all escapes.
+                     */
                     this.rawdiv.dispatchEvent(pagination.events.redoEscapes);
                     this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
                     console.log('something big has changed');
                     return;
-                }                
-                
+                }
+
                 if (this.escapes[escapeTypes[j]][i]['referencePage'] !== this.findEscapeReferencePage(
-                this.escapes[escapeTypes[j]][i]['reference'])) {
+                    this.escapes[escapeTypes[j]][i]['reference'])) {
                     this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
                     console.log('something small has changed');
                     return;
                 }
-                
+
             }
         }
-        
+
         return;
-    };    
-    
-    
+    };
+
+
 
     flowObject.prototype.compareReferenceAndEscapePage = function (
         escapeObject) {
@@ -1090,14 +1090,14 @@
         /* Reset all top floats and footnotes.
          */
         var escapeTypes = ['footnote', 'topfloat'];
-        
+
         for (var j = 0; j < escapeTypes.length; j++) {
             for (var i = 0; i < this.escapes[j].length; i++) {
                 /* Go through all footnotes, removing all spacer blocks and footnote
-                * references from the DOM.
-                */
+                 * references from the DOM.
+                 */
 
-                if (j==='footnote' && 'hidden' in this.escapes[j][i]) {
+                if (j === 'footnote' && 'hidden' in this.escapes[j][i]) {
                     this.escapes[j][i]['hidden'].parentNode.removeChild(
                         this.escapes[j][i]['hidden']);
                 }
@@ -1107,16 +1107,16 @@
                         this.escapes[j][i]['item']);
                 }
             }
-                    
+
             // Start out with no footnotes or top floats.
             this.escapes[j] = [];
         }
-        
+
         // Find footnotes from scratch.
         this.findAllTopfloats();
         this.findAllFootnotes();
     };
-    
+
     flowObject.prototype.findAllTopfloats = function () {
         // Find all the topfloats in the text and prepare them for flow.
         this.findAllEscapes('topfloat');
@@ -1139,7 +1139,7 @@
             document.head.removeChild(this.escapeStylesheets[escapeType]);
             this.escapeStylesheets[escapeType].innerHTML = '';
         }
-        
+
 
         /* Look for all the items that have "pagination-"+escapeType in their 
          * class list. These will be treated as escapes from the normal text 
@@ -1205,15 +1205,15 @@
 
     flowObject.prototype.layoutTopBottomEscapes = function (escapeType) {
         // Layout all footnotes and top floats
-    //    console.log('layout: '+escapeType);
-    
+        //    console.log('layout: '+escapeType);
+
         if (escapeType === 'footnote') {
-            
+
             for (var i = 0; i < this.escapes[escapeType].length; i++) {
-            /* Go through all footnotes, and remove the hidden nodes that were 
-             * previously placed to make sure footnote reference and footnote 
-             * were on the same page. 
-             */
+                /* Go through all footnotes, and remove the hidden nodes that were 
+                 * previously placed to make sure footnote reference and footnote 
+                 * were on the same page. 
+                 */
 
                 if ('hidden' in this.escapes[
                     escapeType][i]) {
@@ -1224,325 +1224,344 @@
             }
         }
 
-    
-    for (var i = 0; i < this.escapes[escapeType].length; i++) {
-        /* Go through the escapes again, this time with the purpose of
-         * placing them correctly.
-         */
 
-        var escapeReferencePage = this.findEscapeReferencePage(
-            document.getElementById(this.escapes[escapeType][i]['id']));
-        
-        // We find the page where the escape is referenced from.
-        var firstEscapeContainer = escapeReferencePage.querySelector(
-            '.pagination-' + escapeType + 's');
-        
-        // Only if the escapenode is not already on the page of its reference do we need to get active.
-        if (this.escapes[escapeType][i]['item'].parentNode !== firstEscapeContainer) {  
-            
-            if (this.escapes[escapeType][i]['item'].parentNode !== null) {
-                
-                /* If the footnote has been placed previously, we remove it and
-                 * recalculate the escapeReferencePage and firstEscapeContainer
-                 */
-                
-                if (escapeType === 'topfloat' && this.escapes[escapeType][i]['item'].parentNode.children.length === 1) {
-                    /* If this is the only top float on the page where the top 
-                     * float had previously been placed, we remove the 
-                     * pagination-page-topfloat class of the page
-                     */
-                    this.escapes[escapeType][i]['item'].parentNode.parentNode.parentNode
-                        .classList.remove('pagination-page-topfloat');
-                }
-      
-                
-                this.escapes[escapeType][i]['item'].parentNode.removeChild(
-                this.escapes[escapeType][i]['item']);
-                
-                escapeReferencePage = this.findEscapeReferencePage(
-                document.getElementById(this.escapes[escapeType][i]['id']));
-                firstEscapeContainer = escapeReferencePage.querySelector(
-                    '.pagination-' + escapeType + 's');
-            }
-            
-            
-            if (i===0 || this.escapes[escapeType][i-1]['item'].parentNode !== firstEscapeContainer) {
-                /* If this is the first footnote or top float or the previous 
-                 * one is not on the same page, we insert it at the very 
-                 * beginning of the footnote/top float container.
-                 */
-                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], firstEscapeContainer.firstChild);
-            } else {
-                /* If the previous footnote/top float is on the same page, we 
-                 * insert after that one
-                 */
-                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
-            }
-            
-            if (escapeType === 'topfloat') {
-            // We add the class 'pagination-page-topfloat' to the page where the top float was inserted.
-                firstEscapeContainer.parentNode.parentNode.classList.add(
-                    'pagination-page-topfloat');
-
-            } 
-            
-        } 
-        
-        if (!(this.compareReferenceAndEscapePage(
-            this.escapes[escapeType][i]))) {
-            /* If the footnote reference has been moved from one page to
-             * another through the insertion procedure, we move the footnote to
-             * where it is referenced from now and create an empty div 
-             * ('hidden') and set it in it's place.
+        for (var i = 0; i < this.escapes[escapeType].length; i++) {
+            /* Go through the escapes again, this time with the purpose of
+             * placing them correctly.
              */
 
-            if (escapeType === 'footnote') {
-                /* We insert a hidden element into the container where the
-                * footnote was previously so that the body text doesn't flow back.
-                */
-                this.escapes[escapeType][i]['hidden'] = document.createElement(
-                    'div');
+            var escapeReferencePage = this.findEscapeReferencePage(
+                document.getElementById(this.escapes[escapeType][i]['id']));
 
-                this.escapes[escapeType][i]['hidden'].style.height = (
-                    this.escapes[escapeType][i]['item'].clientHeight) + 'px';
+            // We find the page where the escape is referenced from.
+            var firstEscapeContainer = escapeReferencePage.querySelector(
+                '.pagination-' + escapeType + 's');
 
-                this.escapes[escapeType][i]['hidden'].id = this.escapes[escapeType][i][
-                    'id'
-                ] +
-                    'hidden';
+            // Only if the escapenode is not already on the page of its reference do we need to get active.
+            if (this.escapes[escapeType][i]['item'].parentNode !==
+                firstEscapeContainer) {
 
-                    
-                firstEscapeContainer.replaceChild(
-                    this.escapes[escapeType][i]['hidden'],
-                    this.escapes[escapeType][i]['item']); 
-                
-                var checkSpacerSize = function () {
-                if (this.escapes[escapeType][i]['item'].clientHeight <
-                    this.escapes[escapeType][i]['hidden'].clientHeight) {
-                    /* The footnote is smaller than its space holder on another
-                     * page. It means the footnote has been shortened and we
-                     * need to reflow escapes!
+                if (this.escapes[escapeType][i]['item'].parentNode !== null) {
+
+                    /* If the footnote has been placed previously, we remove it and
+                     * recalculate the escapeReferencePage and firstEscapeContainer
                      */
-                    this.namedFlow.dispatchEvent(
-                        pagination.events.escapesNeedMove);
-                }
-            };
 
+                    if (escapeType === 'topfloat' && this.escapes[escapeType][i][
+                            'item'
+                    ].parentNode.children.length === 1) {
+                        /* If this is the only top float on the page where the top 
+                         * float had previously been placed, we remove the 
+                         * pagination-page-topfloat class of the page
+                         */
+                        this.escapes[escapeType][i]['item'].parentNode.parentNode
+                            .parentNode
+                            .classList.remove('pagination-page-topfloat');
+                    }
+
+
+                    this.escapes[escapeType][i]['item'].parentNode.removeChild(
+                        this.escapes[escapeType][i]['item']);
+
+                    escapeReferencePage = this.findEscapeReferencePage(
+                        document.getElementById(this.escapes[escapeType][i][
+                            'id'
+                    ]));
+                    firstEscapeContainer = escapeReferencePage.querySelector(
+                        '.pagination-' + escapeType + 's');
+                }
+
+
+                if (i === 0 || this.escapes[escapeType][i - 1]['item'].parentNode !==
+                    firstEscapeContainer) {
+                    /* If this is the first footnote or top float or the previous 
+                     * one is not on the same page, we insert it at the very 
+                     * beginning of the footnote/top float container.
+                     */
+                    firstEscapeContainer.insertBefore(this.escapes[escapeType][
+                            i
+                    ]['item'], firstEscapeContainer.firstChild);
+                } else {
+                    /* If the previous footnote/top float is on the same page, we 
+                     * insert after that one
+                     */
+                    firstEscapeContainer.insertBefore(this.escapes[escapeType][
+                            i
+                    ]['item'], this.escapes[escapeType][i - 1]['item'].nextSibling);
+                }
+
+                if (escapeType === 'topfloat') {
+                    // We add the class 'pagination-page-topfloat' to the page where the top float was inserted.
+                    firstEscapeContainer.parentNode.parentNode.classList.add(
+                        'pagination-page-topfloat');
+
+                }
+
+            }
+
+            if (!(this.compareReferenceAndEscapePage(
+                this.escapes[escapeType][i]))) {
+                /* If the footnote reference has been moved from one page to
+                 * another through the insertion procedure, we move the footnote to
+                 * where it is referenced from now and create an empty div 
+                 * ('hidden') and set it in it's place.
+                 */
+
+                if (escapeType === 'footnote') {
+                    /* We insert a hidden element into the container where the
+                     * footnote was previously so that the body text doesn't flow back.
+                     */
+                    this.escapes[escapeType][i]['hidden'] = document.createElement(
+                        'div');
+
+                    this.escapes[escapeType][i]['hidden'].style.height = (
+                        this.escapes[escapeType][i]['item'].clientHeight) +
+                        'px';
+
+                    this.escapes[escapeType][i]['hidden'].id = this.escapes[
+                        escapeType][i][
+                            'id'
+                    ] +
+                        'hidden';
+
+
+                    firstEscapeContainer.replaceChild(
+                        this.escapes[escapeType][i]['hidden'],
+                        this.escapes[escapeType][i]['item']);
+
+                    var checkSpacerSize = function () {
+                        if (this.escapes[escapeType][i]['item'].clientHeight <
+                            this.escapes[escapeType][i]['hidden'].clientHeight) {
+                            /* The footnote is smaller than its space holder on another
+                             * page. It means the footnote has been shortened and we
+                             * need to reflow escapes!
+                             */
+                            this.namedFlow.dispatchEvent(
+                                pagination.events.escapesNeedMove);
+                        }
+                    };
+
+                    var observer = new MutationObserver(function (mutations) {
+                        checkSpacerSize();
+                    });
+
+                    observer.observe(this.escapes[escapeType][i]['item'], {
+                        attributes: true,
+                        subtree: true,
+                        characterData: true,
+                        childList: true
+                    });
+
+                }
+
+                var newEscapeReferencePage = this.findEscapeReferencePage(
+                    this.escapes[escapeType][i]['reference']);
+                /* We find the page where the escape node is referenced from now and
+                 * move it there.
+                 */
+                var newEscapeContainer = newEscapeReferencePage.querySelector(
+                    '.pagination-' + escapeType + 's');
+
+                if (i === 0 || this.escapes[escapeType][i - 1]['item'].parentNode !==
+                    newEscapeContainer) {
+                    /* If this is the first footnote or top float or the previous 
+                     * one is not on the same page, we insert it at the very 
+                     * beginning of the footnote/top float container.
+                     */
+                    newEscapeContainer.insertBefore(this.escapes[escapeType][i][
+                            'item'
+                    ], newEscapeContainer.firstChild);
+                } else {
+                    /* If the previous footnote/top float is on the same page, we 
+                     * insert after that one
+                     */
+                    newEscapeContainer.insertBefore(this.escapes[escapeType][i][
+                            'item'
+                    ], this.escapes[escapeType][i - 1]['item'].nextSibling);
+                }
+
+                if (escapeType === 'footnote') {
+                    if (firstEscapeContainer.children.length === 0) {
+                        firstEscapeContainer.parentNode.parentNode
+                            .classList.remove('pagination-page-topfloat');
+                    }
+                    newEscapeContainer.parentNode.parentNode.classList.add(
+                        'pagination-page-topfloat');
+                }
+
+            }
+        }
+    };
+
+
+    flowObject.prototype.makeEvenPages = function () {
+        // If the number of pages is odd, add an empty page.
+        var emptyPage = this.div.querySelector(
+            '.pagination-page.pagination-empty');
+        if (emptyPage) {
+            this.div.removeChild(emptyPage);
+        }
+        var allPages = this.div.querySelectorAll('.pagination-page');
+        if (allPages.length % 2 == 1) {
+            this.div.appendChild(
+                pagination.createPages(
+                1,
+                false,
+                this.pageCounter.cssClass,
+                this.columns));
+        }
+    };
+
+    flowObject.prototype.addPagesLoop = function (numberOfPages) {
+        /* Add pages. If the variable numberOfPages is defined, add this amount of
+         * pages. Else use the config option bulkPagesToAdd times
+         * pagesToAddIncrementRatio to determine how many pages should be added.
+         * It is a point to overshoot the target, as it is more costly to add than
+         * to remove pages. 
+         */
+        if (this.bulkPagesToAdd > pagination.config('maxPageNumber')) return;
+        if ('undefined' === typeof (numberOfPages)) {
+            this.div.appendChild(
+                pagination.createPages(
+                this.bulkPagesToAdd,
+                this.name,
+                this.pageCounter.cssClass,
+                this.columns));
+            this.bulkPagesToAdd = Math.floor(
+                this.bulkPagesToAdd * pagination.config(
+                'pagesToAddIncrementRatio'));
+        } else {
+            this.div.appendChild(
+                pagination.createPages(
+                numberOfPages,
+                this.name,
+                this.pageCounter.cssClass,
+                this.columns));
+        }
+        this.addOrRemovePages(numberOfPages);
+    };
+
+
+    flowObject.prototype.addOrRemovePages = function (pages) {
+        // This loop is called when we believe pages have to added or removed. 
+
+        if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
+            /* If there are too few regions (overset==True) and the contents of
+             * rawdiv are at least 1 character long, pages need to be added.
+             */
+            this.pageCounter.needsUpdate = true;
+            this.redoPages = true;
+            this.addPagesLoop(pages);
+        } else if (
+        (this.namedFlow.firstEmptyRegionIndex != -1) && (
+        (
+            this.namedFlow.getRegions().length - this.namedFlow.firstEmptyRegionIndex) >
+            this.columns)) {
+            /* If there are excess regions, and the number of empty regions is
+             * equal to or higher than the number of columns, we need to remove
+             * pages.
+             */
+            this.redoPages = true;
+            this.removeExcessPages(pages);
+        } else if (this.redoPages) {
+            /* If pages have either been added or removed, make sure than the total
+             * number of pages is even if alwaysEven has been set, and emit a
+             * bodyLayoutUpdated event if this is not the frontmatter. 
+             */
+            this.redoPages = false;
+            if (pagination.config('alwaysEven')) {
+                this.makeEvenPages();
+            }
+            if (this.name != 'pagination-frontmatter') {
+                document.body.dispatchEvent(pagination.events.bodyLayoutUpdated);
+            }
+        }
+    };
+
+
+    flowObject.prototype.removeExcessPages = function (pages) {
+        /* Remove pages that are in excess. As it takes much less time to remove
+         * excess pages than to add new ones, it is preferable to add too many
+         * pages initially and then remove them givent hat we do not know exactly
+         * how many pages are needed before we add them.
+         */
+
+        var allPages = this.div.querySelectorAll('.pagination-page');
+
+        for (
+            var i = (
+            Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns)); i <
+            allPages.length; i++) {
+            this.div.removeChild(allPages[i]);
+        }
+        this.addOrRemovePages(pages);
+    };
+
+
+    flowObject.prototype.setupReflow = function () {
+        /* Setup automatic addition and removing of pages when content is added or
+         * removed.
+         */
+        var flowObject = this;
+
+        var checkOverset = function () {
+            /* Something has changed in the contents of this flow. Check if the
+             * values of overset or firstEmptyRegionIndex have changed. If this is
+             * the case, emit a pageLayoutUpdate event. 
+             */
+            if (
+            (
+                flowObject.namedFlow.overset !== flowObject.overset) || (
+                flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)) {
+                flowObject.overset = flowObject.namedFlow.overset;
+                flowObject.firstEmptyRegionIndex =
+                    flowObject.namedFlow.firstEmptyRegionIndex;
+                flowObject.namedFlow.dispatchEvent(
+                    pagination.events.pageLayoutUpdate);
+            }
+        };
+
+
+        var checkAllEscapeReferencePagesPlacements = function () {
+            flowObject.checkAllEscapeReferencePagesPlacements();
+        }
+
+        if (this.rawdiv) {
+            /* Create an observer instance to watch if anything is being changed in
+             * the contents of the original text.
+             * We do this instead of listening to the webkitregionlayoutupdate 
+             * event of the flow, because it is ridden with bugs and fires too often.
+             * This could be changed once 
+             * https://bugs.webkit.org/show_bug.cgi?id=105366 has been resolved.
+             * 
+             * TODO: Check whether throttling this event makes sense.
+             */
             var observer = new MutationObserver(function (mutations) {
-                checkSpacerSize();
+                checkOverset();
+                // console.log('check float references');
+                checkAllEscapeReferencePagesPlacements();
             });
 
-            observer.observe(this.escapes[escapeType][i]['item'], {
+            observer.observe(this.rawdiv, {
                 attributes: true,
                 subtree: true,
                 characterData: true,
                 childList: true
             });
-            
-            } 
-            
-            var newEscapeReferencePage = this.findEscapeReferencePage(
-                this.escapes[escapeType][i]['reference']);
-                /* We find the page where the escape node is referenced from now and
-                * move it there.
-                */
-            var newEscapeContainer = newEscapeReferencePage.querySelector(
-                '.pagination-'+escapeType+'s');
+        }
 
-            if (i===0 || this.escapes[escapeType][i-1]['item'].parentNode !== newEscapeContainer) {
-                 /* If this is the first footnote or top float or the previous 
-                 * one is not on the same page, we insert it at the very 
-                 * beginning of the footnote/top float container.
-                 */
-                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], newEscapeContainer.firstChild);
-            } else {
-                /* If the previous footnote/top float is on the same page, we 
-                 * insert after that one
-                 */
-                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
+        var reFlow = function () {
+            // The page layout has changed. Reflow by adding pages one by one.
+            flowObject.addOrRemovePages(1);
+            if (pagination.config('numberPages')) {
+                flowObject.pageCounter.numberPages();
             }
-            
-            if (escapeType === 'footnote') {
-                if (firstEscapeContainer.children.length === 0) {
-                    firstEscapeContainer.parentNode.parentNode
-                        .classList.remove('pagination-page-topfloat');    
-                }
-                newEscapeContainer.parentNode.parentNode.classList.add('pagination-page-topfloat');
-            }
+        };
+        this.namedFlow.addEventListener('pageLayoutUpdated', reFlow);
 
-        }
-    }
-};
-
-
-flowObject.prototype.makeEvenPages = function () {
-    // If the number of pages is odd, add an empty page.
-    var emptyPage = this.div.querySelector(
-        '.pagination-page.pagination-empty');
-    if (emptyPage) {
-        this.div.removeChild(emptyPage);
-    }
-    var allPages = this.div.querySelectorAll('.pagination-page');
-    if (allPages.length % 2 == 1) {
-        this.div.appendChild(
-            pagination.createPages(
-            1,
-            false,
-            this.pageCounter.cssClass,
-            this.columns));
-    }
-};
-
-flowObject.prototype.addPagesLoop = function (numberOfPages) {
-    /* Add pages. If the variable numberOfPages is defined, add this amount of
-     * pages. Else use the config option bulkPagesToAdd times
-     * pagesToAddIncrementRatio to determine how many pages should be added.
-     * It is a point to overshoot the target, as it is more costly to add than
-     * to remove pages. 
-     */
-    if (this.bulkPagesToAdd > pagination.config('maxPageNumber')) return;
-    if ('undefined' === typeof (numberOfPages)) {
-        this.div.appendChild(
-            pagination.createPages(
-            this.bulkPagesToAdd,
-            this.name,
-            this.pageCounter.cssClass,
-            this.columns));
-        this.bulkPagesToAdd = Math.floor(
-            this.bulkPagesToAdd * pagination.config(
-            'pagesToAddIncrementRatio'));
-    } else {
-        this.div.appendChild(
-            pagination.createPages(
-            numberOfPages,
-            this.name,
-            this.pageCounter.cssClass,
-            this.columns));
-    }
-    this.addOrRemovePages(numberOfPages);
-};
-
-
-flowObject.prototype.addOrRemovePages = function (pages) {
-    // This loop is called when we believe pages have to added or removed. 
-
-    if ((this.namedFlow.overset) && (this.rawdiv.innerText.length > 0)) {
-        /* If there are too few regions (overset==True) and the contents of
-         * rawdiv are at least 1 character long, pages need to be added.
-         */
-        this.pageCounter.needsUpdate = true;
-        this.redoPages = true;
-        this.addPagesLoop(pages);
-    } else if (
-    (this.namedFlow.firstEmptyRegionIndex != -1) && (
-    (
-        this.namedFlow.getRegions().length - this.namedFlow.firstEmptyRegionIndex) >
-        this.columns)) {
-        /* If there are excess regions, and the number of empty regions is
-         * equal to or higher than the number of columns, we need to remove
-         * pages.
-         */
-        this.redoPages = true;
-        this.removeExcessPages(pages);
-    } else if (this.redoPages) {
-        /* If pages have either been added or removed, make sure than the total
-         * number of pages is even if alwaysEven has been set, and emit a
-         * bodyLayoutUpdated event if this is not the frontmatter. 
-         */
-        this.redoPages = false;
-        if (pagination.config('alwaysEven')) {
-            this.makeEvenPages();
-        }
-        if (this.name != 'pagination-frontmatter') {
-            document.body.dispatchEvent(pagination.events.bodyLayoutUpdated);
-        }
-    }
-};
-
-
-flowObject.prototype.removeExcessPages = function (pages) {
-    /* Remove pages that are in excess. As it takes much less time to remove
-     * excess pages than to add new ones, it is preferable to add too many
-     * pages initially and then remove them givent hat we do not know exactly
-     * how many pages are needed before we add them.
-     */
-
-    var allPages = this.div.querySelectorAll('.pagination-page');
-
-    for (
-        var i = (
-        Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns)); i <
-        allPages.length; i++) {
-        this.div.removeChild(allPages[i]);
-    }
-    this.addOrRemovePages(pages);
-};
-
-
-flowObject.prototype.setupReflow = function () {
-    /* Setup automatic addition and removing of pages when content is added or
-     * removed.
-     */
-    var flowObject = this;
-
-    var checkOverset = function () {
-        /* Something has changed in the contents of this flow. Check if the
-         * values of overset or firstEmptyRegionIndex have changed. If this is
-         * the case, emit a pageLayoutUpdate event. 
-         */
-        if (
-        (
-            flowObject.namedFlow.overset !== flowObject.overset) || (
-            flowObject.namedFlow.firstEmptyRegionIndex !== flowObject.firstEmptyRegionIndex)) {
-            flowObject.overset = flowObject.namedFlow.overset;
-            flowObject.firstEmptyRegionIndex =
-                flowObject.namedFlow.firstEmptyRegionIndex;
-            flowObject.namedFlow.dispatchEvent(
-                pagination.events.pageLayoutUpdate);
-        }
     };
 
-    
-    var checkAllEscapeReferencePagesPlacements = function () {
-        flowObject.checkAllEscapeReferencePagesPlacements();
-    }
-
-    if (this.rawdiv) {
-        /* Create an observer instance to watch if anything is being changed in
-         * the contents of the original text.
-         * We do this instead of listening to the webkitregionlayoutupdate 
-         * event of the flow, because it is ridden with bugs and fires too often.
-         * This could be changed once 
-         * https://bugs.webkit.org/show_bug.cgi?id=105366 has been resolved.
-         * 
-         * TODO: Check whether throttling this event makes sense.
-         */
-        var observer = new MutationObserver(function (mutations) {
-            checkOverset();
-           // console.log('check float references');
-            checkAllEscapeReferencePagesPlacements();
-        });
-
-        observer.observe(this.rawdiv, {
-            attributes: true,
-            subtree: true,
-            characterData: true,
-            childList: true
-        });
-    }
-
-    var reFlow = function () {
-        // The page layout has changed. Reflow by adding pages one by one.
-        flowObject.addOrRemovePages(1);
-        if (pagination.config('numberPages')) {
-            flowObject.pageCounter.numberPages();
-        }
-    };
-    this.namedFlow.addEventListener('pageLayoutUpdated', reFlow);
-
-};
-
-exports.flowObject = flowObject;
+    exports.flowObject = flowObject;
 
 }).call(this.pagination);
 
