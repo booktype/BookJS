@@ -1206,39 +1206,24 @@
     flowObject.prototype.layoutTopBottomEscapes = function (escapeType) {
         // Layout all footnotes and top floats
     //    console.log('layout: '+escapeType);
-        for (var i = 0; i < this.escapes[escapeType].length; i++) {
-            /* Go through all escapes, and remove the escape node itself from the DOM.
-             * footnotes: delete the spacer blocks if they have any
-             * top floats: remove the pagination-page-topfloat class from the 
-             * page they were placed on. 
+    
+        if (escapeType === 'footnote') {
+            
+            for (var i = 0; i < this.escapes[escapeType].length; i++) {
+            /* Go through all footnotes, and remove the hidden nodes that were 
+             * previously placed to make sure footnote reference and footnote 
+             * were on the same page. 
              */
 
-            if (escapeType === 'footnote' && 'hidden' in this.escapes[
-                escapeType][i]) {
-                this.escapes[escapeType][i]['hidden'].parentNode.removeChild(
-                    this.escapes[escapeType][i]['hidden']);
-                delete this.escapes[escapeType][i]['hidden'];
+                if ('hidden' in this.escapes[
+                    escapeType][i]) {
+                    this.escapes[escapeType][i]['hidden'].parentNode.removeChild(
+                        this.escapes[escapeType][i]['hidden']);
+                    delete this.escapes[escapeType][i]['hidden'];
+                }
             }
-
-        
-
-        if (this.escapes[escapeType][i]['item'].parentNode !== null) {
-            // If the escape node has a parentNode, it means it has been placed previously.
-            
-            
-            if (escapeType === 'topfloat') {
-                
-                this.escapes[escapeType][i]['item'].parentNode.parentNode.parentNode
-                    .classList.remove('pagination-page-topfloat');
-  //                  console.log('remove top float class');
-            }
-
-           // this.escapes[escapeType][i]['item'].parentNode.removeChild(
-           //     this.escapes[escapeType][i]['item']);
         }
-    }
 
-//    console.log(this.escapes);
     
     for (var i = 0; i < this.escapes[escapeType].length; i++) {
         /* Go through the escapes again, this time with the purpose of
@@ -1248,20 +1233,29 @@
         var escapeReferencePage = this.findEscapeReferencePage(
             document.getElementById(this.escapes[escapeType][i]['id']));
         
-      if (escapeType==='topfloat') {
-          console.log('topfloatreferencepage');
-            console.log(escapeReferencePage);
-        }
         // We find the page where the escape is referenced from.
         var firstEscapeContainer = escapeReferencePage.querySelector(
             '.pagination-' + escapeType + 's');
-        if (this.escapes[escapeType][i]['item'].parentNode !== firstEscapeContainer) {
+        
+        // Only if the escapenode is not already on the page of its reference do we need to get active.
+        if (this.escapes[escapeType][i]['item'].parentNode !== firstEscapeContainer) {  
             
-            //console.log('moving:');
-            //console.log(this.escapes[escapeType][i]['item'].parentNode);
-            //console.log(firstEscapeContainer);
             if (this.escapes[escapeType][i]['item'].parentNode !== null) {
-                // If the footnote has been placed previously, we now remove it and recalculate the escapeReferencePage and firstEscapeContainer
+                
+                /* If the footnote has been placed previously, we remove it and
+                 * recalculate the escapeReferencePage and firstEscapeContainer
+                 */
+                
+                if (escapeType === 'topfloat' && this.escapes[escapeType][i]['item'].parentNode.children.length === 1) {
+                    /* If this is the only top float on the page where the top 
+                     * float had previously been placed, we remove the 
+                     * pagination-page-topfloat class of the page
+                     */
+                    this.escapes[escapeType][i]['item'].parentNode.parentNode.parentNode
+                        .classList.remove('pagination-page-topfloat');
+                }
+      
+                
                 this.escapes[escapeType][i]['item'].parentNode.removeChild(
                 this.escapes[escapeType][i]['item']);
                 
@@ -1272,25 +1266,28 @@
             }
             
             
-            if (i===0) {
+            if (i===0 || this.escapes[escapeType][i-1]['item'].parentNode !== firstEscapeContainer) {
+                /* If this is the first footnote or top float or the previous 
+                 * one is not on the same page, we insert it at the very 
+                 * beginning of the footnote/top float container.
+                 */
                 firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], firstEscapeContainer.firstChild);
-            } else if (this.escapes[escapeType][i-1]['item'].parentNode === firstEscapeContainer) {
-                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
             } else {
-                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], firstEscapeContainer.firstChild);
+                /* If the previous footnote/top float is on the same page, we 
+                 * insert after that one
+                 */
+                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
             }
-            // We insert the escape in the footnote or topfloat container of that page 
-            // if it is not there already.
-        } else {
-            console.log("didn't move: "+escapeType+i);
-        }
-        
-        if (escapeType === 'topfloat') {
+            
+            if (escapeType === 'topfloat') {
             // We add the class 'pagination-page-topfloat' to the page where the top float was inserted.
-            firstEscapeContainer.parentNode.parentNode.classList.add(
-                'pagination-page-topfloat');
+                firstEscapeContainer.parentNode.parentNode.classList.add(
+                    'pagination-page-topfloat');
 
+            } 
+            
         } 
+        
         if (!(this.compareReferenceAndEscapePage(
             this.escapes[escapeType][i]))) {
             /* If the footnote reference has been moved from one page to
@@ -1298,7 +1295,6 @@
              * where it is referenced from now and create an empty div 
              * ('hidden') and set it in it's place.
              */
-            console.log('have to move '+escapeType+i);
 
             if (escapeType === 'footnote') {
                 /* We insert a hidden element into the container where the
@@ -1343,7 +1339,7 @@
                 childList: true
             });
             
-            }
+            } 
             
             var newEscapeReferencePage = this.findEscapeReferencePage(
                 this.escapes[escapeType][i]['reference']);
@@ -1353,17 +1349,26 @@
             var newEscapeContainer = newEscapeReferencePage.querySelector(
                 '.pagination-'+escapeType+'s');
 
-            if (i===0) {
+            if (i===0 || this.escapes[escapeType][i-1]['item'].parentNode !== newEscapeContainer) {
+                 /* If this is the first footnote or top float or the previous 
+                 * one is not on the same page, we insert it at the very 
+                 * beginning of the footnote/top float container.
+                 */
                 newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], newEscapeContainer.firstChild);
-            } else if (this.escapes[escapeType][i-1]['item'].parentNode === newEscapeContainer) {
-                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
             } else {
-                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], newEscapeContainer.firstChild);
-            }            
-
-//            newEscapeContainer.appendChild(this.escapes[escapeType][i][
-//                    'item'
-//            ]);
+                /* If the previous footnote/top float is on the same page, we 
+                 * insert after that one
+                 */
+                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
+            }
+            
+            if (escapeType === 'footnote') {
+                if (firstEscapeContainer.children.length === 0) {
+                    firstEscapeContainer.parentNode.parentNode
+                        .classList.remove('pagination-page-topfloat');    
+                }
+                newEscapeContainer.parentNode.parentNode.classList.add('pagination-page-topfloat');
+            }
 
         }
     }
