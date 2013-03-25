@@ -1248,16 +1248,41 @@
         var escapeReferencePage = this.findEscapeReferencePage(
             document.getElementById(this.escapes[escapeType][i]['id']));
         
-      //  if (escapeType==='topfloat') {
-      //      console.log(escapeReferencePage);
-      //  }
+      if (escapeType==='topfloat') {
+          console.log('topfloatreferencepage');
+            console.log(escapeReferencePage);
+        }
         // We find the page where the escape is referenced from.
         var firstEscapeContainer = escapeReferencePage.querySelector(
             '.pagination-' + escapeType + 's');
         if (this.escapes[escapeType][i]['item'].parentNode !== firstEscapeContainer) {
-            firstEscapeContainer.appendChild(this.escapes[escapeType][i]['item']);
+            
+            //console.log('moving:');
+            //console.log(this.escapes[escapeType][i]['item'].parentNode);
+            //console.log(firstEscapeContainer);
+            if (this.escapes[escapeType][i]['item'].parentNode !== null) {
+                // If the footnote has been placed previously, we now remove it and recalculate the escapeReferencePage and firstEscapeContainer
+                this.escapes[escapeType][i]['item'].parentNode.removeChild(
+                this.escapes[escapeType][i]['item']);
+                
+                escapeReferencePage = this.findEscapeReferencePage(
+                document.getElementById(this.escapes[escapeType][i]['id']));
+                firstEscapeContainer = escapeReferencePage.querySelector(
+                    '.pagination-' + escapeType + 's');
+            }
+            
+            
+            if (i===0) {
+                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], firstEscapeContainer.firstChild);
+            } else if (this.escapes[escapeType][i-1]['item'].parentNode === firstEscapeContainer) {
+                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
+            } else {
+                firstEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], firstEscapeContainer.firstChild);
+            }
             // We insert the escape in the footnote or topfloat container of that page 
             // if it is not there already.
+        } else {
+            console.log("didn't move: "+escapeType+i);
         }
         
         if (escapeType === 'topfloat') {
@@ -1273,6 +1298,7 @@
              * where it is referenced from now and create an empty div 
              * ('hidden') and set it in it's place.
              */
+            console.log('have to move '+escapeType+i);
 
             if (escapeType === 'footnote') {
                 /* We insert a hidden element into the container where the
@@ -1327,11 +1353,17 @@
             var newEscapeContainer = newEscapeReferencePage.querySelector(
                 '.pagination-'+escapeType+'s');
 
-            
+            if (i===0) {
+                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], newEscapeContainer.firstChild);
+            } else if (this.escapes[escapeType][i-1]['item'].parentNode === newEscapeContainer) {
+                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], this.escapes[escapeType][i-1]['item'].nextSibling);
+            } else {
+                newEscapeContainer.insertBefore(this.escapes[escapeType][i]['item'], newEscapeContainer.firstChild);
+            }            
 
-            newEscapeContainer.appendChild(this.escapes[escapeType][i][
-                    'item'
-            ]);
+//            newEscapeContainer.appendChild(this.escapes[escapeType][i][
+//                    'item'
+//            ]);
 
         }
     }
