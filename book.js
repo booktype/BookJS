@@ -1,5 +1,5 @@
 /*!
- * BookJS based on paginationJS v.0.2-dev
+ * BookJS
  * Copyright 2012-13  Steven Levithan, and Johannes Wilm. Freely available 
  * under the AGPL. For further details see LICENSE.txt
  *
@@ -97,7 +97,7 @@
  * true if one wants the frontmatter to render.
  *
  * maxPageNumber: 10000 -- This controls the maximum amount of pages. If more 
- * pages than this are added, BookJS based on paginationJS will die. Notice that pages are added 
+ * pages than this are added, BookJS will die. Notice that pages are added 
  * incrementally, so you won't be able to control the exact number of pages. 
  * You should always set this to something much larger than what you will ever
  * expect that you book will need.
@@ -158,7 +158,7 @@
  * Changing the page style after initialization
  * 
  * At times the user might want to change the page design or page size after 
- * BookJS based on paginationJS has started -- for example to look at the same text in different page
+ * BookJS has started -- for example to look at the same text in different page
  * sizes. To do this, he has to change all the page style options which are now
  * located inside paginationConfig and run pagination.setPageStyle(). Like 
  * this:
@@ -184,7 +184,7 @@
         defaults,
         pagination = {};
 
-    // pagination is the object that contains the namespace used by BookJS based on paginationJS.
+    // pagination is the object that contains the namespace used by BookJS.
 
     defaults = {
         // pagination.config starts out with default config options.
@@ -252,7 +252,7 @@
     pagination.pageStyleSheet = document.createElement('style');
 
     pagination.initiate = function () {
-        /* Initiate BookJS based on paginationJS by importing user set config options and setting basic
+        /* Initiate BookJS by importing user set config options and setting basic
          * CSS style.
          */
 
@@ -279,7 +279,7 @@
     };
 
     pagination.setStyle = function () {
-        /* Set style for the regions and pages used by BookJS based on paginationJS and add it to the
+        /* Set style for the regions and pages used by BookJS and add it to the
          * head of the DOM.
          */
         var stylesheet = document.createElement('style');
@@ -524,7 +524,7 @@
     };
 
     pagination.events = {};
-    // pagination.events represents all the events created specifically by BookJS based on paginationJS.
+    // pagination.events represents all the events created specifically by BookJS.
 
     pagination.events.bodyLayoutUpdated = document.createEvent('Event');
     pagination.events.bodyLayoutUpdated.initEvent(
@@ -567,7 +567,7 @@
         'redoEscapes',
         true,
         true);
-    /* redoEscapes is being listened to by BookJS based on paginationJS to see when escape nodes 
+    /* redoEscapes is being listened to by BookJS to see when escape nodes 
      * (footnotes, top floats) need to be refound and redrawn. This can be used
      * by editors that need to add new footnotes or top floats. 
      */
