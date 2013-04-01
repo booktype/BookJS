@@ -978,8 +978,10 @@
 
     flowObject.prototype.findStartpageNumber = function () {
         // Find the first page number used in this flowObject.
+        var startpageNumberField;
+        
         if (this.rawdiv.innerText.length > 0 && pagination.config('numberPages')) {
-            var startpageNumberField =
+            startpageNumberField =
                 this.div.querySelector('.pagination-pagenumber');
             this.startpageNumber = startpageNumberField.innerText;
         }
@@ -1027,10 +1029,10 @@
          * note the page they are on. This way we can compare to this
          * list when changes have been made and determine whether footnotes need to be reflown.
          */
-        var escapeTypes = ['footnote', 'topfloat', 'marginnote'];
+        var escapeTypes = ['footnote', 'topfloat', 'marginnote'], j, i;
 
-        for (var j = 0; j < escapeTypes.length; j++) {
-            for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
+        for (j = 0; j < escapeTypes.length; j++) {
+            for (i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
                 this.escapes[escapeTypes[j]][i]['referencePage'] = 
                   this.findEscapeReferencePage(
                     this.escapes[escapeTypes[j]][i]['reference']);
@@ -1043,7 +1045,8 @@
          * note their top offset. This way we can compare to this
          * list when changes have been made and determine whether margin notes need to be moved.
          */
-            for (var i = 0; i < this.escapes.marginnote.length; i++) {
+        var i;
+            for (i = 0; i < this.escapes.marginnote.length; i++) {
                 this.escapes.marginnote[i]['referenceOffsetTop'] = 
                     this.escapes.marginnote[i]['reference'].offsetTop;
             }
@@ -1054,10 +1057,10 @@
          * check if they are still on the same page they were on when we froze 
          * them. If one has changed, dispatch a redoEscapes event.
          */
-        var escapeTypes = ['footnote', 'topfloat', 'marginnote'];
+        var escapeTypes = ['footnote', 'topfloat', 'marginnote'], j, i;
 
-        for (var j = 0; j < escapeTypes.length; j++) {
-            for (var i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
+        for (j = 0; j < escapeTypes.length; j++) {
+            for (i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
 
                 if (document.getElementById(this.escapes[escapeTypes[j]][i][
                         'id'
@@ -1101,11 +1104,11 @@
         /* Check whether a footnote/top float and it's corresponding reference in the text
          * are on the same page.
          */
-        var escapeReference = document.getElementById(escapeObject['id']);
+        var escapeReference = document.getElementById(escapeObject['id']), referencePage, escapePage;
 
-        var referencePage = this.findEscapeReferencePage(
+        referencePage = this.findEscapeReferencePage(
             escapeReference);
-        var escapePage = this.findEscapePage(
+        escapePage = this.findEscapePage(
             escapeObject['item']);
 
         if (escapePage === referencePage) {
@@ -1118,16 +1121,16 @@
 
     flowObject.prototype.setupEscapeReflow = function () {
         // Connect footnote reflow events with triggers.
-        var flowObject = this;
+        var flowObject = this, reFlow, redoEscapes;
 
 
-        var reFlow = function () {
+        reFlow = function () {
             flowObject.placeAllEscapes();
         };
 
         this.namedFlow.addEventListener('escapesNeedMove', reFlow);
 
-        var redoEscapes = function () {
+        redoEscapes = function () {
             flowObject.redoEscapes();
         };
 
@@ -1137,27 +1140,28 @@
     flowObject.prototype.redoEscapes = function () {
         /* Reset all top floats and footnotes.
          */
-        var escapeTypes = ['footnote', 'topfloat'];
+        var escapeTypes = ['footnote', 'topfloat'], i, j;
 
-        for (var j = 0; j < escapeTypes.length; j++) {
-            for (var i = 0; i < this.escapes[j].length; i++) {
+        for (j = 0; j < escapeTypes.length; j++) {
+
+            for (i = 0; i < this.escapes[escapeTypes[j]].length; i++) {
                 /* Go through all footnotes, removing all spacer blocks and footnote
                  * references from the DOM.
                  */
 
-                if (j === 'footnote' && 'hidden' in this.escapes[j][i]) {
-                    this.escapes[j][i]['hidden'].parentNode.removeChild(
-                        this.escapes[j][i]['hidden']);
+                if (j === 'footnote' && 'hidden' in this.escapes[escapeTypes[j]][i]) {
+                    this.escapes[escapeTypes[j]][i]['hidden'].parentNode.removeChild(
+                        this.escapes[escapeTypes[j]][i]['hidden']);
                 }
 
-                if (this.escapes[j][i]['item'].parentNode !== null) {
-                    this.escapes[j][i]['item'].parentNode.removeChild(
-                        this.escapes[j][i]['item']);
+                if (this.escapes[escapeTypes[j]][i]['item'].parentNode !== null) {
+                    this.escapes[escapeTypes[j]][i]['item'].parentNode.removeChild(
+                        this.escapes[escapeTypes[j]][i]['item']);
                 }
             }
 
             // Start out with no footnotes or top floats.
-            this.escapes[j] = [];
+            this.escapes[escapeTypes[j]] = [];
         }
 
         // Find footnotes from scratch.
@@ -1185,6 +1189,7 @@
         /* Find all the escapes (footnotes, topfloats) in the text and prepare
          * them for flow.
          */
+        var allEscapes, escapeId, escapeObject, escapeFlowTo, i;
 
         if (this.escapeStylesheets[escapeType].parentNode === document.head) {
             // Remove all previous stylesheet rules of the same escape type.
@@ -1197,10 +1202,10 @@
          * class list. These will be treated as escapes from the normal text 
          * flow.
          */
-        var allEscapes = this.rawdiv.querySelectorAll(
+        allEscapes = this.rawdiv.querySelectorAll(
             pagination.config(escapeType + 'Selector'));
 
-        for (var i = 0; i < allEscapes.length; i++) {
+        for (i = 0; i < allEscapes.length; i++) {
 
             if (allEscapes[i].id === '') {
                 /* If the escape has no id, create one, so that we can target it
@@ -1210,7 +1215,7 @@
                     'pagination-' + escapeType + '-');
             }
 
-            var escapeId = allEscapes[i].id;
+            escapeId = allEscapes[i].id;
 
             this.escapeStylesheets[escapeType].innerHTML +=
                 '\n#' + escapeId + ' > * {-webkit-flow-into: ' + escapeId +
@@ -1218,14 +1223,14 @@
                 escapeId + ';}';
 
 
-            var escapeObject = {};
+            escapeObject = {};
             /* We create this object so that we can find the escape item and
              * reference again later on.
              */
 
             escapeObject['reference'] = allEscapes[i];
 
-            var escapeFlowTo = document.createElement('div');
+            escapeFlowTo = document.createElement('div');
 
             escapeFlowTo.id = escapeId + '-flow-into';
 
@@ -1286,16 +1291,16 @@
             /* Go through the escapes, this with the purpose of placing them 
              * correctly.
              */
-
-            var escapeReferencePage = this.findEscapeReferencePage(
+            var escapeReferencePage, firstEscapeContainer, marginnoteOffsetTop, checkSpacerSize, observer, newEscapeReferencePage, newEscapeContainer;
+            escapeReferencePage = this.findEscapeReferencePage(
                 document.getElementById(this.escapes[escapeType][i]['id']));
 
             // We find the page where the escape is referenced from.
-            var firstEscapeContainer = escapeReferencePage.querySelector(
+            firstEscapeContainer = escapeReferencePage.querySelector(
                 '.pagination-' + escapeType + 's');
             
             if (escapeType === 'marginnote') {
-                var marginnoteOffsetTop = document.getElementById(this.escapes[escapeType][i]['id']).offsetTop;
+                marginnoteOffsetTop = document.getElementById(this.escapes[escapeType][i]['id']).offsetTop;
             }
             
             // Only if the escapenode is not already on the page of its reference do we need to get active.
@@ -1394,7 +1399,7 @@
                         this.escapes[escapeType][i]['hidden'],
                         this.escapes[escapeType][i]['item']);
 
-                    var checkSpacerSize = function () {
+                    checkSpacerSize = function () {
                         if (this.escapes[escapeType][i]['item'].clientHeight <
                             this.escapes[escapeType][i]['hidden'].clientHeight) {
                             /* The footnote is smaller than its space holder on another
@@ -1406,7 +1411,7 @@
                         }
                     };
 
-                    var observer = new MutationObserver(function (mutations) {
+                    observer = new MutationObserver(function (mutations) {
                         checkSpacerSize();
                     });
 
@@ -1419,12 +1424,12 @@
 
                 }
 
-                var newEscapeReferencePage = this.findEscapeReferencePage(
+                newEscapeReferencePage = this.findEscapeReferencePage(
                     this.escapes[escapeType][i]['reference']);
                 /* We find the page where the escape node is referenced from now and
                  * move it there.
                  */
-                var newEscapeContainer = newEscapeReferencePage.querySelector(
+                newEscapeContainer = newEscapeReferencePage.querySelector(
                     '.pagination-' + escapeType + 's');
 
                 if (i === 0 || this.escapes[escapeType][i - 1]['item'].parentNode !==
@@ -1462,11 +1467,11 @@
     flowObject.prototype.makeEvenPages = function () {
         // If the number of pages is odd, add an empty page.
         var emptyPage = this.div.querySelector(
-            '.pagination-page.pagination-empty');
+            '.pagination-page.pagination-empty'), allPages;
         if (emptyPage) {
             this.div.removeChild(emptyPage);
         }
-        var allPages = this.div.querySelectorAll('.pagination-page');
+        allPages = this.div.querySelectorAll('.pagination-page');
         if (allPages.length % 2 === 1) {
             this.div.appendChild(
                 pagination.createPages(
@@ -1551,10 +1556,10 @@
          * how many pages are needed before we add them.
          */
 
-        var allPages = this.div.querySelectorAll('.pagination-page');
+        var allPages = this.div.querySelectorAll('.pagination-page'), i;
 
         for (
-            var i = (
+            i = (
             Math.ceil(this.namedFlow.firstEmptyRegionIndex / this.columns)); i <
             allPages.length; i++) {
             this.div.removeChild(allPages[i]);
@@ -1567,9 +1572,9 @@
         /* Setup automatic addition and removing of pages when content is added or
          * removed.
          */
-        var flowObject = this;
+        var flowObject = this, checkOverset, checkAllEscapeReferencePagesPlacements, observer, reFlow;
 
-        var checkOverset = function () {
+        checkOverset = function () {
             /* Something has changed in the contents of this flow. Check if the
              * values of overset or firstEmptyRegionIndex have changed. If this is
              * the case, emit a pageLayoutUpdate event. 
@@ -1587,7 +1592,7 @@
         };
 
 
-        var checkAllEscapeReferencePagesPlacements = function () {
+        checkAllEscapeReferencePagesPlacements = function () {
             flowObject.checkAllEscapeReferencePagesPlacements();
         };
 
@@ -1601,7 +1606,7 @@
              * 
              * TODO: Check whether throttling this event makes sense.
              */
-            var observer = new MutationObserver(function (mutations) {
+            observer = new MutationObserver(function (mutations) {
                 checkOverset();
                 checkAllEscapeReferencePagesPlacements();
             });
@@ -1614,7 +1619,7 @@
             });
         }
 
-        var reFlow = function () {
+        reFlow = function () {
             // The page layout has changed. Reflow by adding pages one by one.
             flowObject.addOrRemovePages(1);
             if (pagination.config('numberPages')) {
