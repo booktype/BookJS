@@ -11,10 +11,22 @@
 	.caption {
 	font-weight: bold;
 	}
+	.pagination-page-topfloat .pagination-header {
+	display: none;
+	}
+/* Don't display section titles in the header on odd pages */
+.pagination-page:nth-child(odd) .pagination-header .pagination-header-section {
+display:none;
+}
+
+/* Don't display chapter titles in the header on even pages */
+.pagination-page:nth-child(even) .pagination-header .pagination-header-chapter {
+display:none;
+}
 	</style>
         <script type="text/javascript">
 paginationConfig = {
-    'sectionStartMarker': 'h1',
+    'sectionStartMarker': '.newsection',
     'sectionTitleMarker': 'h1',
     'chapterStartMarker': 'h2',
     'chapterTitleMarker': 'h2',
@@ -22,7 +34,7 @@ paginationConfig = {
     'alwaysEven': true,
     'divideContents': true,
     'columns': 2,
-    'enableFrontmatter': false,
+    'enableFrontmatter': true,
     'bulkPagesToAdd': 50, 
     'pagesToAddIncrementRatio': 1.4, 
     'frontmatterContents': '<h1>The Malay Archipelago</h1>'
@@ -30,15 +42,17 @@ paginationConfig = {
 	+ '</div><div id="copyrightpage">Copyright: Wikimedia<br>License: CC</div>'
 	+ '<div class="pagination-pagebreak"></div>',
     'autoStart': true,
+	'topfloatSelector': 'h1, .pagination-topfloat',
 }
 	</script>
         <script src="book.js" type="text/javascript"></script>
         
     </head>
     
-    <body>
+    <body contenteditable="true">
 	<div id="flow">
-<div contenteditable="true">
+
+<div class="newsection"></div>
 <span class="pagination-topfloat">
 <h1>The Malay Archipelago</h1>
 	<img src="http://upload.wikimedia.org/wikipedia/commons/0/07/Malay_Archipelago_Chief%27s_House_and_Rice-shed_in_a_Sumatran_Village.jpg">
@@ -77,7 +91,7 @@ paginationConfig = {
 
 
 	
-	</div>
+
 </div>
     </body>
 

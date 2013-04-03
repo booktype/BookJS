@@ -993,7 +993,11 @@
         escapeReference) {
         /* Find the page where the the escape would be placed in the body text.
          */
-        var escapeReferenceNode = this.namedFlow.getRegionsByContent(
+        var escapeReferenceNode;
+	if (!escapeReference) {
+	    return false;
+	}
+	escapeReferenceNode = this.namedFlow.getRegionsByContent(
             escapeReference)[0];
         if (escapeReferenceNode) {
             return escapeReferenceNode.parentNode.parentNode.parentNode;
