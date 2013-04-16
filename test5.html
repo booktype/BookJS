@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    
+
+    <head>
+        <title>BookJS test</title>
+        <script type="text/javascript">
+paginationConfig = {
+    'sectionStartMarker': 'h1',
+    'sectionTitleMarker': 'h1',
+    'chapterStartMarker': 'h2',
+    'chapterTitleMarker': 'h2',
+    'flowElement': 'document.getElementById("flow")',
+    'alwaysEven': false,
+    'divideContents': false,
+    'columns': 1,
+    'enableFrontmatter': false,
+    'bulkPagesToAdd': 50, 
+    'pagesToAddIncrementRatio': 1.4, 
+    'autoStart': true,
+}
+        </script>
+        <script src="book.js" type="text/javascript"></script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'] ],
+      processEscapes: true
+    }
+  });
+</script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    </head>
+    
+    <body >
+        <div id="flow">
+            <p>Here it says X² using mathjax: $X^2$.</p>
+            <p>Here it says X+10=Y using mathjax: $X+10=Y$.</p>
+            <p>And this is the next line.</p>
+        </div>
+    </body>
+
+</html>
