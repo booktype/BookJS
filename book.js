@@ -196,6 +196,7 @@
         'alwaysEven': false,
         'columns': 1,
         'enableFrontmatter': true,
+        'enableTableOfFigures': false,
         'bulkPagesToAdd': 50,
         'pagesToAddIncrementRatio': 1.4,
         'frontmatterContents': '',
