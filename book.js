@@ -355,6 +355,7 @@
             pagenumberBottomMargin + ";}" + "\n.pagination-header {top:" +
             headerTopMargin + ";}" +
             "\n#pagination-toc-title:before {content:'Contents';}" +
+            "\n#pagination-tof-title:before {content:'Figures';}" +
             "\n.pagination-page:nth-child(odd) .pagination-contents-container, " +
             ".pagination-page:nth-child(odd) .pagination-pagenumber," +
             ".pagination-page:nth-child(odd) .pagination-header {" + "right:" +
@@ -372,7 +373,7 @@
             "\n.pagination-footnote > * > * {font-size: 0.7em; margin:.25em;}" +
             "\n.pagination-footnote > * > *::before, .pagination-footnote::before " +
             "{position: relative; top: -0.5em; font-size: 80%;}" +
-            "\n.pagination-toc-entry .pagination-toc-pagenumber {float:right}"
+            "\n.pagination-toc-entry .pagination-toc-pagenumber, .pagination-tof-entry .pagination-tof-pagenumber {float:right}"
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
          * contentsContainer's width.
@@ -573,6 +574,68 @@
      * by editors that need to add new footnotes or top floats. 
      */
 
+    pagination.tof = function (bodyObjects) {
+        /* Go through all pages of all flowobjects, looking for all figures to 
+         * create a "table of figures".
+         */
+        var tofDiv, tofTitleH1, figures, figure, image, title, i, j;
+        
+        
+        tofDiv = document.createElement('div');
+        tofDiv.id = 'pagination-tof';
+        
+        tofTitleH1 = document.createElement('h1');
+        tofTitleH1.id = 'pagination-tof-title';
+
+        tofDiv.appendChild(tofTitleH1);
+        for (i = 0; i < bodyObjects.length; i++) {
+            figures = bodyObjects[i].rawdiv.querySelectorAll('div.figure');
+            for (j = 0; j < figures.length; j++) {
+                figure = figures[j];
+                image = figure.querySelector('img');
+                caption = figure.querySelector('div.caption');
+                if (image && image.alt !== '') {
+                    title = image.alt;
+                } else if (caption) {
+                    title = caption.innerText;
+                } else {
+                    title = 'Figure '+ i + '.' + j;
+                }
+                HANSEN = pagination.findRegions(figure, bodyObjects[i].namedFlow)[0];
+                HANSENF= figure;
+                pagenumber = pagination.findRegions(figure, bodyObjects[i].namedFlow)[0].parentNode.parentNode.parentNode.querySelector('.pagination-pagenumber').innerText;
+                tofItemDiv = document.createElement('div');
+                tofItemDiv.classList.add('pagination-tof-entry');
+                tofItemTextSpan = document.createElement('span');
+                tofItemTextSpan.classList.add('pagination-tof-text');                
+                tofItemTextSpan.innerHTML = title;
+                tofItemDiv.appendChild(tofItemTextSpan);
+
+                tofItemPnSpan = document.createElement('span');
+                tofItemPnSpan.classList.add('pagination-tof-pagenumber');
+
+                tofItemPnText = document.createTextNode(pagenumber);
+                tofItemPnSpan.appendChild(tofItemPnText);
+
+                tofItemDiv.appendChild(tofItemPnSpan);
+
+                tofDiv.appendChild(tofItemDiv);                
+                
+            }
+        }
+        
+        return tofDiv;
+    }
+    
+    pagination.findRegions = function (object,namedFlow) {
+        // Some times a region cannot be found directly. In that case we need to check out it's parent element instead. 
+        var regions = namedFlow.getRegionsByContent(object);
+        if (regions.length===0) {
+            return pagination.findRegions(object.parentNode,namedFlow);
+        } else {
+            return regions;
+        }
+    };
 
     pagination.headersAndToc = function (bodyObjects) {
         /* Go through all pages of all flowObjects and add page headers and
@@ -733,7 +796,7 @@
          * Will first divide the original DOM up into individual chapters and 
          * sections.
          */
-        var bodyObjects, layoutDiv, contentsDiv, toc, redoToc, fmObject, i;
+        var bodyObjects, layoutDiv, contentsDiv, toc, tof, redoToc, fmObject, i;
         
         bodyObjects = pagination.createBodyObjects();
 
@@ -747,7 +810,6 @@
         contentsDiv.id = 'pagination-contents';
         document.body.appendChild(contentsDiv);
 
-//        counter = 0;
 
         for (i = 0; i < bodyObjects.length; i++) {
             layoutDiv.appendChild(bodyObjects[i].div);
@@ -767,8 +829,13 @@
             contentsDiv.insertBefore(fmObject.rawdiv, contentsDiv.firstChild);
             fmObject.rawdiv.innerHTML = pagination.config('frontmatterContents');
             toc = pagination.headersAndToc(bodyObjects);
+            
             if (pagination.config('numberPages')) {
                 fmObject.rawdiv.appendChild(toc);
+            }
+            if (pagination.config('enableTableOfFigures')) {
+                tof = pagination.tof(bodyObjects);
+                fmObject.rawdiv.appendChild(tof);
             }
             layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
             fmObject.initiate();
@@ -776,6 +843,11 @@
                 var oldToc = toc;
                 toc = pagination.headersAndToc(bodyObjects);
                 fmObject.rawdiv.replaceChild(toc, oldToc);
+                if (pagination.config('enableTableOfFigures')) {
+                    var oldTof = tof;
+                    tof = pagination.tof(bodyObjects);
+                    fmObject.rawdiv.replaceChild(tof, oldTof);
+                }
             };
             document.body.addEventListener('bodyLayoutUpdated', redoToc);
         }
