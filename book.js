@@ -601,9 +601,7 @@
                 } else {
                     title = 'Figure '+ i + '.' + j;
                 }
-                HANSEN = pagination.findRegions(figure, bodyObjects[i].namedFlow)[0];
-                HANSENF= figure;
-                pagenumber = pagination.findRegions(figure, bodyObjects[i].namedFlow)[0].parentNode.parentNode.parentNode.querySelector('.pagination-pagenumber').innerText;
+                pagenumber = pagination.findPage(figure).querySelector('.pagination-pagenumber').innerText;
                 tofItemDiv = document.createElement('div');
                 tofItemDiv.classList.add('pagination-tof-entry');
                 tofItemTextSpan = document.createElement('span');
@@ -627,14 +625,22 @@
         return tofDiv;
     }
     
-    pagination.findRegions = function (object,namedFlow) {
-        // Some times a region cannot be found directly. In that case we need to check out it's parent element instead. 
-        var regions = namedFlow.getRegionsByContent(object);
-        if (regions.length===0) {
-            return pagination.findRegions(object.parentNode,namedFlow);
-        } else {
-            return regions;
-        }
+    pagination.findPage = function (object) {
+        /* Find the page a certain element is placed on
+         */
+        // TODO: cache some of these values, as they will be reused every time.
+        var allPages = document.querySelectorAll('.pagination-page');
+        var firstPage = allPages[0];
+        var firstPageOffsetTop = firstPage.getBoundingClientRect()['top'] + window.pageYOffset;
+        var lastPage = allPages[allPages.length-1];
+        var lastPageOffsetTop = lastPage.getBoundingClientRect()['top'] + window.pageYOffset;
+        var averageActualPageSize = (lastPageOffsetTop - firstPageOffsetTop)/(allPages.length-1);
+        
+        var objectOffsetTop = object.getBoundingClientRect()['top'] + window.pageYOffset;
+        var page = (objectOffsetTop - firstPageOffsetTop)/averageActualPageSize;
+        console.log(page);
+        return allPages[parseInt(page, 10)];
+        
     };
 
     pagination.headersAndToc = function (bodyObjects) {
@@ -850,6 +856,11 @@
                 }
             };
             document.body.addEventListener('bodyLayoutUpdated', redoToc);
+            document.fontloader.addEventListener('loadingdone', function() {
+                // When fonts have been loaded, update the body layout.
+                // TODO: This does not seem to work at all times. 
+                document.body.dispatchEvent(pagination.events.bodyLayoutUpdated);
+            });
         }
         document.dispatchEvent(pagination.events.layoutFlowFinished);
     };
@@ -1704,7 +1715,7 @@
             }
         };
         this.namedFlow.addEventListener('pageLayoutUpdate', reFlow);
-
+        
     };
 
     exports.flowObject = flowObject;
