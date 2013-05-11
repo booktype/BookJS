@@ -588,6 +588,9 @@
         tofTitleH1.id = 'pagination-tof-title';
 
         tofDiv.appendChild(tofTitleH1);
+        
+        //var calculateTof = function() {
+        
         for (i = 0; i < bodyObjects.length; i++) {
             figures = bodyObjects[i].rawdiv.querySelectorAll('div.figure');
             for (j = 0; j < figures.length; j++) {
@@ -623,6 +626,10 @@
         }
         
         return tofDiv;
+        //}
+        
+        
+        
     }
     
     pagination.findPage = function (object) {
@@ -638,7 +645,6 @@
         
         var objectOffsetTop = object.getBoundingClientRect()['top'] + window.pageYOffset;
         var page = (objectOffsetTop - firstPageOffsetTop)/averageActualPageSize;
-        console.log(page);
         return allPages[parseInt(page, 10)];
         
     };
@@ -855,7 +861,12 @@
                     fmObject.rawdiv.replaceChild(tof, oldTof);
                 }
             };
-            document.body.addEventListener('bodyLayoutUpdated', redoToc);
+            document.body.addEventListener('bodyLayoutUpdated', function() {
+                // We have to set a time out of zero to make sure fonts have been applied, etc. before toc and tof are being calculated.
+                // TODO:mIdeally, this shouldn't be needed.
+                setTimeout(redoToc, 0);
+                
+            });
             document.fontloader.addEventListener('loadingdone', function() {
                 // When fonts have been loaded, update the body layout.
                 // TODO: This does not seem to work at all times. 
