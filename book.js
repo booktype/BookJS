@@ -684,11 +684,15 @@
             for (j = 0; j < pages.length; j++) {
                 chapterHeader = pages[j].querySelector(
                     '.pagination-header .pagination-header-chapter');
-                chapterHeader.innerHTML = currentChapterTitle;
-
+                if (chapterHeader) {
+                    chapterHeader.innerHTML = currentChapterTitle;
+                }
+                
                 sectionHeader = pages[j].querySelector(
                     '.pagination-header .pagination-header-section');
-                sectionHeader.innerHTML = currentSectionTitle;
+                if (sectionHeader) {
+                    sectionHeader.innerHTML = currentSectionTitle;
+                }
             }
 
             if (bodyObjects[i].type && pagination.config('numberPages')) {
@@ -1078,7 +1082,9 @@
         if (this.rawdiv.innerText.length > 0 && pagination.config('numberPages')) {
             startpageNumberField =
                 this.div.querySelector('.pagination-pagenumber');
-            this.startpageNumber = startpageNumberField.innerText;
+            if (startpageNumberField) {    
+                this.startpageNumber = startpageNumberField.innerText;
+            }
         }
     };
 

@@ -42,12 +42,12 @@ paginationConfig = {
     'enableTableOfFigures': true,
     'bulkPagesToAdd': 50, 
     'pagesToAddIncrementRatio': 1.4, 
-    'frontmatterContents': '<h1>The Malay Archipelago</h1>'
+    'frontmatterContents': '<h1 class="title">The Malay Archipelago</h1>'
 	+ '<h5>From Wikipedia, the free encyclopedia</h5><div class="pagination-pagebreak">'
 	+ '</div><div id="copyrightpage">Copyright: Wikimedia<br>License: CC</div>'
 	+ '<div class="pagination-pagebreak"></div>',
     'autoStart': true,
-	'topfloatSelector': 'h1, .pagination-topfloat',
+	'topfloatSelector': 'h1:not(.title), .pagination-topfloat',
 }
 	</script>
         <script src="book.js" type="text/javascript"></script>
