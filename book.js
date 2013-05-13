@@ -672,45 +672,111 @@
         /* Find the page a certain element is placed on
          */
         // TODO: cache some of these values, as they will be reused every time.
-        var allPages, firstPage, firstPageOffsetTop, lastPage, lastPageOffsetTop, averageActualPageStartDistance, objectOffsetTop, pageNumber;
+        var allPages, firstPage, firstPageOffsetTop, lastPage, lastPageOffsetTop, pageStartDistance, objectOffsetTop, pageNumber;
         allPages = document.querySelectorAll('.pagination-page');
         firstPage = allPages[0];
         firstPageOffsetTop = firstPage.getBoundingClientRect()['top'];
         lastPage = allPages[allPages.length-1];
         lastPageOffsetTop = lastPage.getBoundingClientRect()['top'];
-        averageActualPageStartDistance = (lastPageOffsetTop - firstPageOffsetTop)/(allPages.length-1);
+        pageStartDistance = (lastPageOffsetTop - firstPageOffsetTop)/(allPages.length-1);
         
         objectOffsetTop = object.getBoundingClientRect()['top'];
-        pageNumber = parseInt((objectOffsetTop - firstPageOffsetTop)/averageActualPageStartDistance, 10);
+        pageNumber = parseInt((objectOffsetTop - firstPageOffsetTop)/pageStartDistance, 10);
         return allPages[pageNumber];
         
+    };
+    
+    pagination.marginNotesContainerStartDistance = false;
+    pagination.firstMarginNotesContainerOffsetTop = false;
+    
+    pagination.setMarginNotesContainerStartDistance = function () {
+        /* Find the actual distance between the margin note containers between 
+         * pages and the top offset for the first page. We asusme that the 
+         * first two pages are not empty for this to work.
+         */
+        var allPages, 
+            firstMarginNotesContainer, 
+            firstMarginNotesContainerOffsetTop, 
+            secondMarginNotesContainer, 
+            secondMarginNotesContainersOffsetTop, 
+            marginNotesContainerStartDistance; 
+        allPages = document.querySelectorAll('.pagination-page');
+        firstMarginNotesContainer = allPages[0].querySelector('.pagination-marginnotes-container');
+        pagination.firstMarginNotesContainerOffsetTop = firstMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;;
+        secondMarginNotesContainer = allPages[1].querySelector('.pagination-marginnotes-container');
+        secondMarginNotesContainersOffsetTop = secondMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;;
+        pagination.marginNotesContainerStartDistance = secondMarginNotesContainersOffsetTop - pagination.firstMarginNotesContainerOffsetTop;
     };
     
     pagination.findMarginNotesContainerAndOffset = function (object) {
         /* Find the margin note container next to the object, and the top 
          * offset within it.
          */
-        // TODO: Cache values, as in pagination.findPage.
-        var allMarginNotesContainers, 
-            firstMarginNotesContainer, 
-            firstMarginNotesContainerOffsetTop, 
-            lastMarginNotesContainer, 
-            lastMarginNotesContainersOffsetTop, 
-            averageActualMarginNotesContainerStartDistance, 
-            objectOffsetTop, containerNumber, offsetTopWithinContainer; 
-        allMarginNotesContainers = document.querySelectorAll('.pagination-marginnotes-container');
-        firstMarginNotesContainer = allMarginNotesContainers[0];
-        firstMarginNotesContainerOffsetTop = firstMarginNotesContainer.getBoundingClientRect()['top'];
-        lastMarginNotesContainer = allMarginNotesContainers[allMarginNotesContainers.length-1];
-        lastMarginNotesContainersOffsetTop = lastMarginNotesContainer.getBoundingClientRect()['top'];
-        averageActualMarginNotesContainerStartDistance = (lastMarginNotesContainersOffsetTop - firstMarginNotesContainerOffsetTop)/(allMarginNotesContainers.length);
-        console.log(averageActualMarginNotesContainerStartDistance);
-        objectOffsetTop = object.getBoundingClientRect()['top'];
-        containerNumber = parseInt((objectOffsetTop - firstMarginNotesContainerOffsetTop)/averageActualMarginNotesContainerStartDistance, 10);
+
+        var allPages, objectOffsetTop, containerNumber, offsetTopWithinContainer; 
+
+        if (!pagination.marginNotesContainerStartDistance) {
+            pagination.setMarginNotesContainerStartDistance();
+        };
         
-        offsetTopWithinContainer = objectOffsetTop - containerNumber * (averageActualMarginNotesContainerStartDistance) - firstMarginNotesContainerOffsetTop;
-        return [allMarginNotesContainers[containerNumber-1], offsetTopWithinContainer];
-    }
+        allPages = document.querySelectorAll('.pagination-page');
+        objectOffsetTop = object.getBoundingClientRect()['top'] + window.pageYOffset;;
+
+        containerNumber = parseInt((objectOffsetTop - pagination.firstMarginNotesContainerOffsetTop)/pagination.marginNotesContainerStartDistance, 10);
+        
+        offsetTopWithinContainer = objectOffsetTop - containerNumber * (pagination.marginNotesContainerStartDistance) - pagination.firstMarginNotesContainerOffsetTop;
+        return [allPages[containerNumber].querySelector('.pagination-marginnotes-container'), offsetTopWithinContainer];
+    };
+    
+    pagination.adjustMarginNotesPositionsPerPage = function (marginNotesContainer) {
+        /* Adjust the placement of all the margin notes on one particular page.
+         */
+        var marginNotesItems = marginNotesContainer.querySelectorAll('.pagination-marginnote-item'), marginNotesList = [], i;
+        
+        if (marginNotesItems.length === 0) {
+            return false;
+        }
+        
+        for (i = 0; i < marginNotesItems.length; i++) {
+            marginNotesList.push(marginNotesItems[i]);    
+        }
+        
+        marginNotesList.sort(function(a, b) {
+            return a.offsetTop == b.offsetTop ? 0 : (a.offsetTop > b.offsetTop ? 1 : -1);
+        });
+        
+        for (i = 1; i < marginNotesList.length; i++) {
+            if ((marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight) > marginNotesList[i].offsetTop ) {
+                marginNotesList[i].style.top = (marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight) + 'px';
+                // TODO: Add minimum distance between elements;
+            }
+        }
+        
+        if (marginNotesList[marginNotesList.length-1].offsetTop + marginNotesList[marginNotesList.length-1].offsetHeight > marginNotesContainer.offsetHeight) {
+            marginNotesList[marginNotesList.length-1].style.top = (marginNotesContainer.offsetHeight - marginNotesList[marginNotesList.length-1].offsetHeight) + 'px';
+            for (i = (marginNotesList.length-2); i > -1; i--) {
+                if (marginNotesList[i+1].offsetTop > (marginNotesList[i].offsetTop + marginNotesList[i].offsetHeight) ) {
+                    marginNotesList[i].style.top = (marginNotesList[i+1].offsetTop - marginNotesList[i].offsetHeight) + 'px';
+                    // TODO: Add minimum distance between elements;
+                } else {
+                    break;
+                }
+            }            
+            
+        }
+        
+        return true;
+    };
+    
+    pagination.adjustAllMarginNotesPositions = function () {
+        /* Add margin notes for the entire document
+         */
+        var allMarginNoteContainers = document.querySelectorAll('.pagination-marginnotes-container'), i;
+        
+        for (i=0; i < allMarginNoteContainers.length; i++) {
+            pagination.adjustMarginNotesPositionsPerPage(allMarginNoteContainers[i]);
+        }
+    };
 
     pagination.headersAndToc = function (bodyObjects) {
         /* Go through all pages of all flowObjects and add page headers and
@@ -1465,7 +1531,7 @@
                 marginNotesAndOffset = pagination.findMarginNotesContainerAndOffset(document.getElementById(this.escapes[escapeType][i]['id']));
                 firstEscapeContainer = marginNotesAndOffset[0];
                 marginnoteOffsetTop = marginNotesAndOffset[1];
-                
+
             } else {
                 escapeReferencePage = this.findEscapeReferencePage(
                     document.getElementById(this.escapes[escapeType][i]['id']));
@@ -1633,6 +1699,10 @@
                 }
 
             }
+        }
+        
+        if (escapeType==='marginnote') {
+            pagination.adjustAllMarginNotesPositions();
         }
     };
 
