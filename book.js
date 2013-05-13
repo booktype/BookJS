@@ -197,6 +197,7 @@
         'columns': 1,
         'enableFrontmatter': true,
         'enableTableOfFigures': false,
+        'enableMarginNotes': false,
         'bulkPagesToAdd': 50,
         'pagesToAddIncrementRatio': 1.4,
         'frontmatterContents': '',
@@ -216,6 +217,8 @@
         'pagenumberBottomMargin': 0.3,
         'pageHeight': 8.3,
         'pageWidth': 5.8,
+        'marginNotesWidth': 1.0,
+        'marginNotesSeparatorWidth': 0.09,
         'lengthUnit': 'in'
     };
 
@@ -285,8 +288,9 @@
          */
         var stylesheet = document.createElement('style');
         stylesheet.innerHTML =
-            ".pagination-contents-container {display: -webkit-flex; " +
-            "-webkit-flex-direction: column; position: absolute;}" +
+            ".pagination-main-contents-container {display: -webkit-flex; " +
+            "-webkit-flex-direction: column;}" +
+            "\n.pagination-contents-container {position: absolute;}" +
             "\n.pagination-contents {display: -webkit-flex; -webkit-flex: 1;}"
         /* There seems to be a bug in the new flexbox model code which requires the
          * height to be set to an arbitrary value (which is ignored).
@@ -306,15 +310,21 @@
             "\n.pagination-pagenumber, .pagination-header {position: absolute;}" +
             "\n.pagination-pagebreak {-webkit-region-break-after: always;}" +
             "\n.pagination-simple {height: auto; position-relative;}" +
-            "\n.pagination-page {margin-left:auto; margin-right:auto;}";
+            "\n.pagination-page {margin-left:auto; margin-right:auto;}" +
+            "\n.pagination-marginnote-item {position:absolute;}" +
+            "\n.pagination-marginnote > * {display: block;}";
         document.head.appendChild(stylesheet);
     };
 
     pagination.setPageStyle = function () {
         // Set style for a particular page size.
         var unit = pagination.config('lengthUnit'),
+            marginNotesWidthNumber = pagination.config('marginNotesWidth') * pagination.config('enableMarginNotes'), 
+            marginNotesWidth = marginNotesWidthNumber + unit,
+            marginNotesSeparatorWidthNumber = pagination.config('marginNotesSeparatorWidth') * pagination.config('enableMarginNotes'),
+            marginNotesSeparatorWidth = marginNotesSeparatorWidthNumber + unit,
             contentsWidthNumber = pagination.config('pageWidth') - pagination.config(
-                'innerMargin') - pagination.config('outerMargin'),
+                'innerMargin') - pagination.config('outerMargin') - (marginNotesWidthNumber + marginNotesSeparatorWidthNumber),
             contentsWidth = contentsWidthNumber + unit,
             contentsColumnSeparatorWidthNumber = pagination.config('columnSeparatorWidth'),
             contentsColumnSeparatorWidth = contentsColumnSeparatorWidthNumber + unit,
@@ -336,7 +346,7 @@
             headerTopMargin = pagination.config('headerTopMargin') + unit,
             imageMaxHeight = contentsHeightNumber - .1 + unit,
             imageMaxWidth = contentsWidthNumber - .1 + unit;
-
+            
         pagination.pageStyleSheet.innerHTML =
             ".pagination-page {height:" + pageHeight + "; width:" + pageWidth +
             ";" + "background-color: #fff;}" + "\n@page {size:" + pageWidth +
@@ -346,9 +356,8 @@
         // To give the appearance on the screen of pages, add a space of .2in
         + "\n@media screen{.pagination-page {border:solid 1px #000; " +
             "margin-bottom:.2in;}}" +
-            "\n.pagination-contents-container {height:" + contentsHeight + ";" +
-            "width:" + contentsWidth + ";" + "bottom:" + contentsBottomMargin +
-            ";}"
+            "\n.pagination-main-contents-container {width:" + contentsWidth + ";}" + 
+            "\n.pagination-contents-container {bottom:" + contentsBottomMargin + "; height:" + contentsHeight + "; display: -webkit-flex;}"
         // Images should at max size be slightly smaller than the contentsWidth.
         + "\nimg {max-height: " + imageMaxHeight + ";max-width: " +
             imageMaxWidth + ";}" + "\n.pagination-pagenumber {bottom:" +
@@ -376,7 +385,7 @@
             "\n.pagination-toc-entry .pagination-toc-pagenumber, .pagination-tof-entry .pagination-tof-pagenumber {float:right}"
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
-         * contentsContainer's width.
+         * mainContentsContainer's width.
          */ 
         
         + "\n.pagination-contents-item {width:" + columnWidth + ";}" +
@@ -384,7 +393,11 @@
         + "\n.pagination-contents-column-separator {width:" + contentsColumnSeparatorWidth + ";}" +
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         "\n.pagination-simple .pagination-footnote > span {" +
-            "position: absolute; right: 0in; width: 1in;}";
+            "position: absolute; right: 0in; width: 1in;}" +
+        "\n.pagination-marginnotes-container {width:" + marginNotesWidth + ";}" +
+        "\n.pagination-marginnotes-separator {width:" + marginNotesSeparatorWidth + ";}" +
+        "\n.pagination-main-contents-container, .pagination-marginnotes-container, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
+        
     };
 
 
@@ -457,8 +470,11 @@
 
     pagination.createPages = function (num, flowName, pageCounterClass, columns) {
         // Create the DOM structure of num number of pages.
-        var page, contents, footnotes, contentsContainer, column, columnSeparator, topfloats, header, chapterheader, sectionheader, pagenumberfield, i, j,
-        tempRoot = document.createDocumentFragment();
+        var page, contents, footnotes, contentsContainer, mainContentsContainer, column, columnSeparator, 
+            topfloats, header, chapterheader, sectionheader, pagenumberfield, 
+            marginNotesContainer, marginNotesSeparator, i, j,
+            tempRoot = document.createDocumentFragment();
+            
         for (i = 0; i < num; i++) {
             page = document.createElement('div');
             page.classList.add('pagination-page');
@@ -489,6 +505,9 @@
             if (flowName) {
                 contentsContainer = document.createElement('div');
                 contentsContainer.classList.add('pagination-contents-container');
+                
+                mainContentsContainer = document.createElement('div');
+                mainContentsContainer.classList.add('pagination-main-contents-container');
 
                 topfloats = document.createElement('div');
                 topfloats.classList.add('pagination-topfloats');
@@ -506,14 +525,25 @@
                         columnSeparator.classList.add('pagination-contents-column-separator');
                         contents.appendChild(columnSeparator);
                     }
-                }
-
+                }               
+                
                 footnotes = document.createElement('div');
                 footnotes.classList.add('pagination-footnotes');
 
-                contentsContainer.appendChild(topfloats);
-                contentsContainer.appendChild(contents);
-                contentsContainer.appendChild(footnotes);
+                mainContentsContainer.appendChild(topfloats);
+                mainContentsContainer.appendChild(contents);
+                mainContentsContainer.appendChild(footnotes);
+                contentsContainer.appendChild(mainContentsContainer);
+                
+                // Containers for margin notes
+                marginNotesSeparator = document.createElement('div');
+                marginNotesSeparator.classList.add('pagination-marginnotes-separator');
+                contentsContainer.appendChild(marginNotesSeparator);
+                
+                marginNotesContainer = document.createElement('div');
+                marginNotesContainer.classList.add('pagination-marginnotes-container');
+                contentsContainer.appendChild(marginNotesContainer); 
+                
                 page.appendChild(contentsContainer);
                 // If no flowName is given, an empty page is created.
             } else {
@@ -636,18 +666,45 @@
         /* Find the page a certain element is placed on
          */
         // TODO: cache some of these values, as they will be reused every time.
-        var allPages = document.querySelectorAll('.pagination-page');
-        var firstPage = allPages[0];
-        var firstPageOffsetTop = firstPage.getBoundingClientRect()['top'] + window.pageYOffset;
-        var lastPage = allPages[allPages.length-1];
-        var lastPageOffsetTop = lastPage.getBoundingClientRect()['top'] + window.pageYOffset;
-        var averageActualPageSize = (lastPageOffsetTop - firstPageOffsetTop)/(allPages.length-1);
+        var allPages, firstPage, firstPageOffsetTop, lastPage, lastPageOffsetTop, averageActualPageStartDistance, objectOffsetTop, pageNumber;
+        allPages = document.querySelectorAll('.pagination-page');
+        firstPage = allPages[0];
+        firstPageOffsetTop = firstPage.getBoundingClientRect()['top'];
+        lastPage = allPages[allPages.length-1];
+        lastPageOffsetTop = lastPage.getBoundingClientRect()['top'];
+        averageActualPageStartDistance = (lastPageOffsetTop - firstPageOffsetTop)/(allPages.length-1);
         
-        var objectOffsetTop = object.getBoundingClientRect()['top'] + window.pageYOffset;
-        var page = (objectOffsetTop - firstPageOffsetTop)/averageActualPageSize;
-        return allPages[parseInt(page, 10)];
+        objectOffsetTop = object.getBoundingClientRect()['top'];
+        pageNumber = parseInt((objectOffsetTop - firstPageOffsetTop)/averageActualPageStartDistance, 10);
+        return allPages[pageNumber];
         
     };
+    
+    pagination.findMarginNotesContainerAndOffset = function (object) {
+        /* Find the margin note container next to the object, and the top 
+         * offset within it.
+         */
+        // TODO: Cache values, as in pagination.findPage.
+        var allMarginNotesContainers, 
+            firstMarginNotesContainer, 
+            firstMarginNotesContainerOffsetTop, 
+            lastMarginNotesContainer, 
+            lastMarginNotesContainersOffsetTop, 
+            averageActualMarginNotesContainerStartDistance, 
+            objectOffsetTop, containerNumber, offsetTopWithinContainer; 
+        allMarginNotesContainers = document.querySelectorAll('.pagination-marginnotes-container');
+        firstMarginNotesContainer = allMarginNotesContainers[0];
+        firstMarginNotesContainerOffsetTop = firstMarginNotesContainer.getBoundingClientRect()['top'];
+        lastMarginNotesContainer = allMarginNotesContainers[allMarginNotesContainers.length-1];
+        lastMarginNotesContainersOffsetTop = lastMarginNotesContainer.getBoundingClientRect()['top'];
+        averageActualMarginNotesContainerStartDistance = (lastMarginNotesContainersOffsetTop - firstMarginNotesContainerOffsetTop)/(allMarginNotesContainers.length);
+        console.log(averageActualMarginNotesContainerStartDistance);
+        objectOffsetTop = object.getBoundingClientRect()['top'];
+        containerNumber = parseInt((objectOffsetTop - firstMarginNotesContainerOffsetTop)/averageActualMarginNotesContainerStartDistance, 10);
+        
+        offsetTopWithinContainer = objectOffsetTop - containerNumber * (averageActualMarginNotesContainerStartDistance) - firstMarginNotesContainerOffsetTop;
+        return [allMarginNotesContainers[containerNumber-1], offsetTopWithinContainer];
+    }
 
     pagination.headersAndToc = function (bodyObjects) {
         /* Go through all pages of all flowObjects and add page headers and
@@ -1396,17 +1453,22 @@
             /* Go through the escapes, this with the purpose of placing them 
              * correctly.
              */
-            var escapeReferencePage, firstEscapeContainer, marginnoteOffsetTop, checkSpacerSize, observer, newEscapeReferencePage, newEscapeContainer;
-            escapeReferencePage = this.findEscapeReferencePage(
-                document.getElementById(this.escapes[escapeType][i]['id']));
-
-            // We find the page where the escape is referenced from.
-            firstEscapeContainer = escapeReferencePage.querySelector(
-                '.pagination-' + escapeType + 's');
+            var escapeReferencePage, firstEscapeContainer, marginnoteOffsetTop, checkSpacerSize, observer, newEscapeReferencePage, newEscapeContainer, marginNotesAndOffset;
             
             if (escapeType === 'marginnote') {
-                marginnoteOffsetTop = document.getElementById(this.escapes[escapeType][i]['id']).offsetTop;
+                marginNotesAndOffset = pagination.findMarginNotesContainerAndOffset(document.getElementById(this.escapes[escapeType][i]['id']));
+                firstEscapeContainer = marginNotesAndOffset[0];
+                marginnoteOffsetTop = marginNotesAndOffset[1];
+                
+            } else {
+                escapeReferencePage = this.findEscapeReferencePage(
+                    document.getElementById(this.escapes[escapeType][i]['id']));
+
+                // We find the page where the escape is referenced from.
+                firstEscapeContainer = escapeReferencePage.querySelector(
+                    '.pagination-' + escapeType + 's');
             }
+
             
             // Only if the escapenode is not already on the page of its reference do we need to get active.
             if (this.escapes[escapeType][i]['item'].parentNode !==
