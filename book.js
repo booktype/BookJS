@@ -394,7 +394,7 @@
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         "\n.pagination-simple .pagination-footnote > span {" +
             "position: absolute; right: 0in; width: 1in;}" +
-        "\n.pagination-marginnotes-container {width:" + marginNotesWidth + ";}" +
+        "\n.pagination-marginnotes-container, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
         "\n.pagination-marginnotes-separator {width:" + marginNotesSeparatorWidth + ";}" +
         "\n.pagination-main-contents-container, .pagination-marginnotes-container, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
         
@@ -538,11 +538,17 @@
                 // Containers for margin notes
                 marginNotesSeparator = document.createElement('div');
                 marginNotesSeparator.classList.add('pagination-marginnotes-separator');
-                contentsContainer.appendChild(marginNotesSeparator);
                 
                 marginNotesContainer = document.createElement('div');
                 marginNotesContainer.classList.add('pagination-marginnotes-container');
-                contentsContainer.appendChild(marginNotesContainer); 
+                
+                if (i%2 == 0) {
+                    contentsContainer.appendChild(marginNotesSeparator);
+                    contentsContainer.appendChild(marginNotesContainer); 
+                } else {
+                    contentsContainer.insertBefore(marginNotesSeparator, contentsContainer.firstChild);
+                    contentsContainer.insertBefore(marginNotesContainer, contentsContainer.firstChild); 
+                }
                 
                 page.appendChild(contentsContainer);
                 // If no flowName is given, an empty page is created.
