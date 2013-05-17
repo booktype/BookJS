@@ -394,9 +394,9 @@
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         "\n.pagination-simple .pagination-footnote > span {" +
             "position: absolute; right: 0in; width: 1in;}" +
-        "\n.pagination-marginnotes-container, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
+        "\n.pagination-marginnotes, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
         "\n.pagination-marginnotes-separator {width:" + marginNotesSeparatorWidth + ";}" +
-        "\n.pagination-main-contents-container, .pagination-marginnotes-container, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
+        "\n.pagination-main-contents-container, .pagination-marginnotes, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
         
     };
 
@@ -540,7 +540,7 @@
                 marginNotesSeparator.classList.add('pagination-marginnotes-separator');
                 
                 marginNotesContainer = document.createElement('div');
-                marginNotesContainer.classList.add('pagination-marginnotes-container');
+                marginNotesContainer.classList.add('pagination-marginnotes');
                 
                 if (i%2 == 0) {
                     contentsContainer.appendChild(marginNotesSeparator);
@@ -701,9 +701,9 @@
             secondMarginNotesContainersOffsetTop, 
             marginNotesContainerStartDistance; 
         allPages = document.querySelectorAll('.pagination-page');
-        firstMarginNotesContainer = allPages[0].querySelector('.pagination-marginnotes-container');
+        firstMarginNotesContainer = allPages[0].querySelector('.pagination-marginnotes');
         pagination.firstMarginNotesContainerOffsetTop = firstMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;;
-        secondMarginNotesContainer = allPages[1].querySelector('.pagination-marginnotes-container');
+        secondMarginNotesContainer = allPages[1].querySelector('.pagination-marginnotes');
         secondMarginNotesContainersOffsetTop = secondMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;;
         pagination.marginNotesContainerStartDistance = secondMarginNotesContainersOffsetTop - pagination.firstMarginNotesContainerOffsetTop;
     };
@@ -725,7 +725,7 @@
         containerNumber = parseInt((objectOffsetTop - pagination.firstMarginNotesContainerOffsetTop)/pagination.marginNotesContainerStartDistance, 10);
         
         offsetTopWithinContainer = objectOffsetTop - containerNumber * (pagination.marginNotesContainerStartDistance) - pagination.firstMarginNotesContainerOffsetTop;
-        return [allPages[containerNumber].querySelector('.pagination-marginnotes-container'), offsetTopWithinContainer];
+        return [allPages[containerNumber].querySelector('.pagination-marginnotes'), offsetTopWithinContainer];
     };
     
     pagination.adjustMarginNotesPositionsPerPage = function (marginNotesContainer) {
@@ -771,7 +771,7 @@
     pagination.adjustAllMarginNotesPositions = function () {
         /* Add margin notes for the entire document
          */
-        var allMarginNoteContainers = document.querySelectorAll('.pagination-marginnotes-container'), i;
+        var allMarginNoteContainers = document.querySelectorAll('.pagination-marginnotes'), i;
         
         for (i=0; i < allMarginNoteContainers.length; i++) {
             pagination.adjustMarginNotesPositionsPerPage(allMarginNoteContainers[i]);
