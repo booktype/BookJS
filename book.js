@@ -125,7 +125,10 @@
  * settings are different from the baove ones in that they can be overriden 
  * through CSS to provide more advanced designs (see the above note on 
  * pagination.css).
- * 
+ *
+ * mirrorMargins: true -- If true outerMargin and innerMargin will be
+ * contraries for odd and even pages.
+ *
  * outerMargin: .5 (inch)-- This controls the margin on the outer part of the 
  * page.
  * 
@@ -209,6 +212,7 @@
         'marginnoteSelector': '.pagination-marginnote',
         'maxPageNumber': 10000,
         'columnSeparatorWidth': 0.09,
+        'mirrorMargins': true,
         'outerMargin': 0.5,
         'innerMargin': 0.8,
         'contentsTopMargin': 0.8,
@@ -365,15 +369,25 @@
             headerTopMargin + ";}" +
             "\n#pagination-toc-title:before {content:'Contents';}" +
             "\n#pagination-tof-title:before {content:'Figures';}" +
-            "\n.pagination-page:nth-child(odd) .pagination-contents-container, " +
-            ".pagination-page:nth-child(odd) .pagination-pagenumber," +
-            ".pagination-page:nth-child(odd) .pagination-header {" + "right:" +
-            outerMargin + ";left:" + innerMargin + ";}" +
-            "\n.pagination-page:nth-child(even) .pagination-contents-container, " +
-            ".pagination-page:nth-child(even) .pagination-pagenumber," +
-            ".pagination-page:nth-child(even) .pagination-header {" + "right:" +
-            innerMargin + ";left:" + outerMargin + ";}" +
-            "\n.pagination-page:nth-child(odd) .pagination-pagenumber," +
+            +(paginationConfig['mirrorMargins']?
+                    ("\n.pagination-page:nth-child(odd) .pagination-contents-container, "
+                    + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
+                    + ".pagination-page:nth-child(odd) .pagination-header {"
+                    + "right:"+outerMargin+";left:"+innerMargin+";}"
+                    + "\n.pagination-page:nth-child(even) .pagination-contents-container, "
+                    + ".pagination-page:nth-child(even) .pagination-pagenumber,"
+                    + ".pagination-page:nth-child(even) .pagination-header {"
+                    + "right:"+innerMargin+";left:"+outerMargin+";}"):
+                    /*else*/
+                    ("\n.pagination-page:nth-child(odd) .pagination-contents-container, "
+                    + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
+                    + ".pagination-page:nth-child(odd) .pagination-header {"
+                    + "right:"+outerMargin+";left:"+innerMargin+";}"
+                    + "\n.pagination-page:nth-child(even) .pagination-contents-container, "
+                    + ".pagination-page:nth-child(even) .pagination-pagenumber,"
+                    + ".pagination-page:nth-child(even) .pagination-header {"
+                    + "right:"+outerMargin+";left:"+innerMargin+";}"))
+            + "\n.pagination-page:nth-child(odd) .pagination-pagenumber," +
             ".pagination-page:nth-child(odd) .pagination-header {" +
             "text-align:right;}" +
             "\n.pagination-page:nth-child(even) .pagination-pagenumber," +
