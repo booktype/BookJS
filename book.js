@@ -379,13 +379,9 @@
                     + ".pagination-page:nth-child(even) .pagination-header {"
                     + "right:"+innerMargin+";left:"+outerMargin+";}"):
                     /*else*/
-                    ("\n.pagination-page:nth-child(odd) .pagination-contents-container, "
-                    + ".pagination-page:nth-child(odd) .pagination-pagenumber,"
-                    + ".pagination-page:nth-child(odd) .pagination-header {"
-                    + "right:"+outerMargin+";left:"+innerMargin+";}"
-                    + "\n.pagination-page:nth-child(even) .pagination-contents-container, "
-                    + ".pagination-page:nth-child(even) .pagination-pagenumber,"
-                    + ".pagination-page:nth-child(even) .pagination-header {"
+                    ("\n.pagination-page .pagination-contents-container, "
+                    + ".pagination-page .pagination-pagenumber,"
+                    + ".pagination-page .pagination-header {"
                     + "right:"+outerMargin+";left:"+innerMargin+";}"))
             + "\n.pagination-page:nth-child(odd) .pagination-pagenumber," +
             ".pagination-page:nth-child(odd) .pagination-header {" +
