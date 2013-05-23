@@ -628,11 +628,11 @@
         //var calculateTof = function() {
         
         for (i = 0; i < bodyObjects.length; i++) {
-            figures = bodyObjects[i].rawdiv.querySelectorAll('div.figure');
+            figures = bodyObjects[i].rawdiv.querySelectorAll('figure');
             for (j = 0; j < figures.length; j++) {
                 figure = figures[j];
                 image = figure.querySelector('img');
-                caption = figure.querySelector('div.caption');
+                caption = figure.querySelector('figcaption');
                 if (image && image.alt !== '') {
                     title = image.alt;
                 } else if (caption) {
