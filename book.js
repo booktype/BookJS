@@ -74,6 +74,14 @@
  * description text is generated of the following format:
  * 
  * "Figure chapter.number"
+ * 
+ * enableTableOfTables: false -- This creates a table of <table>s within 
+ * <figure>s, similarly to enableTableOfFigures. If this option is enabled,
+ * tables will not additionally be listed in the table of figures. If no 
+ * <figcaption> element is present, the description text will be in the 
+ * following format:
+ * 
+ * "Table chapter.number"
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
@@ -210,6 +218,7 @@
         'columns': 1,
         'enableFrontmatter': true,
         'enableTableOfFigures': false,
+        'enableTableOfTables': false,
         'enableMarginNotes': false,
         'bulkPagesToAdd': 50,
         'pagesToAddIncrementRatio': 1.4,
@@ -378,6 +387,7 @@
             headerTopMargin + ";}" +
             "\n#pagination-toc-title:before {content:'Contents';}" +
             "\n#pagination-tof-title:before {content:'Figures';}" +
+            "\n#pagination-tot-title:before {content:'Tables';}" +
             "\n.pagination-page:nth-child(odd) .pagination-contents-container, " +
             ".pagination-page:nth-child(odd) .pagination-pagenumber," +
             ".pagination-page:nth-child(odd) .pagination-header {" + "right:" +
@@ -395,7 +405,9 @@
             "\n.pagination-footnote > * > * {font-size: 0.7em; margin:.25em;}" +
             "\n.pagination-footnote > * > *::before, .pagination-footnote::before " +
             "{position: relative; top: -0.5em; font-size: 80%;}" +
-            "\n.pagination-toc-entry .pagination-toc-pagenumber, .pagination-tof-entry .pagination-tof-pagenumber {float:right}"
+            "\n.pagination-toc-entry .pagination-toc-pagenumber, " +
+            ".pagination-tof-entry .pagination-tof-pagenumber, " +
+            ".pagination-tot-entry .pagination-tot-pagenumber {float:right}"
         /* This seems to be a bug in Webkit. But unless we set the width of the 
          * original element that is being flown, some elements extend beyond the
          * mainContentsContainer's width.
@@ -627,7 +639,7 @@
         /* Go through all pages of all flowobjects, looking for all figures to 
          * create a "table of figures".
          */
-        var tofDiv, tofTitleH1, figures, figure, image, title, i, j;
+        var tofDiv, tofTitleH1, figures, figure, image, title, caption, pagenumber, tofItemDiv, tofItemTextSpan, tofItemPnSpan, tofItemPnText, i, j;
         
         
         tofDiv = document.createElement('div');
@@ -644,6 +656,11 @@
             figures = bodyObjects[i].rawdiv.querySelectorAll('figure');
             for (j = 0; j < figures.length; j++) {
                 figure = figures[j];
+                
+                if (pagination.config('enableTableOfTables') && figure.querySelector('table')) {
+                    console.log(j);
+                    continue;
+                }
                 image = figure.querySelector('img');
                 caption = figure.querySelector('figcaption');
                 if (image && image.alt !== '') {
@@ -674,12 +691,68 @@
             }
         }
         
-        return tofDiv;
-        //}
-        
-        
+        return tofDiv; 
         
     }
+    
+    pagination.closest = function(element, searchedFor) {
+        if (element.webkitMatchesSelector(searchedFor)) {
+            return element;
+        } else {
+            return pagination.closest(element.parentNode, searchedFor);
+        }
+    };
+    
+    pagination.tot = function (bodyObjects) {
+        /* Go through all pages of all flowobjects, looking for all tables within figures to 
+         * create a "table of tables".
+         */
+        var totDiv, totTitleH1, tables, figure, table, title, caption, pagenumber, totItemDiv, totItemTextSpan, totItemPnSpan, totItemPnText, i, j;
+        
+        
+        totDiv = document.createElement('div');
+        totDiv.id = 'pagination-tot';
+        
+        totTitleH1 = document.createElement('h1');
+        totTitleH1.id = 'pagination-tot-title';
+
+        totDiv.appendChild(totTitleH1);
+        
+        for (i = 0; i < bodyObjects.length; i++) {
+            tables = bodyObjects[i].rawdiv.querySelectorAll('figure table');
+            console.log(tables);
+            for (j = 0; j < tables.length; j++) {
+                figure = pagination.closest(tables[j], 'figure');
+                    caption = figure.querySelector('figcaption');
+                    if (caption) {
+                        title = caption.innerText;
+                    } else {
+                        title = 'Table '+ i + '.' + j;
+                    }
+                    pagenumber = pagination.findPage(figure).querySelector('.pagination-pagenumber').innerText;
+                    totItemDiv = document.createElement('div');
+                    totItemDiv.classList.add('pagination-tot-entry');
+                    totItemTextSpan = document.createElement('span');
+                    totItemTextSpan.classList.add('pagination-tot-text');                
+                    totItemTextSpan.innerHTML = title;
+                    totItemDiv.appendChild(totItemTextSpan);
+
+                    totItemPnSpan = document.createElement('span');
+                    totItemPnSpan.classList.add('pagination-tot-pagenumber');
+
+                    totItemPnText = document.createTextNode(pagenumber);
+                    totItemPnSpan.appendChild(totItemPnText);
+
+                    totItemDiv.appendChild(totItemPnSpan);
+
+                    totDiv.appendChild(totItemDiv);
+                
+            }
+        }
+        
+        return totDiv; 
+        
+    }    
     
     pagination.findPage = function (object) {
         /* Find the page a certain element is placed on
@@ -954,7 +1027,7 @@
          * Will first divide the original DOM up into individual chapters and 
          * sections.
          */
-        var bodyObjects, layoutDiv, contentsDiv, toc, tof, redoToc, fmObject, i;
+        var bodyObjects, layoutDiv, contentsDiv, toc, tof, tot, redoToc, fmObject, i;
         
         bodyObjects = pagination.createBodyObjects();
 
@@ -995,6 +1068,10 @@
                 tof = pagination.tof(bodyObjects);
                 fmObject.rawdiv.appendChild(tof);
             }
+            if (pagination.config('enableTableOfTables')) {
+                tot = pagination.tot(bodyObjects);
+                fmObject.rawdiv.appendChild(tot);
+            }            
             layoutDiv.insertBefore(fmObject.div, bodyObjects[0].div);
             fmObject.initiate();
             redoToc = function () {
