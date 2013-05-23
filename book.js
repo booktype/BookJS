@@ -658,7 +658,6 @@
                 figure = figures[j];
                 
                 if (pagination.config('enableTableOfTables') && figure.querySelector('table')) {
-                    console.log(j);
                     continue;
                 }
                 image = figure.querySelector('img');
@@ -720,7 +719,6 @@
         
         for (i = 0; i < bodyObjects.length; i++) {
             tables = bodyObjects[i].rawdiv.querySelectorAll('figure table');
-            console.log(tables);
             for (j = 0; j < tables.length; j++) {
                 figure = pagination.closest(tables[j], 'figure');
                     caption = figure.querySelector('figcaption');
@@ -1082,6 +1080,11 @@
                     var oldTof = tof;
                     tof = pagination.tof(bodyObjects);
                     fmObject.rawdiv.replaceChild(tof, oldTof);
+                }
+               if (pagination.config('enableTableOfTables')) {
+                    var oldTot = tot;
+                    tot = pagination.tot(bodyObjects);
+                    fmObject.rawdiv.replaceChild(tot, oldTot);
                 }
             };
             document.body.addEventListener('bodyLayoutUpdated', function() {
