@@ -61,6 +61,19 @@
  * enableFrontmatter: true -- This resolves whether a table of contents, page\
  * headers and other frontmatter contents should be added upon page creation. 
  * Note: divideContents has to be true if one wants the frontmatter to render.
+ * 
+ * enableTableOfFigures: false -- This creates a table of figures in the front. 
+ * Figures are expected to be in the HTML5 format:
+ * 
+ * <figure>...<figcaption></figcaption></figure>
+ * 
+ * If an <img> element is present in the figure, its alt-attribute text will be
+ * used as the reference text. If no <img> element is present, or one is 
+ * present, but it has no alt-attribute, the contents of the <figcaption> 
+ * element will be usd instead. If no <figcaption> element is present, a 
+ * description text is generated of the following format:
+ * 
+ * "Figure chapter.number"
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
