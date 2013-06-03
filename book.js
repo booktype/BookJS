@@ -241,6 +241,7 @@
         'pageWidth': 5.8,
         'marginNotesWidth': 1.0,
         'marginNotesSeparatorWidth': 0.09,
+        'marginNotesVerticalSeperator': 0.09,
         'lengthUnit': 'in'
     };
 
@@ -345,6 +346,7 @@
             marginNotesWidth = marginNotesWidthNumber + unit,
             marginNotesSeparatorWidthNumber = pagination.config('marginNotesSeparatorWidth') * pagination.config('enableMarginNotes'),
             marginNotesSeparatorWidth = marginNotesSeparatorWidthNumber + unit,
+            marginNotesVerticalSeperator = pagination.config('marginNotesVerticalSeparator') + unit,
             contentsWidthNumber = pagination.config('pageWidth') - pagination.config(
                 'innerMargin') - pagination.config('outerMargin') - (marginNotesWidthNumber + marginNotesSeparatorWidthNumber),
             contentsWidth = contentsWidthNumber + unit,
@@ -420,6 +422,7 @@
         "\n.pagination-simple .pagination-footnote > span {" +
             "position: absolute; right: 0in; width: 1in;}" +
         "\n.pagination-marginnotes, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
+        "\n.pagination-marginnote-item {margin-bottom:" + marginNotesVerticalSeperator + ";}" +
         "\n.pagination-marginnotes-separator {width:" + marginNotesSeparatorWidth + ";}" +
         "\n.pagination-main-contents-container, .pagination-marginnotes, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
         
@@ -650,7 +653,6 @@
 
         tofDiv.appendChild(tofTitleH1);
         
-        //var calculateTof = function() {
         
         for (i = 0; i < bodyObjects.length; i++) {
             figures = bodyObjects[i].rawdiv.querySelectorAll('figure');
@@ -830,8 +832,8 @@
         });
         
         for (i = 1; i < marginNotesList.length; i++) {
-            if ((marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight) > marginNotesList[i].offsetTop ) {
-                marginNotesList[i].style.top = (marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight) + 'px';
+            if ((marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight + window.getComputedStyle(marginNotesList[i-1]).marginBottom) > marginNotesList[i].offsetTop ) {
+                marginNotesList[i].style.top = (marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight + window.getComputedStyle(marginNotesList[i-1]).marginBottom) + 'px';
                 // TODO: Add minimum distance between elements;
             }
         }
@@ -839,8 +841,8 @@
         if (marginNotesList[marginNotesList.length-1].offsetTop + marginNotesList[marginNotesList.length-1].offsetHeight > marginNotesContainer.offsetHeight) {
             marginNotesList[marginNotesList.length-1].style.top = (marginNotesContainer.offsetHeight - marginNotesList[marginNotesList.length-1].offsetHeight) + 'px';
             for (i = (marginNotesList.length-2); i > -1; i--) {
-                if (marginNotesList[i+1].offsetTop > (marginNotesList[i].offsetTop + marginNotesList[i].offsetHeight) ) {
-                    marginNotesList[i].style.top = (marginNotesList[i+1].offsetTop - marginNotesList[i].offsetHeight) + 'px';
+                if (marginNotesList[i+1].offsetTop > (marginNotesList[i].offsetTop + marginNotesList[i].offsetHeight + window.getComputedStyle(marginNotesList[i]).marginBottom) ) {
+                    marginNotesList[i].style.top = (marginNotesList[i+1].offsetTop - (marginNotesList[i].offsetHeight + window.getComputedStyle(marginNotesList[i]).marginBottom) ) + 'px';
                     // TODO: Add minimum distance between elements;
                 } else {
                     break;
