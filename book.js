@@ -140,6 +140,25 @@
  * <span class='pagination-footnote'><span><span>This is a footnote</span>
  * </span></span>. 
  * 
+ * marginnoteSelector: '.pagination-marginnote' -- this is the CSS selector 
+ * used for finding marginnotes within the HTML code. Margin notes are moved 
+ * whenever the reference to them is moved. They do not overlap and don't go 
+ * beyond the bottom of the text. At the same time they are placed as close as 
+ * possible to where they are referenced from.
+ * 
+ * <span class='pagination-marginnote'><span><span>This is a margin note</span>
+ * </span></span>. 
+ * 
+ * Three settings can be defined to adjust margin notes:
+ * 
+ * marginNotesWidth: 1.0 (inch): This is the width oiccupied by margin notes.
+ * 
+ * marginNotesSeparatorWidth: 0.09 (inch): This is the gap between body text and 
+ * margin notes.
+ * 
+ * marginNotesVerticalSeparatorWidth': 0.09 (inch): This is the vertical space 
+ * between any two margin notes.
+ * 
  * Page style options
  * 
  * These settings provide a way to do simple styling of the page. These 
@@ -241,7 +260,7 @@
         'pageWidth': 5.8,
         'marginNotesWidth': 1.0,
         'marginNotesSeparatorWidth': 0.09,
-        'marginNotesVerticalSeperator': 0.09,
+        'marginNotesVerticalSeparatorWidth': 0.09,
         'lengthUnit': 'in'
     };
 
@@ -346,7 +365,7 @@
             marginNotesWidth = marginNotesWidthNumber + unit,
             marginNotesSeparatorWidthNumber = pagination.config('marginNotesSeparatorWidth') * pagination.config('enableMarginNotes'),
             marginNotesSeparatorWidth = marginNotesSeparatorWidthNumber + unit,
-            marginNotesVerticalSeperator = pagination.config('marginNotesVerticalSeparator') + unit,
+            marginNotesVerticalSeparator = pagination.config('marginNotesVerticalSeparatorWidth') + unit,
             contentsWidthNumber = pagination.config('pageWidth') - pagination.config(
                 'innerMargin') - pagination.config('outerMargin') - (marginNotesWidthNumber + marginNotesSeparatorWidthNumber),
             contentsWidth = contentsWidthNumber + unit,
@@ -422,7 +441,7 @@
         "\n.pagination-simple .pagination-footnote > span {" +
             "position: absolute; right: 0in; width: 1in;}" +
         "\n.pagination-marginnotes, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
-        "\n.pagination-marginnote-item {margin-bottom:" + marginNotesVerticalSeperator + ";}" +
+        "\n.pagination-marginnote-item {margin-bottom:" + marginNotesVerticalSeparator + ";}" +
         "\n.pagination-marginnotes-separator {width:" + marginNotesSeparatorWidth + ";}" +
         "\n.pagination-main-contents-container, .pagination-marginnotes, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
         
@@ -628,6 +647,15 @@
      * node (footnote, top float) no longer is on the page where it used to be.
      */
 
+    pagination.events.marginnotesNeedMove = document.createEvent('Event');
+    pagination.events.marginnotesNeedMove.initEvent(
+        'marginnotesNeedMove',
+        true,
+        true);
+    /* escapesNeedMove is emitted when at least one reference to a an escape 
+     * node (footnote, top float) no longer is on the page where it used to be.
+     */
+    
     pagination.events.redoEscapes = document.createEvent('Event');
     pagination.events.redoEscapes.initEvent(
         'redoEscapes',
@@ -777,7 +805,7 @@
     
     pagination.setMarginNotesContainerStartDistance = function () {
         /* Find the actual distance between the margin note containers between 
-         * pages and the top offset for the first page. We asusme that the 
+         * pages and the top offset for the first page. We assume that the 
          * first two pages are not empty for this to work.
          */
         var allPages, 
@@ -788,9 +816,9 @@
             marginNotesContainerStartDistance; 
         allPages = document.querySelectorAll('.pagination-page');
         firstMarginNotesContainer = allPages[0].querySelector('.pagination-marginnotes');
-        pagination.firstMarginNotesContainerOffsetTop = firstMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;;
+        pagination.firstMarginNotesContainerOffsetTop = firstMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;
         secondMarginNotesContainer = allPages[1].querySelector('.pagination-marginnotes');
-        secondMarginNotesContainersOffsetTop = secondMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;;
+        secondMarginNotesContainersOffsetTop = secondMarginNotesContainer.getBoundingClientRect()['top'] + window.pageYOffset;
         pagination.marginNotesContainerStartDistance = secondMarginNotesContainersOffsetTop - pagination.firstMarginNotesContainerOffsetTop;
     };
     
@@ -811,7 +839,7 @@
         containerNumber = parseInt((objectOffsetTop - pagination.firstMarginNotesContainerOffsetTop)/pagination.marginNotesContainerStartDistance, 10);
         
         offsetTopWithinContainer = objectOffsetTop - containerNumber * (pagination.marginNotesContainerStartDistance) - pagination.firstMarginNotesContainerOffsetTop;
-        return [allPages[containerNumber].querySelector('.pagination-marginnotes'), offsetTopWithinContainer];
+        return [allPages[containerNumber].querySelector('.pagination-marginnotes'), offsetTopWithinContainer, objectOffsetTop];
     };
     
     pagination.adjustMarginNotesPositionsPerPage = function (marginNotesContainer) {
@@ -832,18 +860,16 @@
         });
         
         for (i = 1; i < marginNotesList.length; i++) {
-            if ((marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight + window.getComputedStyle(marginNotesList[i-1]).marginBottom) > marginNotesList[i].offsetTop ) {
-                marginNotesList[i].style.top = (marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight + window.getComputedStyle(marginNotesList[i-1]).marginBottom) + 'px';
-                // TODO: Add minimum distance between elements;
+            if ((marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight + parseInt(window.getComputedStyle(marginNotesList[i-1]).marginBottom)) > marginNotesList[i].offsetTop ) {
+                marginNotesList[i].style.top = (marginNotesList[i-1].offsetTop + marginNotesList[i-1].offsetHeight + parseInt(window.getComputedStyle(marginNotesList[i-1]).marginBottom)) + 'px';
             }
         }
         
         if (marginNotesList[marginNotesList.length-1].offsetTop + marginNotesList[marginNotesList.length-1].offsetHeight > marginNotesContainer.offsetHeight) {
             marginNotesList[marginNotesList.length-1].style.top = (marginNotesContainer.offsetHeight - marginNotesList[marginNotesList.length-1].offsetHeight) + 'px';
             for (i = (marginNotesList.length-2); i > -1; i--) {
-                if (marginNotesList[i+1].offsetTop > (marginNotesList[i].offsetTop + marginNotesList[i].offsetHeight + window.getComputedStyle(marginNotesList[i]).marginBottom) ) {
-                    marginNotesList[i].style.top = (marginNotesList[i+1].offsetTop - (marginNotesList[i].offsetHeight + window.getComputedStyle(marginNotesList[i]).marginBottom) ) + 'px';
-                    // TODO: Add minimum distance between elements;
+                                if (marginNotesList[i+1].offsetTop < (marginNotesList[i].offsetTop + marginNotesList[i].offsetHeight + parseInt(window.getComputedStyle(marginNotesList[i]).marginBottom)) ) {
+                    marginNotesList[i].style.top = (marginNotesList[i+1].offsetTop - (marginNotesList[i].offsetHeight + parseInt(window.getComputedStyle(marginNotesList[i]).marginBottom)) ) + 'px';
                 } else {
                     break;
                 }
@@ -1249,7 +1275,7 @@
         this.findAllTopfloats();
         this.findAllFootnotes();
         this.findAllMarginnotes();
-        // Layout magrin notes once before everything else, so that they don't fill up text
+        // Layout margin notes once before everything else, so that they don't fill up text
         //this.layoutMarginnotes();
         this.placeAllEscapes();
         this.setupEscapeReflow();
@@ -1365,6 +1391,10 @@
                 this.escapes[escapeTypes[j]][i]['referencePage'] = 
                   this.findEscapeReferencePage(
                     this.escapes[escapeTypes[j]][i]['reference']);
+                if (escapeTypes[j]==='marginnote') {
+                    this.escapes[escapeTypes[j]][i]['referenceTopOffset'] = 
+                      this.escapes[escapeTypes[j]][i]['reference'].getBoundingClientRect()['top'] + window.pageYOffset;                   
+                }
             }
         }
     };
@@ -1419,7 +1449,11 @@
                         this.namedFlow.dispatchEvent(pagination.events.escapesNeedMove);
                         return;
                     }
+                } else if (escapeTypes[j] === 'marginnote' && (this.escapes[escapeTypes[j]][i]['reference'].getBoundingClientRect()['top'] + window.pageYOffset) !== this.escapes[escapeTypes[j]][i]['referenceTopOffset']) {
+                    this.namedFlow.dispatchEvent(pagination.events.marginnotesNeedMove);
                 }
+                
+                
 
             }
         }
@@ -1459,6 +1493,13 @@
 
         this.namedFlow.addEventListener('escapesNeedMove', reFlow);
 
+        reFlowMarginnotes = function () {
+            flowObject.layoutMarginnotes();
+            flowObject.freezeEscapeReferencePages();
+        };
+        
+        this.namedFlow.addEventListener('marginnotesNeedMove', reFlowMarginnotes);
+        
         redoEscapes = function () {
             flowObject.redoEscapes();
         };
@@ -1620,12 +1661,13 @@
             /* Go through the escapes, this with the purpose of placing them 
              * correctly.
              */
-            var escapeReferencePage, firstEscapeContainer, marginnoteOffsetTop, checkSpacerSize, observer, newEscapeReferencePage, newEscapeContainer, marginNotesAndOffset;
+            var escapeReferencePage, firstEscapeContainer, marginnoteOffsetTop, marginnoteOffsetTopTotal, checkSpacerSize, observer, newEscapeReferencePage, newEscapeContainer, marginNotesAndOffset;
             
             if (escapeType === 'marginnote') {
                 marginNotesAndOffset = pagination.findMarginNotesContainerAndOffset(document.getElementById(this.escapes[escapeType][i]['id']));
                 firstEscapeContainer = marginNotesAndOffset[0];
                 marginnoteOffsetTop = marginNotesAndOffset[1];
+                //marginnoteOffsetTopTotal = marginNotesAndOffset[2];
 
             } else {
                 escapeReferencePage = this.findEscapeReferencePage(
@@ -1636,7 +1678,6 @@
                     '.pagination-' + escapeType + 's');
             }
 
-            
             // Only if the escapenode is not already on the page of its reference do we need to get active.
             if (this.escapes[escapeType][i]['item'].parentNode !==
                 firstEscapeContainer || (escapeType === 'marginnote' && marginnoteOffsetTop !== this.escapes[escapeType][i]['offsetTop'])) {
