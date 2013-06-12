@@ -834,7 +834,7 @@
         };
         
         allPages = document.querySelectorAll('.pagination-page');
-        objectOffsetTop = object.getBoundingClientRect()['top'] + window.pageYOffset;;
+        objectOffsetTop = object.getBoundingClientRect()['top'] + window.pageYOffset;
 
         containerNumber = parseInt((objectOffsetTop - pagination.firstMarginNotesContainerOffsetTop)/pagination.marginNotesContainerStartDistance, 10);
         
@@ -1161,7 +1161,46 @@
         //simplePage.id = bodyContainer.id;
         //bodyContainer.innerHTML = '';
         //document.body.appendChild(simplePage);
+        pagination.adjustSimpleFootnotes(simplePage);
+        
+        var observerOptions = {
+                attributes: false,
+                subtree: true,
+                characterData: true,
+                childList: true
+            };
+            
+            var observer = new MutationObserver(function (mutations) {
+                observer.disconnect();
+                pagination.adjustSimpleFootnotes(simplePage);
+                observer.observe(simplePage,observerOptions);
+            });
+        observer.observe(simplePage,observerOptions);
         document.dispatchEvent(pagination.events.layoutFlowFinished);
+    };
+    
+    pagination.resetSimpleFootnotes = function () {
+        var footnotes = eval(pagination.config('flowElement')).flowElement.querySelectorAll(pagination.config('footnoteSelector')+' > *'), i;
+        for (i=0;i<footnotes.length;i++) {
+            footnotes[i].style.top='';
+        }
+    };
+    
+    pagination.adjustSimpleFootnotes = function (simplePage) {
+        var footnotes = simplePage.querySelectorAll(pagination.config('footnoteSelector')+' > *'), i;
+        if (footnotes.length > 0 && footnotes[0].style.top !== '') {
+            footnotes[0].style.top = '';
+        }
+        if (footnotes.length > 1) {   
+            footnotes[0].style.top='';
+            for (i=1;i<footnotes.length;i++) {
+                if ((footnotes[i].parentNode.offsetTop<(footnotes[i-1].offsetTop+footnotes[i-1].offsetHeight)) &&
+                    footnotes[i].style.top !== (footnotes[i-1].offsetTop+footnotes[i-1].offsetHeight)+'px'
+                ) {
+                    footnotes[i].style.top=(footnotes[i-1].offsetTop+footnotes[i-1].offsetHeight)+'px';
+                }
+            }
+        }
     };
 
     pagination._cssRegionsCheck = function () {
@@ -1185,6 +1224,7 @@
         if (document.readyState === 'interactive' && !cssRegionsPresent) {
             pagination.applySimpleBookLayout();
         } else if (document.readyState === 'complete' && cssRegionsPresent) {
+            pagination.resetSimpleFootnotes();
             if (pagination.config('divideContents')) {
                 pagination.applyBookLayout();
             } else {
@@ -1345,10 +1385,10 @@
         /* Find the page where the the escape would be placed in the body text.
          */
         var escapeReferenceNode;
-	if (!escapeReference) {
-	    return false;
-	}
-	escapeReferenceNode = this.namedFlow.getRegionsByContent(
+        if (!escapeReference) {
+            return false;
+        }
+        escapeReferenceNode = this.namedFlow.getRegionsByContent(
             escapeReference)[0];
         if (escapeReferenceNode) {
             return escapeReferenceNode.parentNode.parentNode.parentNode;
@@ -1951,7 +1991,7 @@
         /* Setup automatic addition and removing of pages when content is added or
          * removed.
          */
-        var flowObject = this, checkOverset, checkAllEscapeReferencePagesPlacements, observer, reFlow;
+        var flowObject = this, checkOverset, checkAllEscapeReferencePagesPlacements, observer, observerOptions, reFlow;
 
         checkOverset = function () {
             /* Something has changed in the contents of this flow. Check if the
@@ -1985,17 +2025,21 @@
              * 
              * TODO: Check whether throttling this event makes sense.
              */
-            observer = new MutationObserver(function (mutations) {
-                checkOverset();
-                checkAllEscapeReferencePagesPlacements();
-            });
-
-            observer.observe(this.rawdiv, {
-                attributes: true,
+            observerOptions = {
+                attributes: false,
                 subtree: true,
                 characterData: true,
                 childList: true
+            };
+            
+            observer = new MutationObserver(function (mutations) {
+                observer.disconnect();
+                checkOverset();
+                checkAllEscapeReferencePagesPlacements();
+                observer.observe(this.rawdiv,observerOptions);
             });
+
+            observer.observe(this.rawdiv,observerOptions);
         }
 
         reFlow = function () {
