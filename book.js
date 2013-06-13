@@ -1180,7 +1180,7 @@
     };
     
     pagination.resetSimpleFootnotes = function () {
-        var footnotes = eval(pagination.config('flowElement')).flowElement.querySelectorAll(pagination.config('footnoteSelector')+' > *'), i;
+        var footnotes = eval(pagination.config('flowElement')).querySelectorAll(pagination.config('footnoteSelector')+' > *'), i;
         for (i=0;i<footnotes.length;i++) {
             footnotes[i].style.top='';
         }
@@ -1991,7 +1991,7 @@
         /* Setup automatic addition and removing of pages when content is added or
          * removed.
          */
-        var flowObject = this, checkOverset, checkAllEscapeReferencePagesPlacements, observer, observerOptions, reFlow;
+        var flowObject = this, checkOverset, checkAllEscapeReferencePagesPlacements, observer, observerOptions, reFlow, ourRawdiv;
 
         checkOverset = function () {
             /* Something has changed in the contents of this flow. Check if the
@@ -2032,14 +2032,16 @@
                 childList: true
             };
             
+            ourRawdiv = this.rawdiv;
+            
             observer = new MutationObserver(function (mutations) {
                 observer.disconnect();
                 checkOverset();
                 checkAllEscapeReferencePagesPlacements();
-                observer.observe(this.rawdiv,observerOptions);
+                observer.observe(ourRawdiv,observerOptions);
             });
 
-            observer.observe(this.rawdiv,observerOptions);
+            observer.observe(ourRawdiv,observerOptions);
         }
 
         reFlow = function () {
