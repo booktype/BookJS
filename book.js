@@ -82,6 +82,10 @@
  * following format:
  * 
  * "Table chapter.number"
+ * 
+ * enableCrossReferences: true -- This converts the inner part  all internal 
+ * links within the flow element into the page number of the page the referred
+ * element is placed on. 
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
@@ -239,6 +243,7 @@
         'enableTableOfFigures': false,
         'enableTableOfTables': false,
         'enableMarginNotes': false,
+        'enableCrossReferences': true,
         'bulkPagesToAdd': 50,
         'pagesToAddIncrementRatio': 1.4,
         'frontmatterContents': '',
@@ -889,6 +894,22 @@
             pagination.adjustMarginNotesPositionsPerPage(allMarginNoteContainers[i]);
         }
     };
+    
+    pagination.findAllCrossReferences = function () {
+        /* Find all links that point to places within the same document
+         */
+        var flowElement = eval(pagination.config('flowElement')), allReferences = flowElement.querySelectorAll('a'), referredElement, pageNumber, i;
+        
+        for (i=0; i < allReferences.length;i++) {
+            if (allReferences[i].getAttribute('href')[0]==='#') {
+                referredElement = flowElement.querySelector(allReferences[i].getAttribute('href'));
+                pageNumber = pagination.findPage(referredElement).querySelector('.pagination-pagenumber').innerHTML;
+                if (allReferences[i].innerHTML !== pageNumber) {
+                    allReferences[i].innerHTML = pageNumber;
+                }
+            }
+        }
+    };
 
     pagination.headersAndToc = function (bodyObjects) {
         /* Go through all pages of all flowObjects and add page headers and
@@ -1114,10 +1135,13 @@
                     tot = pagination.tot(bodyObjects);
                     fmObject.rawdiv.replaceChild(tot, oldTot);
                 }
+                if (pagination.config('enableCrossReferences')) {
+                    pagination.findAllCrossReferences();
+                }
             };
             document.body.addEventListener('bodyLayoutUpdated', function() {
                 // We have to set a time out of zero to make sure fonts have been applied, etc. before toc and tof are being calculated.
-                // TODO:mIdeally, this shouldn't be needed.
+                // TODO: Ideally, this shouldn't be needed.
                 setTimeout(redoToc, 0);
                 
             });
@@ -1126,6 +1150,9 @@
                 // TODO: This does not seem to work at all times. 
                 document.body.dispatchEvent(pagination.events.bodyLayoutUpdated);
             });
+        }
+        if (pagination.config('enableCrossReferences')) {
+            pagination.findAllCrossReferences();
         }
         document.dispatchEvent(pagination.events.layoutFlowFinished);
     };
