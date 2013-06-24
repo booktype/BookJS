@@ -910,7 +910,75 @@
             }
         }
     };
-
+    
+    pagination.orderIndexItem(itemList, indexTerms, page) {
+        /* take an index item as output by findAllIndexItems and order it.
+         */        
+        if (itemList.length===0) {
+            if (!(indexTerms.hasOwnProperty('pagination-index-page'))) {
+                indexTerms['pagination-index-page'] = [];
+            }
+            indexTerms['pagination-index-page'].push(page);
+            return;
+        }
+        if (!(indexTerms.hasOwnProperty(itemList[0]))) {
+            indexTerms[itemList[0]] = {};
+        }
+        
+        var subIndexTerms = indexTerms[itemList.shift()];
+        
+        pagination.orderIndexItem(itemList,subIndexTerms,page);
+        return;
+    };
+    
+    pagination.findAllIndexItems = function () {
+        /* find all index items.
+         */
+        var flowElement = eval(pagination.config('flowElement')), allIndexItems = flowElement.querySelectorAll('.pagination-index'), pageNumber, indexTerms = {}, indexTerm, i;
+ 
+        for (i=0; i < allIndexIterms.length; i++) {
+            indexTerm = allIndexItems[i].getAttribute('data-pagination-index').split('!');
+            pagination.orderIndexItem(indexTerm, indexTerms, pagination.findPage(allIndexItems[i]).querySelector('.pagination-pagenumber').innerHTML);
+        }
+        return indexTerms;
+    };
+    
+    pagination.sortAssociativeArray = function (associativeArray) {
+        var keys = [];
+        for (key in associativeArray) {
+            keys.push(key);
+        }
+        return keys.sort();
+    };
+    
+    pagination.layoutWordIndex = function (indexTerms, element) {
+        var keys = pagination.sortAssociativeArray(indexTerms), newElement, pageElement, i;
+        for (i=0; i < keys.length;i++) {
+            if (keys[i] === 'pagination-index-page') {
+                pageElement = document.createElement('span');
+                pageElement.classList.add('pagination-index-page');
+                
+                pageElement.innerHTML = indexTerms[keys[i]];
+                element.insertBefore(pageElement, element.firstChild);
+            } else {
+                newElement = document.createElement('div');
+                newElement.innerHTML = '<span class="pagination-index-term">' + keys[i] + '</span>';
+                element.appendChild(newElement);
+                pagination.layoutWordIndex(indexTerms[keys[i]], newElement);
+            }
+        }
+        
+    };
+    
+    pagination.createWordIndex = function () {
+        var flowElement = eval(pagination.config('flowElement')), 
+            wordIndexElement = flowElement.querySelector('.pagination-index-list'),
+            ;
+        pagination.layoutWordIndex(pagination.findAllIndexItems(), wordIndexElement);
+        
+    };
+    
+    
     pagination.headersAndToc = function (bodyObjects) {
         /* Go through all pages of all flowObjects and add page headers and
          * calculate the table fo contents (TOC) for the frontmatter. This has to
