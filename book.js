@@ -443,7 +443,7 @@
             "\n.pagination-frontmatter-contents {width:" + contentsWidth + ";}"
         + "\n.pagination-contents-column-separator {width:" + contentsColumnSeparatorWidth + ";}" +
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
-        "\n.pagination-simple .pagination-footnote > span {" +
+        "\n.pagination-simple .pagination-footnote > span, .pagination-simple .pagination-marginnote > span {" +
             "position: absolute; right: 0in; width: 1in;}" +
         "\n.pagination-marginnotes, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
         "\n.pagination-marginnote-item {margin-bottom:" + marginNotesVerticalSeparator + ";}" +
@@ -1188,7 +1188,7 @@
         //simplePage.id = bodyContainer.id;
         //bodyContainer.innerHTML = '';
         //document.body.appendChild(simplePage);
-        pagination.adjustSimpleFootnotes(simplePage);
+        pagination.adjustSimpleEscapenotes(simplePage);
         
         var observerOptions = {
                 attributes: false,
@@ -1199,32 +1199,32 @@
             
             var observer = new MutationObserver(function (mutations) {
                 observer.disconnect();
-                pagination.adjustSimpleFootnotes(simplePage);
+                pagination.adjustSimpleEscapenotes(simplePage);
                 observer.observe(simplePage,observerOptions);
             });
         observer.observe(simplePage,observerOptions);
         document.dispatchEvent(pagination.events.layoutFlowFinished);
     };
     
-    pagination.resetSimpleFootnotes = function () {
-        var footnotes = eval(pagination.config('flowElement')).querySelectorAll(pagination.config('footnoteSelector')+' > *'), i;
-        for (i=0;i<footnotes.length;i++) {
-            footnotes[i].style.top='';
+    pagination.resetSimpleEscapenotes = function () {
+        var escapenotes = eval(pagination.config('flowElement')).querySelectorAll(pagination.config('footnoteSelector')+' > *, '+ pagination.config('marginnoteSelector') + ' > *'), i;
+        for (i=0;i<escapenotes.length;i++) {
+            escapenotes[i].style.top='';
         }
     };
     
-    pagination.adjustSimpleFootnotes = function (simplePage) {
-        var footnotes = simplePage.querySelectorAll(pagination.config('footnoteSelector')+' > *'), i;
-        if (footnotes.length > 0 && footnotes[0].style.top !== '') {
-            footnotes[0].style.top = '';
+    pagination.adjustSimpleEscapenotes = function (simplePage) {
+        var escapenotes = simplePage.querySelectorAll(pagination.config('footnoteSelector')+' > *, '+ pagination.config('marginnoteSelector') + ' > *'), i;
+        if (escapenotes.length > 0 && escapenotes[0].style.top !== '') {
+            escapenotes[0].style.top = '';
         }
-        if (footnotes.length > 1) {   
-            footnotes[0].style.top='';
-            for (i=1;i<footnotes.length;i++) {
-                if ((footnotes[i].parentNode.offsetTop<(footnotes[i-1].offsetTop+footnotes[i-1].offsetHeight)) &&
-                    footnotes[i].style.top !== (footnotes[i-1].offsetTop+footnotes[i-1].offsetHeight)+'px'
+        if (escapenotes.length > 1) {   
+            escapenotes[0].style.top='';
+            for (i=1;i<escapenotes.length;i++) {
+                if ((escapenotes[i].parentNode.offsetTop<(escapenotes[i-1].offsetTop+escapenotes[i-1].offsetHeight)) &&
+                    escapenotes[i].style.top !== (escapenotes[i-1].offsetTop+escapenotes[i-1].offsetHeight)+'px'
                 ) {
-                    footnotes[i].style.top=(footnotes[i-1].offsetTop+footnotes[i-1].offsetHeight)+'px';
+                    escapenotes[i].style.top=(escapenotes[i-1].offsetTop+escapenotes[i-1].offsetHeight)+'px';
                 }
             }
         }
@@ -1251,7 +1251,7 @@
         if (document.readyState === 'interactive' && !cssRegionsPresent) {
             pagination.applySimpleBookLayout();
         } else if (document.readyState === 'complete' && cssRegionsPresent) {
-            pagination.resetSimpleFootnotes();
+            pagination.resetSimpleEscapenotes();
             if (pagination.config('divideContents')) {
                 pagination.applyBookLayout();
             } else {
