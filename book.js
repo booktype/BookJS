@@ -911,7 +911,7 @@
         }
     };
     
-    pagination.orderIndexItem(itemList, indexTerms, page) {
+    pagination.orderIndexItem = function (itemList, indexTerms, page) {
         /* take an index item as output by findAllIndexItems and order it.
          */        
         if (itemList.length===0) {
@@ -936,7 +936,7 @@
          */
         var flowElement = eval(pagination.config('flowElement')), allIndexItems = flowElement.querySelectorAll('.pagination-index'), pageNumber, indexTerms = {}, indexTerm, i;
  
-        for (i=0; i < allIndexIterms.length; i++) {
+        for (i=0; i < allIndexItems.length; i++) {
             indexTerm = allIndexItems[i].getAttribute('data-pagination-index').split('!');
             pagination.orderIndexItem(indexTerm, indexTerms, pagination.findPage(allIndexItems[i]).querySelector('.pagination-pagenumber').innerHTML);
         }
@@ -972,8 +972,7 @@
     
     pagination.createWordIndex = function () {
         var flowElement = eval(pagination.config('flowElement')), 
-            wordIndexElement = flowElement.querySelector('.pagination-index-list'),
-            ;
+            wordIndexElement = flowElement.querySelector('.pagination-index-list');
         pagination.layoutWordIndex(pagination.findAllIndexItems(), wordIndexElement);
         
     };
