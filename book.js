@@ -272,7 +272,7 @@
         'pageHeight': 8.3,
         'pageWidth': 5.8,
         'marginNotesWidth': 1.5,
-        'marginNotesSeparatorWidth': 1.09,
+        'marginNotesSeparatorWidth': 0.09,
         'marginNotesVerticalSeparatorWidth': 0.09,
         'lengthUnit': 'in'
     };
