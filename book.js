@@ -927,7 +927,11 @@
         if (itemList.length===0) {
             if (!(indexTerms.hasOwnProperty('pagination-index-page'))) {
                 indexTerms['pagination-index-page'] = [];
+            } else if (indexTerms['pagination-index-page'][indexTerms['pagination-index-page'].length-1]===page) {
+                // last page is same as this page
+                return;
             }
+            
             indexTerms['pagination-index-page'].push(page);
             return;
         }
