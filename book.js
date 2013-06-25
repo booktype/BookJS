@@ -83,9 +83,16 @@
  * 
  * "Table chapter.number"
  * 
- * enableCrossReferences: true -- This converts the inner part  all internal 
+ * enableCrossReferences: true -- This converts the inner part of all internal 
  * links within the flow element into the page number of the page the referred
  * element is placed on. 
+ * 
+ * enableWordIndex: true -- This creates a word index. An empty word index 
+ * element has to be placed somewhere in the HTML and given the class 
+ * pagination-index-list. every index word is defined this way:
+ * 
+ * <someElement class="pagination-index" data-pagination-index=
+ * "topcategory!subcategory!subsubcategory"></someElement>
  *
  * bulkPagesToAdd: 50 -- This is the initial number of pages of each flowable
  * part (section, chapter). After this number is added, adjustments are made by
@@ -244,6 +251,7 @@
         'enableTableOfTables': false,
         'enableMarginNotes': false,
         'enableCrossReferences': true,
+        'enableWordIndex': true,
         'bulkPagesToAdd': 50,
         'pagesToAddIncrementRatio': 1.4,
         'frontmatterContents': '',
@@ -359,7 +367,9 @@
             "\n.pagination-simple {height: auto; position-relative;}" +
             "\n.pagination-page {margin-left:auto; margin-right:auto;}" +
             "\n.pagination-marginnote-item {position:absolute;}" +
-            "\n.pagination-marginnote > * {display: block;}";
+            "\n.pagination-marginnote > * {display: block;}" +
+            "\n.pagination-index-page {float:right;}" +
+            "\n.pagination-index-list div {margin-left: 5px;)";
         document.head.appendChild(stylesheet);
     };
 
@@ -934,7 +944,7 @@
     pagination.findAllIndexItems = function () {
         /* find all index items.
          */
-        var flowElement = eval(pagination.config('flowElement')), allIndexItems = flowElement.querySelectorAll('.pagination-index'), pageNumber, indexTerms = {}, indexTerm, i;
+        var allIndexItems = document.querySelectorAll('.pagination-index'), pageNumber, indexTerms = {}, indexTerm, i;
  
         for (i=0; i < allIndexItems.length; i++) {
             indexTerm = allIndexItems[i].getAttribute('data-pagination-index').split('!');
@@ -959,7 +969,7 @@
                 pageElement.classList.add('pagination-index-page');
                 
                 pageElement.innerHTML = indexTerms[keys[i]];
-                element.insertBefore(pageElement, element.firstChild);
+                element.insertBefore(pageElement, element.firstChild.nextSibling);
             } else {
                 newElement = document.createElement('div');
                 newElement.innerHTML = '<span class="pagination-index-term">' + keys[i] + '</span>';
@@ -971,8 +981,7 @@
     };
     
     pagination.createWordIndex = function () {
-        var flowElement = eval(pagination.config('flowElement')), 
-            wordIndexElement = flowElement.querySelector('.pagination-index-list');
+        var wordIndexElement = document.querySelector('.pagination-index-list');
         pagination.layoutWordIndex(pagination.findAllIndexItems(), wordIndexElement);
         
     };
@@ -1205,6 +1214,9 @@
                 if (pagination.config('enableCrossReferences')) {
                     pagination.findAllCrossReferences();
                 }
+                if (pagination.config('enableWordIndex')) {
+                    pagination.createWordIndex();
+                }                
             };
             document.body.addEventListener('bodyLayoutUpdated', function() {
                 // We have to set a time out of zero to make sure fonts have been applied, etc. before toc and tof are being calculated.
@@ -1221,6 +1233,10 @@
         if (pagination.config('enableCrossReferences')) {
             pagination.findAllCrossReferences();
         }
+        
+        if (pagination.config('enableWordIndex')) {
+            pagination.createWordIndex();
+        }         
         document.dispatchEvent(pagination.events.layoutFlowFinished);
     };
 
