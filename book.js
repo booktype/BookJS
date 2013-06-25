@@ -271,8 +271,8 @@
         'pagenumberBottomMargin': 0.3,
         'pageHeight': 8.3,
         'pageWidth': 5.8,
-        'marginNotesWidth': 1.0,
-        'marginNotesSeparatorWidth': 0.09,
+        'marginNotesWidth': 1.5,
+        'marginNotesSeparatorWidth': 1.09,
         'marginNotesVerticalSeparatorWidth': 0.09,
         'lengthUnit': 'in'
     };
@@ -378,6 +378,8 @@
         var unit = pagination.config('lengthUnit'),
             marginNotesWidthNumber = pagination.config('marginNotesWidth') * pagination.config('enableMarginNotes'), 
             marginNotesWidth = marginNotesWidthNumber + unit,
+            simpleMarginNotesWidth = pagination.config('marginNotesWidth') + unit,
+            simpleMarginNotesWidthAndMargin = pagination.config('marginNotesWidth') + pagination.config('marginNotesVerticalSeparatorWidth') + unit,
             marginNotesSeparatorWidthNumber = pagination.config('marginNotesSeparatorWidth') * pagination.config('enableMarginNotes'),
             marginNotesSeparatorWidth = marginNotesSeparatorWidthNumber + unit,
             marginNotesVerticalSeparator = pagination.config('marginNotesVerticalSeparatorWidth') + unit,
@@ -454,12 +456,12 @@
         + "\n.pagination-contents-column-separator {width:" + contentsColumnSeparatorWidth + ";}" +
         // Footnotes in non-CSS Regions browsers will render as right margin notes.
         "\n.pagination-simple .pagination-footnote > span, .pagination-simple .pagination-marginnote > span {" +
-            "position: absolute; right: 0in; width: 1in;}" +
+            "position: absolute; right: 0in; width: " + simpleMarginNotesWidth + ";}" +
+        "\n.pagination-simple {padding-right:" + simpleMarginNotesWidthAndMargin + ";}" +
         "\n.pagination-marginnotes, .pagination-marginnote-item {width:" + marginNotesWidth + ";}" +
         "\n.pagination-marginnote-item {margin-bottom:" + marginNotesVerticalSeparator + ";}" +
         "\n.pagination-marginnotes-separator {width:" + marginNotesSeparatorWidth + ";}" +
         "\n.pagination-main-contents-container, .pagination-marginnotes, .pagination-marginnotes-separator {height:" + contentsHeight + ";}";
-        
     };
 
 
