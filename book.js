@@ -985,8 +985,13 @@
     };
     
     pagination.createWordIndex = function () {
-        var wordIndexElement = document.querySelector('.pagination-index-list');
-        pagination.layoutWordIndex(pagination.findAllIndexItems(), wordIndexElement);
+        var wordIndexElement = document.querySelector('.pagination-index-list'), newElement = document.createElement('divs');
+        
+        pagination.layoutWordIndex(pagination.findAllIndexItems(), newElement);
+        
+        if (wordIndexElement.innerHTML !== newElement.innerHTML) {
+            wordIndexElement.innerHTML = newElement.innerHTML;
+        }
         
     };
     
