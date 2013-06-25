@@ -988,10 +988,14 @@
     
     pagination.createWordIndex = function () {
         var wordIndexElement = document.querySelector('.pagination-index-list'), newElement = document.createElement('div');
+
+        if (!wordIndexElement) {
+            return;
+        }
         
         pagination.layoutWordIndex(pagination.findAllIndexItems(), newElement);
         
-        if (wordIndexElement.innerHTML !== newElement.innerHTML) {
+        if (wordIndexElement && (wordIndexElement.innerHTML !== newElement.innerHTML)) {
             wordIndexElement.innerHTML = newElement.innerHTML;
         }
         
