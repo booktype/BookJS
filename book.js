@@ -987,7 +987,7 @@
     };
     
     pagination.createWordIndex = function () {
-        var wordIndexElement = document.querySelector('.pagination-index-list'), newElement = document.createElement('divs');
+        var wordIndexElement = document.querySelector('.pagination-index-list'), newElement = document.createElement('div');
         
         pagination.layoutWordIndex(pagination.findAllIndexItems(), newElement);
         
