@@ -1,12 +1,19 @@
-0.70-dev
+1.1-dev
 ----
+use webkitregionoversetchange event to trigger add/removal of pages.s
+
+1.0-dev
+----
+word index
+margin notes
+cross references
 column separators
 pages with top floats have extra CSS class: pagination-page-topfloat
 use mutation observers instead of flow events
 support for top floats
 changed default options reading. Changing page size on the fly now has to happen by changing page sized in paginationConfig rather than Pagionation.config
 
-0.60-dev
+0.60
 ----
 changed version scheme
 prefix flownames and content elements

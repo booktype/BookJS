@@ -1950,7 +1950,7 @@
                                 pagination.events.escapesNeedMove);
                         }
                     };
-
+                    
                     observer = new MutationObserver(function (mutations) {
                         checkSpacerSize();
                     });
@@ -2139,6 +2139,8 @@
         checkAllEscapeReferencePagesPlacements = function () {
             flowObject.checkAllEscapeReferencePagesPlacements();
         };
+        
+        flowObject.namedFlow.addEventListener("webkitregionoversetchange", checkOverset);
 
         if (this.rawdiv) {
             /* Create an observer instance to watch if anything is being changed in
@@ -2161,12 +2163,12 @@
             
             observer = new MutationObserver(function (mutations) {
                 observer.disconnect();
-                checkOverset();
                 checkAllEscapeReferencePagesPlacements();
                 observer.observe(ourRawdiv,observerOptions);
             });
 
             observer.observe(ourRawdiv,observerOptions);
+            
         }
 
         reFlow = function () {
