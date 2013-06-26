@@ -2142,6 +2142,8 @@
         
         flowObject.namedFlow.addEventListener("webkitregionoversetchange", checkOverset);
 
+        flowObject.currentlyChecking = false;
+        
         if (this.rawdiv) {
             /* Create an observer instance to watch if anything is being changed in
              * the contents of the original text.
@@ -2162,9 +2164,14 @@
             ourRawdiv = this.rawdiv;
             
             observer = new MutationObserver(function (mutations) {
-                observer.disconnect();
-                checkAllEscapeReferencePagesPlacements();
-                observer.observe(ourRawdiv,observerOptions);
+                
+                if (!(flowObject.currentlyChecking)) {
+                    flowObject.currentlyChecking = true;
+                    setTimeout(function() {
+                        checkAllEscapeReferencePagesPlacements();
+                        flowObject.currentlyChecking = false;
+                    },1);
+                }
             });
 
             observer.observe(ourRawdiv,observerOptions);
