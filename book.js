@@ -437,6 +437,8 @@
             "\n.pagination-page:nth-child(odd) .pagination-pagenumber," +
             ".pagination-page:nth-child(odd) .pagination-header {" +
             "text-align:right;}" +
+            "\n.pagination-page:nth-child(odd) .pagination-header-section {display:none;}" +
+            "\n.pagination-page:nth-child(even) .pagination-header-chapter {display:none;}" +
             "\n.pagination-page:nth-child(even) .pagination-pagenumber," +
             ".pagination-page:nth-child(even) .pagination-header {" +
             "text-align:left;}" +
