@@ -1050,7 +1050,7 @@
                 }
             }
 
-            if (bodyObjects[i].type && pagination.config('numberPages')) {
+            if (bodyObjects[i].type && pagination.config('numberPages') && (typeof(bodyObjects[i].startpageNumber) != 'undefined')) {
 
                 tocItemDiv = document.createElement('div');
                 tocItemDiv.classList.add('pagination-toc-entry');
