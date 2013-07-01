@@ -2195,5 +2195,6 @@
 
 }).call(this.pagination);
 
-
-pagination.initiate();
+if (!paginationConfig || !paginationConfig.hasOwnProperty('autostart') || paginationConfig.autostart === false) {
+    pagination.initiate();
+}
