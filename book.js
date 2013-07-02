@@ -2142,6 +2142,13 @@
             flowObject.checkAllEscapeReferencePagesPlacements();
         };
         
+        /* REMOVE AFTER CHROME 29 COMES OUT */
+        // If using a chrome version lower than 29, use a mutation watcher
+        if (parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10)<29) {
+            flowObject.namedFlow.addEventListener("webkitregionlayoutupdate", checkOverset);
+        }
+        /* END REMOVE AFTER CHROME 29 COMES OUT */
+        
         flowObject.namedFlow.addEventListener("webkitregionoversetchange", checkOverset);
 
         flowObject.currentlyChecking = false;
