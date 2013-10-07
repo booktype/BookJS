@@ -1241,11 +1241,13 @@
                 setTimeout(redoToc, 0);
                 
             });
-            document.fontloader.addEventListener('loadingdone', function() {
-                // When fonts have been loaded, update the body layout.
-                // TODO: This does not seem to work at all times. 
-                document.body.dispatchEvent(pagination.events.bodyLayoutUpdated);
-            });
+            if (document.hasOwnProperty('fontloader')) {
+            	document.fontloader.addEventListener('loadingdone', function() {
+                	// When fonts have been loaded, update the body layout.
+                	// TODO: This does not seem to work at all times. 
+                	document.body.dispatchEvent(pagination.events.bodyLayoutUpdated);
+            	});
+            }
         }
         if (pagination.config('enableCrossReferences')) {
             pagination.findAllCrossReferences();
@@ -2144,6 +2146,14 @@
         
         
         flowObject.namedFlow.addEventListener("webkitregionoversetchange", checkOverset);
+
+        if (navigator.userAgent.indexOf('6.1 Safari/') > -1 
+        || navigator.userAgent.indexOf('7.0 Safari/') > -1) {
+            /* Safari 6.1/7 does not include the regionoversetchange event. 
+             * Newer versions should drop the regionlayoutupdate event.
+         	 */
+        	flowObject.namedFlow.addEventListener("webkitregionlayoutupdate", checkOverset);
+        }
 
         flowObject.currentlyChecking = false;
         
