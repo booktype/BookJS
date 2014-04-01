@@ -1337,7 +1337,7 @@
         var returnValue;
         if (
         (
-            document.webkitGetNamedFlows) && (
+            document.webkitGetNamedFlows()) && (
             document.webkitGetNamedFlows() !== null)) {
             returnValue = true;
         } else {
@@ -1438,7 +1438,7 @@
          * have been set and rawdiv has been filled with initial contents.
          */
         this.setStyle();
-        this.namedFlow = document.webkitGetNamedFlows()[this.name];
+        this.namedFlow = document.webkitGetNamedFlows().namedItem(this.name)
         this.addOrRemovePages();
         this.setupReflow();
         this.findAllTopfloats();
